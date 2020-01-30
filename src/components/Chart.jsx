@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import { Vega, VegaLite, createClassFromSpec } from "react-vega";
 
-class VegaLiteVis extends Component {
+class Chart extends Component {
   spec = {
     width: 400,
     height: 200,
@@ -111,4 +111,4 @@ class VegaLiteVis extends Component {
   }
 }
 
-export default VegaLiteVis;
+export default Chart;
