@@ -1,6 +1,7 @@
 import React, { Fragment, Component } from "react";
 import ReactDOM from "react-dom";
 import editorStyles from "../editorStyles.css";
+import "../Draft.css";
 
 import {
   EditorState,
