@@ -6,21 +6,25 @@ class Navbar extends Component {
   state = {};
   render() {
     return (
-      <div>
-        <nav>
-          <ul className={css.navbar}>
-            <li>
-              <Link to="/">Editor</Link>
-            </li>
-            <li>
-              <Link to="/viscreator">VisCreator</Link>
-            </li>
-            <li>
-              <Link to="/reader">Reader</Link>
-            </li>
-          </ul>
-        </nav>
-      </div>
+      <nav className="navbar navbar-expand-md navbar-dark bg-dark">
+        <ul className="navbar-nav mr-auto">
+          <li className="nav-item active">
+            <Link to="/" className="nav-link">
+              Editor
+            </Link>
+          </li>
+          <li className="nav-item active">
+            <Link to="/viscreator" className="nav-link">
+              VisCreator
+            </Link>
+          </li>
+          <li className="nav-item active">
+            <Link to="/reader" className="nav-link">
+              Reader
+            </Link>
+          </li>
+        </ul>
+      </nav>
     );
   }
 }

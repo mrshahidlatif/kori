@@ -33,6 +33,7 @@ import {
   CodeBlockButton
 } from "draft-js-buttons";
 import Chart from "./Chart";
+import VisPanel from "./VisPanel";
 
 class HeadlinesPicker extends Component {
   componentDidMount() {
@@ -114,36 +115,41 @@ class MyEditor extends React.Component {
   render() {
     // const { editorState } = this.state;
     return (
-      <Fragment>
-        <button onClick={this.insertBlock}>Insert block</button>
-        <Editor
-          editorState={this.state.editorState}
-          placeholder="Start composing an interactive article!"
-          onChange={this.handleEditorChange}
-          blockRendererFn={blockRenderer}
-          plugins={plugins}
-          ref={element => {
-            this.editor = element;
-          }}
-        />
-        <Toolbar>
-          {// may be use React.Fragment instead of div to improve perfomance after React 16
-          externalProps => (
-            <div>
-              <BoldButton {...externalProps} />
-              <ItalicButton {...externalProps} />
-              <UnderlineButton {...externalProps} />
-              <CodeButton {...externalProps} />
-              <Separator {...externalProps} />
-              <HeadlinesButton {...externalProps} />
-              <UnorderedListButton {...externalProps} />
-              <OrderedListButton {...externalProps} />
-              <BlockquoteButton {...externalProps} />
-              <CodeBlockButton {...externalProps} />
-            </div>
-          )}
-        </Toolbar>
-      </Fragment>
+      <div className="row">
+        <div class="col">
+          <VisPanel />
+        </div>
+        <div class="col-10">
+          <Editor
+            editorState={this.state.editorState}
+            placeholder="Start composing an interactive article!"
+            onChange={this.handleEditorChange}
+            blockRendererFn={blockRenderer}
+            plugins={plugins}
+            ref={element => {
+              this.editor = element;
+            }}
+          />
+          <Toolbar>
+            {// may be use React.Fragment instead of div to improve perfomance after React 16
+            externalProps => (
+              <div>
+                <BoldButton {...externalProps} />
+                <ItalicButton {...externalProps} />
+                <UnderlineButton {...externalProps} />
+                <CodeButton {...externalProps} />
+                <Separator {...externalProps} />
+                <HeadlinesButton {...externalProps} />
+                <UnorderedListButton {...externalProps} />
+                <OrderedListButton {...externalProps} />
+                <BlockquoteButton {...externalProps} />
+                <CodeBlockButton {...externalProps} />
+              </div>
+            )}
+          </Toolbar>
+          <button onClick={this.insertBlock}>VIS</button>
+        </div>
+      </div>
     );
   }
 
@@ -151,11 +157,7 @@ class MyEditor extends React.Component {
     const { editorState } = this.state;
     console.log("STATE Props", this.props.text.Charts);
     const contentState = editorState.getCurrentContent();
-    const contentStateWithEntity = contentState.createEntity(
-      "TEST",
-      "MUTABLE",
-      { a: "b" }
-    );
+    const contentStateWithEntity = contentState.createEntity();
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
 
     console.log("Entity Key", entityKey);
