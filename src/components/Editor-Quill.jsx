@@ -6,6 +6,7 @@ import { updateText } from "../ducks/text";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import PropTypes from "prop-types";
+import Chart from "./Chart.jsx";
 
 class Editor extends Component {
   constructor(props) {
@@ -43,16 +44,11 @@ class Editor extends Component {
     this.rteChange = this.rteChange.bind(this);
   }
   shouldComponentUpdate(nextProps, nextState) {
-    console.log(
-      nextProps.text,
-      this.props.text,
-      nextProps.text == this.props.text
-    );
-
     return nextProps.text == this.props.text;
   }
 
   rteChange = (content, delta, source, editor) => {
+    console.log(this.props.text);
     //console.log(editor.getHTML()); // rich text
     //console.log(editor.getText()); // plain text
     //console.log(editor.getLength()); // number of characters
@@ -60,7 +56,6 @@ class Editor extends Component {
   };
 
   render() {
-    console.log(this.props.text);
     return (
       <div>
         <ReactQuill
@@ -70,6 +65,7 @@ class Editor extends Component {
           onChange={this.rteChange}
           defaultValue={this.props.text}
         />
+        <Chart />
       </div>
     );
   }

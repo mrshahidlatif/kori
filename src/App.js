@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "./components/Navbar";
-import Editor from "./components/Editor";
+import MyEditor from "./components/Editor-Draft";
 import Chart from "./components/Chart";
 import VisCreator from "./components/VisCreator";
 import Reader from "./components/Reader";
@@ -22,7 +22,7 @@ function App() {
             <Reader />
           </Route>
           <Route path="/">
-            <Editor />
+            <MyEditor />
           </Route>
         </Switch>
       </Router>
