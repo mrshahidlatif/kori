@@ -3,12 +3,19 @@ import ReactDOM from "react-dom";
 import editorStyles from "../editorStyles.css";
 import "../Draft.css";
 
+import { updateEditorState } from "../ducks/editor";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import PropTypes from "prop-types";
+
 import {
   EditorState,
   EditorBlock,
   AtomicBlockUtils,
   RichUtils,
-  convertToRaw
+  convertToRaw,
+  convertFromRaw,
+  ContentState
 } from "draft-js";
 import Editor, { createEditorStateWithText } from "draft-js-plugins-editor";
 import createToolbarPlugin, { Separator } from "draft-js-static-toolbar-plugin";
@@ -84,21 +91,35 @@ class MyEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = { editorState: EditorState.createEmpty() };
-    this.onChange = editorState => {
-      this.setState({ editorState });
-      console.log(editorState.getCurrentContent().getPlainText("\u0001"));
-    };
+    this.handleEditorChange = this.handleEditorChange.bind(this);
+  }
+  handleEditorChange = editorState => {
+    this.setState({ editorState });
+    const raw = convertToRaw(editorState.getCurrentContent());
+    //Only storing the RAW data of the editor
+    this.props.updateEditorState(raw);
+    console.log("EDITOR RAW CONTENT", raw);
+    console.log("RAW from STORE", this.props.editor.editor);
+  };
+  componentDidMount() {
+    const rawEditorData = this.props.editor.editor;
+    if (rawEditorData !== null) {
+      const contentState = convertFromRaw(rawEditorData);
+      this.setState({
+        editorState: EditorState.createWithContent(contentState)
+      });
+    }
   }
 
   render() {
-    const { editorState } = this.state;
+    // const { editorState } = this.state;
     return (
       <Fragment>
         <button onClick={this.insertBlock}>Insert block</button>
         <Editor
-          editorState={editorState}
+          editorState={this.state.editorState}
           placeholder="Start composing an interactive article!"
-          onChange={this.onChange}
+          onChange={this.handleEditorChange}
           blockRendererFn={blockRenderer}
           plugins={plugins}
           ref={element => {
@@ -128,6 +149,7 @@ class MyEditor extends React.Component {
 
   insertBlock = () => {
     const { editorState } = this.state;
+    console.log("STATE Props", this.props.text.Charts);
     const contentState = editorState.getCurrentContent();
     const contentStateWithEntity = contentState.createEntity(
       "TEST",
@@ -135,6 +157,8 @@ class MyEditor extends React.Component {
       { a: "b" }
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+
+    console.log("Entity Key", entityKey);
     const newEditorState = EditorState.set(editorState, {
       currentContent: contentStateWithEntity
     });
@@ -149,23 +173,44 @@ class MyEditor extends React.Component {
 }
 const blockRenderer = contentBlock => {
   const type = contentBlock.getType();
-
   if (type === "atomic") {
     return {
-      component: CustomComponent,
-      editable: true,
-      props: {
-        foo: "bar"
-      }
+      component: ChartComponent,
+      editable: false
     };
   }
 };
 
-const CustomComponent = props => {
+const ChartComponent = props => {
+  console.log("Chart Props", props);
   return (
     <div style={{ border: "1px solid #f00" }}>
-      <Chart {...props} />
+      <Chart />
     </div>
   );
 };
-export default MyEditor;
+
+//Define the public proptypes of this componenet
+Editor.propTypes = {
+  editor: PropTypes.object,
+  updateEditorState: PropTypes.func
+};
+const mapStateToProps = (state, ownProps) => {
+  console.log("MapStateToProps", state);
+  return {
+    ...state,
+    editor: state
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    ...bindActionCreators(
+      {
+        updateEditorState
+      },
+      dispatch
+    )
+  };
+};
+export default connect(mapStateToProps, mapDispatchToProps)(MyEditor);

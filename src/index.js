@@ -43,10 +43,10 @@ loadData
         localforage.setItem("state", state);
       }, 1000)
     );
-    localforage.clear(function(err) {
-      // Run this code once the database has been entirely deleted.
-      console.log("Database is now empty.");
-    });
+    // localforage.clear(function(err) {
+    //   // Run this code once the database has been entirely deleted.
+    //   console.log("Database is now empty.");
+    // });
     ReactDOM.render(
       <Provider store={store}>
         <App />
