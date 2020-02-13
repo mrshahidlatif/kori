@@ -1,7 +1,8 @@
 import React, { Fragment, Component } from "react";
-import ReactDOM from "react-dom";
-import editorStyles from "../editorStyles.css";
-import "../Draft.css";
+import "../css-draftjs/Draft.css";
+// import "../css-draftjs/inline-toolbar-plugin.css";
+import "../css-draftjs/static-toolbar-plugin.css";
+import "../css-draftjs/editorStyles.css";
 
 import { updateEditorState } from "../ducks/editor";
 import { connect } from "react-redux";
@@ -75,15 +76,14 @@ class HeadlinesButton extends Component {
 
   render() {
     return (
-      <div className={editorStyles.headlineButtonWrapper}>
-        <button onClick={this.onClick} className={editorStyles.headlineButton}>
+      <div className="headlineButtonWrapper">
+        <button onClick={this.onClick} className="headlineButton">
           H
         </button>
       </div>
     );
   }
 }
-
 const toolbarPlugin = createToolbarPlugin();
 const { Toolbar } = toolbarPlugin;
 const plugins = [toolbarPlugin];
@@ -116,10 +116,10 @@ class MyEditor extends React.Component {
     // const { editorState } = this.state;
     return (
       <div className="row">
-        <div class="col">
+        <div className="col">
           <VisPanel />
         </div>
-        <div class="col-10">
+        <div className="col-10 editor">
           <Editor
             editorState={this.state.editorState}
             placeholder="Start composing an interactive article!"
@@ -147,7 +147,9 @@ class MyEditor extends React.Component {
               </div>
             )}
           </Toolbar>
-          <button onClick={this.insertBlock}>VIS</button>
+          <button className="headlineButton" onClick={this.insertBlock}>
+            VIS
+          </button>
         </div>
       </div>
     );
