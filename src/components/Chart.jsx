@@ -5,9 +5,16 @@ import { bindActionCreators } from "redux";
 import PropTypes from "prop-types";
 
 class Chart extends Component {
+  constructor(props) {
+    super(props);
+  }
   state = {
     specs: this.props.specs,
     data: this.props.data
+  };
+
+  handleClick = () => {
+    console.log("You clicked me!", this.props);
   };
 
   render() {
@@ -15,7 +22,11 @@ class Chart extends Component {
     const Cspecs = JSON.parse(JSON.stringify(this.props.specs));
     const Cdata = JSON.parse(JSON.stringify(this.props.data));
 
-    return <VegaLite spec={Cspecs} data={Cdata} />;
+    return (
+      <div onClick={this.handleClick}>
+        <VegaLite spec={Cspecs} data={Cdata} />
+      </div>
+    );
   }
 }
 

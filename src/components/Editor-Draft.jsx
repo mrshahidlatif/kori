@@ -93,6 +93,8 @@ class MyEditor extends React.Component {
     super(props);
     this.state = { editorState: EditorState.createEmpty() };
     this.handleEditorChange = this.handleEditorChange.bind(this);
+    this.blockRenderer = this.blockRenderer.bind(this);
+    this.chartToAdd = this.chartToAdd.bind(this);
   }
   handleEditorChange = editorState => {
     this.setState({ editorState });
@@ -101,7 +103,6 @@ class MyEditor extends React.Component {
     this.props.updateEditorState(raw);
   };
   componentDidMount() {
-    console.log("Editor Mounted!", this.props.editor);
     const rawEditorData = this.props.editor;
     const contentState = convertFromRaw(rawEditorData);
     this.setState({
@@ -119,7 +120,7 @@ class MyEditor extends React.Component {
             editorState={this.state.editorState}
             placeholder="Start composing an interactive article!"
             onChange={this.handleEditorChange}
-            blockRendererFn={blockRenderer}
+            blockRendererFn={this.blockRenderer}
             plugins={plugins}
             ref={element => {
               this.editor = element;
@@ -166,24 +167,27 @@ class MyEditor extends React.Component {
       )
     });
   };
-}
-const blockRenderer = contentBlock => {
-  const type = contentBlock.getType();
-  if (type === "atomic") {
-    return {
-      component: ChartComponent,
-      editable: false
-    };
+  blockRenderer(contentBlock) {
+    const type = contentBlock.getType();
+    if (type === "atomic") {
+      return {
+        component: this.chartToAdd,
+        editable: false
+      };
+    }
   }
-};
 
-const ChartComponent = props => {
-  return (
-    <div style={{ border: "1px solid #f00" }}>
-      <Chart />
-    </div>
-  );
-};
+  chartToAdd() {
+    return (
+      <div style={{ border: "1px solid #f00" }}>
+        <Chart
+          specs={this.props.visPanel.charts[0].specs}
+          data={this.props.visPanel.charts[0].data}
+        />
+      </div>
+    );
+  }
+}
 
 //Define the public proptypes of this componenet
 Editor.propTypes = {
