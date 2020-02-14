@@ -69,7 +69,9 @@ class VisPanel extends Component {
   };
   handleAddChartToEditor() {
     console.log("addChartToEditor");
-    updateCharts(this.state);
+  }
+  componentDidMount() {
+    this.props.updateCharts(this.state);
   }
   render() {
     return (
@@ -89,9 +91,7 @@ VisPanel.propTypes = {
   updateCharts: PropTypes.func
 };
 const mapStateToProps = (state, ownProps) => {
-  return {
-    charts: state
-  };
+  return state;
 };
 
 const mapDispatchToProps = dispatch => {

@@ -1,4 +1,4 @@
-export const UPDATE_CHARTS = "UPDATE-CHARTS";
+export const UPDATE_CHARTS = "UPDATE_CHARTS";
 
 //actions
 export const updateCharts = charts => {

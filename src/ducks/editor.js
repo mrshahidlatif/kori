@@ -1,15 +1,15 @@
-export const UPDATE_EDITOR_STATE = "UPDATE-EDITOR-STATE";
+export const UPDATE_EDITOR_STATE = "UPDATE_EDITOR_STATE";
 
 //actions
-export const updateEditorState = editorState => {
-  return { type: UPDATE_EDITOR_STATE, editorState };
+export const updateEditorState = editorRawState => {
+  return { type: UPDATE_EDITOR_STATE, editorRawState };
 };
 
 //reducers
 export default (state = {}, action) => {
   switch (action.type) {
     case UPDATE_EDITOR_STATE:
-      return action.editorState;
+      return action.editorRawState;
     default:
       return state;
   }

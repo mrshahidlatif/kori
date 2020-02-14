@@ -7,16 +7,11 @@ export const updateText = text => {
 };
 
 //reducers
-export default (state = initialState, action) => {
+export default (state = "", action) => {
   switch (action.type) {
     case UPDATE_TEXT:
       return action.text;
     default:
       return state;
   }
-};
-
-var initialState = {
-  Text: "Compose an interactive article!",
-  Charts: {}
 };

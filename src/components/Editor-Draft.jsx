@@ -99,21 +99,16 @@ class MyEditor extends React.Component {
     const raw = convertToRaw(editorState.getCurrentContent());
     //Only storing the RAW data of the editor
     this.props.updateEditorState(raw);
-    console.log("EDITOR RAW CONTENT", raw);
-    console.log("RAW from STORE", this.props.editor.editor);
   };
   componentDidMount() {
-    const rawEditorData = this.props.editor.editor;
-    if (rawEditorData !== null) {
-      const contentState = convertFromRaw(rawEditorData);
-      this.setState({
-        editorState: EditorState.createWithContent(contentState)
-      });
-    }
+    console.log("Editor Mounted!", this.props.editor);
+    const rawEditorData = this.props.editor;
+    const contentState = convertFromRaw(rawEditorData);
+    this.setState({
+      editorState: EditorState.createWithContent(contentState)
+    });
   }
-
   render() {
-    // const { editorState } = this.state;
     return (
       <div className="row">
         <div className="col">
@@ -157,12 +152,9 @@ class MyEditor extends React.Component {
 
   insertBlock = () => {
     const { editorState } = this.state;
-    console.log("STATE Props", this.props.text.Charts);
     const contentState = editorState.getCurrentContent();
     const contentStateWithEntity = contentState.createEntity();
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-
-    console.log("Entity Key", entityKey);
     const newEditorState = EditorState.set(editorState, {
       currentContent: contentStateWithEntity
     });
@@ -186,7 +178,6 @@ const blockRenderer = contentBlock => {
 };
 
 const ChartComponent = props => {
-  console.log("Chart Props", props);
   return (
     <div style={{ border: "1px solid #f00" }}>
       <Chart />
@@ -200,11 +191,7 @@ Editor.propTypes = {
   updateEditorState: PropTypes.func
 };
 const mapStateToProps = (state, ownProps) => {
-  console.log("MapStateToProps", state);
-  return {
-    ...state,
-    editor: state
-  };
+  return state;
 };
 
 const mapDispatchToProps = dispatch => {

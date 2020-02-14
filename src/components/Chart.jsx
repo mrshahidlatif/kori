@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import ReactDOM from "react-dom";
 import { Vega, VegaLite, createClassFromSpec } from "react-vega";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
@@ -12,19 +11,24 @@ class Chart extends Component {
   };
 
   render() {
-    return <VegaLite spec={this.state.specs} data={this.state.data} />;
+    //This is a hack. Find a better solution!
+    const Cspecs = JSON.parse(JSON.stringify(this.props.specs));
+    const Cdata = JSON.parse(JSON.stringify(this.props.data));
+
+    return <VegaLite spec={Cspecs} data={Cdata} />;
   }
 }
 
 //Define the public proptypes of this componenet
-const mapStateToProps = (state, ownProps) => {
-  return state;
-};
+// const mapStateToProps = (state, ownProps) => {
+//   return state.charts;
+// };
 
-const mapDispatchToProps = dispatch => {
-  return {
-    ...bindActionCreators({}, dispatch)
-  };
-};
+// const mapDispatchToProps = dispatch => {
+//   return {
+//     ...bindActionCreators({}, dispatch)
+//   };
+// };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Chart);
+// export default connect(mapStateToProps, mapDispatchToProps)(Chart);
+export default Chart;
