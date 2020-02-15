@@ -109,6 +109,11 @@ class MyEditor extends React.Component {
       editorState: EditorState.createWithContent(contentState)
     });
   }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.chart != this.props.chart) {
+      this.insertBlock();
+    }
+  }
   render() {
     return (
       <div className="row">
@@ -143,9 +148,6 @@ class MyEditor extends React.Component {
               </div>
             )}
           </Toolbar>
-          <button className="headlineButton" onClick={this.insertBlock}>
-            VIS
-          </button>
         </div>
       </div>
     );
@@ -178,12 +180,12 @@ class MyEditor extends React.Component {
   }
 
   chartToAdd() {
+    var chart = this.props.visPanel.charts.filter(
+      c => c.id === this.props.chart
+    )[0];
     return (
       <div style={{ border: "1px solid #f00" }}>
-        <Chart
-          specs={this.props.visPanel.charts[0].specs}
-          data={this.props.visPanel.charts[0].data}
-        />
+        <Chart specs={chart.specs} data={chart.data} id={chart.id} />
       </div>
     );
   }

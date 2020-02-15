@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import PropTypes from "prop-types";
 import Chart from "./Chart";
-import { updateCharts } from "../ducks/charts";
+import { updateCharts } from "../ducks/visPanel";
 
 class VisPanel extends Component {
   constructor(props) {
@@ -78,9 +78,13 @@ class VisPanel extends Component {
       <div>
         <h3>Available Charts</h3>
         {this.state.charts.map(chart => (
-          <Chart key={chart.id} specs={chart.specs} data={chart.data} />
+          <Chart
+            key={chart.id}
+            id={chart.id}
+            specs={chart.specs}
+            data={chart.data}
+          />
         ))}
-        <button onClick={this.handleAddChartToEditor}>VIS#1</button>
       </div>
     );
   }
