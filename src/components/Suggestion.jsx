@@ -1,9 +1,9 @@
 import React, { Component } from "react";
-import { Dropdown } from "semantic-ui-react";
 
 class Suggestion extends Component {
+  state = { haveSuggestion: false };
   render() {
-    return "Suggestion!";
+    return <div>AutoSuggestion was called!</div>;
   }
 }
 

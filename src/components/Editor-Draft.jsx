@@ -88,19 +88,38 @@ const toolbarPlugin = createToolbarPlugin();
 const { Toolbar } = toolbarPlugin;
 const plugins = [toolbarPlugin];
 
+const ChartBlock = ({
+  contentState,
+  block,
+  blockProps: { data, onSave, content },
+  ...rest
+}) => {
+  return (
+    <div>
+      <Chart specs={content.specs} data={content.data} />
+    </div>
+  );
+};
+
 class MyEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = { editorState: EditorState.createEmpty() };
     this.handleEditorChange = this.handleEditorChange.bind(this);
-    this.blockRenderer = this.blockRenderer.bind(this);
-    this.chartToAdd = this.chartToAdd.bind(this);
   }
   handleEditorChange = editorState => {
     this.setState({ editorState });
-    const raw = convertToRaw(editorState.getCurrentContent());
+    const rawContent = convertToRaw(editorState.getCurrentContent());
     //Only storing the RAW data of the editor
-    this.props.updateEditorState(raw);
+
+    this.props.updateEditorState(rawContent);
+
+    const blocks = rawContent.blocks;
+    const allText = blocks
+      .map(block => (!block.text.trim() && "\n") || block.text)
+      .join("\n");
+
+    console.log("Typed Text in Editor", allText);
   };
   componentDidMount() {
     const rawEditorData = this.props.editor;
@@ -108,11 +127,6 @@ class MyEditor extends React.Component {
     this.setState({
       editorState: EditorState.createWithContent(contentState)
     });
-  }
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.chart != this.props.chart) {
-      this.insertBlock();
-    }
   }
   render() {
     return (
@@ -125,7 +139,7 @@ class MyEditor extends React.Component {
             editorState={this.state.editorState}
             placeholder="Start composing an interactive article!"
             onChange={this.handleEditorChange}
-            blockRendererFn={this.blockRenderer}
+            blockRendererFn={this.blockRendererFn}
             plugins={plugins}
             ref={element => {
               this.editor = element;
@@ -149,46 +163,50 @@ class MyEditor extends React.Component {
             )}
           </Toolbar>
         </div>
+        <button onClick={this.insertChart}>Add VIS</button>
       </div>
     );
   }
 
-  insertBlock = () => {
+  insertChart = () => {
     const { editorState } = this.state;
-    const contentState = editorState.getCurrentContent();
-    const contentStateWithEntity = contentState.createEntity();
-    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    const newEditorState = EditorState.set(editorState, {
-      currentContent: contentStateWithEntity
+    let content = editorState.getCurrentContent();
+
+    var chartId = Math.floor(Math.random() * 2) + 1;
+
+    content = content.createEntity("CHART", "IMMUTABLE", {
+      content: this.props.charts.charts.byId[chartId]
     });
+    const entityKey = content.getLastCreatedEntityKey();
     this.setState({
       editorState: AtomicBlockUtils.insertAtomicBlock(
-        newEditorState,
+        editorState,
         entityKey,
         " "
       )
     });
   };
-  blockRenderer(contentBlock) {
-    const type = contentBlock.getType();
-    if (type === "atomic") {
-      return {
-        component: this.chartToAdd,
-        editable: false
-      };
-    }
-  }
+  blockRendererFn = block => {
+    const { editorState } = this.state;
+    const content = editorState.getCurrentContent();
 
-  chartToAdd() {
-    var chart = this.props.visPanel.charts.filter(
-      c => c.id === this.props.chart
-    )[0];
-    return (
-      <div style={{ border: "1px solid #f00" }}>
-        <Chart specs={chart.specs} data={chart.data} id={chart.id} />
-      </div>
-    );
-  }
+    if (block.getType() === "atomic") {
+      const entityKey = block.getEntityAt(0);
+      const entity = content.getEntity(entityKey);
+      const entityData = entity.getData() || { content: "" };
+
+      if (entity != null && entity.getType() === "CHART") {
+        return {
+          component: ChartBlock,
+          props: {
+            data: this.props.charts.charts.byId,
+            onSave: this.saveChart,
+            ...entityData
+          }
+        };
+      }
+    }
+  };
 }
 
 //Define the public proptypes of this componenet

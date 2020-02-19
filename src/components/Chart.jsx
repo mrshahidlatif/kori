@@ -3,7 +3,6 @@ import { Vega, VegaLite, createClassFromSpec } from "react-vega";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import PropTypes from "prop-types";
-import { updateSelectedChart } from "../ducks/chart";
 
 class Chart extends Component {
   constructor(props) {
@@ -14,22 +13,12 @@ class Chart extends Component {
     specs: this.props.specs,
     data: this.props.data
   };
-
-  handleClick = () => {
-    this.props.updateSelectedChart(this.state.id);
-  };
-
   render() {
     //This is a hack. Find a better solution!
     const Cspecs = JSON.parse(JSON.stringify(this.props.specs));
     const Cdata = JSON.parse(JSON.stringify(this.props.data));
-    console.log("Cspecs", Cspecs);
 
-    return (
-      <div onClick={this.handleClick}>
-        <VegaLite spec={Cspecs} data={Cdata} />
-      </div>
-    );
+    return <VegaLite spec={Cspecs} data={Cdata} />;
   }
 }
 
@@ -40,7 +29,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    ...bindActionCreators({ updateSelectedChart }, dispatch)
+    ...bindActionCreators({}, dispatch)
   };
 };
 

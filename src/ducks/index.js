@@ -1,12 +1,8 @@
 import { combineReducers } from "redux";
-import text from "./text";
 import editor from "./editor";
-import visPanel from "./visPanel";
-import chart from "./chart";
+import charts from "././charts";
 
 export default combineReducers({
-  text,
   editor,
-  visPanel,
-  chart
+  charts
 });
