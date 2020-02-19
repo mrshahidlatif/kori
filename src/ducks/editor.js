@@ -1,12 +1,8 @@
 export const UPDATE_EDITOR_STATE = "UPDATE_EDITOR_STATE";
-export const ADD_CHART = "ADD_CHART";
 
 //actions
 export const updateEditorState = editorRawState => {
   return { type: UPDATE_EDITOR_STATE, editorRawState };
-};
-export const addChart = chartID => {
-  return { type: ADD_CHART, chartID };
 };
 
 //reducers

@@ -13,14 +13,14 @@ class VisPanel extends Component {
   state = {};
 
   componentDidMount() {
-    // this.props.updateCharts(this.props);
+    this.props.updateCharts(this.props);
   }
   render() {
-    var allCharts = this.props.charts.byId;
+    var allCharts = this.props.byId;
     return (
       <div>
         <h3>Available Charts</h3>
-        {this.props.charts.allIds.map(id => (
+        {this.props.allIds.map(id => (
           <Chart
             key={id}
             specs={allCharts[id].specs}

@@ -5,6 +5,8 @@ import "../css-draftjs/static-toolbar-plugin.css";
 import "../css-draftjs/editorStyles.css";
 
 import { updateEditorState } from "../ducks/editor";
+import { addSelectedChart } from "../ducks/ui";
+
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import PropTypes from "prop-types";
@@ -91,7 +93,7 @@ const plugins = [toolbarPlugin];
 const ChartBlock = ({
   contentState,
   block,
-  blockProps: { data, onSave, content },
+  blockProps: { content },
   ...rest
 }) => {
   return (
@@ -172,10 +174,13 @@ class MyEditor extends React.Component {
     const { editorState } = this.state;
     let content = editorState.getCurrentContent();
 
+    //Adding a random chart on button click!
+    //Needs to replace with drag and drop feature!
     var chartId = Math.floor(Math.random() * 2) + 1;
+    this.props.addSelectedChart(chartId);
 
     content = content.createEntity("CHART", "IMMUTABLE", {
-      content: this.props.charts.charts.byId[chartId]
+      content: this.props.charts.byId[chartId]
     });
     const entityKey = content.getLastCreatedEntityKey();
     this.setState({
@@ -199,8 +204,7 @@ class MyEditor extends React.Component {
         return {
           component: ChartBlock,
           props: {
-            data: this.props.charts.charts.byId,
-            onSave: this.saveChart,
+            data: this.props.charts.byId,
             ...entityData
           }
         };
@@ -212,7 +216,8 @@ class MyEditor extends React.Component {
 //Define the public proptypes of this componenet
 Editor.propTypes = {
   editor: PropTypes.object,
-  updateEditorState: PropTypes.func
+  updateEditorState: PropTypes.func,
+  addSelectedChart: PropTypes.func
 };
 const mapStateToProps = (state, ownProps) => {
   return state;
@@ -222,7 +227,8 @@ const mapDispatchToProps = dispatch => {
   return {
     ...bindActionCreators(
       {
-        updateEditorState
+        updateEditorState,
+        addSelectedChart
       },
       dispatch
     )
