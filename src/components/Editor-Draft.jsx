@@ -5,7 +5,12 @@ import "../css-draftjs/static-toolbar-plugin.css";
 import "../css-draftjs/editorStyles.css";
 
 import { updateEditorState } from "../ducks/editor";
-import { addSelectedChart } from "../ducks/ui";
+import {
+  addSelectedChart,
+  updateCursorPosition,
+  updateEditorPosition,
+  updateSuggestionList
+} from "../ducks/ui";
 
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
@@ -37,6 +42,7 @@ import {
 } from "draft-js-buttons";
 import Chart from "./Chart";
 import VisPanel from "./VisPanel";
+import Suggestion from "./Suggestion";
 
 class HeadlinesPicker extends Component {
   componentDidMount() {
@@ -98,7 +104,7 @@ const ChartBlock = ({
 }) => {
   return (
     <div>
-      <Chart specs={content.specs} data={content.data} />
+      <Chart specs={content.chartData.specs} data={content.chartData.data} />
     </div>
   );
 };
@@ -106,7 +112,11 @@ const ChartBlock = ({
 class MyEditor extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { editorState: EditorState.createEmpty() };
+    this.state = {
+      editorState: EditorState.createEmpty(),
+      cursorPositionInEditor: {},
+      editorPosition: {}
+    };
     this.handleEditorChange = this.handleEditorChange.bind(this);
   }
   handleEditorChange = editorState => {
@@ -121,7 +131,45 @@ class MyEditor extends React.Component {
       .map(block => (!block.text.trim() && "\n") || block.text)
       .join("\n");
 
-    console.log("Typed Text in Editor", allText);
+    // console.log("Typed Text in Editor", allText);
+    var allFeatures = [];
+    if (
+      Object.keys(rawContent.entityMap).length !=
+        Object.keys(this.props.editor.entityMap).length &&
+      Object.keys(rawContent.entityMap).length > 0
+    ) {
+      //get chart features and update them in the Redux Store
+      Object.keys(rawContent.entityMap).map(function(key) {
+        var id = rawContent.entityMap[key].data.content.id;
+
+        var featuers = this.parseChartForFeatures(id);
+
+        allFeatures = allFeatures.concat(featuers);
+      }, this);
+      this.props.updateSuggestionList(allFeatures);
+    } else if (Object.keys(rawContent.entityMap).length == 0) {
+      this.props.updateSuggestionList();
+    }
+
+    //Computing the position of cursor relative to viewport for showing suggestions
+    //https://github.com/facebook/draft-js/issues/45
+
+    var selectionState = editorState.getSelection();
+    var anchorKey = selectionState.getAnchorKey();
+    var currentContent = editorState.getCurrentContent();
+    var currentContentBlock = currentContent.getBlockForKey(anchorKey);
+    var start = selectionState.getStartOffset();
+    var end = selectionState.getEndOffset();
+    var selectedText = currentContentBlock.getText().slice(start, end);
+    if (start > 0) {
+      var selection = window.getSelection();
+      if (selection.anchorNode == null) return;
+      var range = selection.getRangeAt(0);
+      var cursorPosition = range.getBoundingClientRect();
+      cursorPosition = JSON.parse(JSON.stringify(cursorPosition));
+      this.setState({ cursorPositionInEditor: cursorPosition });
+      this.props.updateCursorPosition(cursorPosition);
+    }
   };
   componentDidMount() {
     const rawEditorData = this.props.editor;
@@ -129,6 +177,12 @@ class MyEditor extends React.Component {
     this.setState({
       editorState: EditorState.createWithContent(contentState)
     });
+
+    var editorNode = document.getElementById("mainEditor");
+    var editorPosition = editorNode.getBoundingClientRect();
+    editorPosition = JSON.parse(JSON.stringify(editorPosition));
+    this.setState({ editorPosition: editorPosition });
+    this.props.updateEditorPosition(editorPosition);
   }
   render() {
     return (
@@ -136,7 +190,7 @@ class MyEditor extends React.Component {
         <div className="col">
           <VisPanel />
         </div>
-        <div className="col-10 editor">
+        <div className="col-10 editor" id="mainEditor">
           <Editor
             editorState={this.state.editorState}
             placeholder="Start composing an interactive article!"
@@ -166,9 +220,23 @@ class MyEditor extends React.Component {
           </Toolbar>
         </div>
         <button onClick={this.insertChart}>Add VIS</button>
+        <Suggestion />
       </div>
     );
   }
+  //Parsing ChartInEditor for extracting chart features from vegalite specs
+  parseChartForFeatures = chartId => {
+    let chart = this.props.charts.byId[chartId];
+    let encodings = chart.specs.encoding;
+    let data = chart.Data;
+    var features = [];
+    //Extract dimensions from Vega Specifications
+    Object.keys(encodings).forEach(function(key) {
+      //   console.log(key, encodings[key].field);
+      features.push(encodings[key].field);
+    });
+    return features;
+  };
 
   insertChart = () => {
     const { editorState } = this.state;
@@ -180,7 +248,7 @@ class MyEditor extends React.Component {
     this.props.addSelectedChart(chartId);
 
     content = content.createEntity("CHART", "IMMUTABLE", {
-      content: this.props.charts.byId[chartId]
+      content: { chartData: this.props.charts.byId[chartId], id: chartId }
     });
     const entityKey = content.getLastCreatedEntityKey();
     this.setState({
@@ -212,7 +280,6 @@ class MyEditor extends React.Component {
     }
   };
 }
-
 //Define the public proptypes of this componenet
 Editor.propTypes = {
   editor: PropTypes.object,
@@ -228,7 +295,10 @@ const mapDispatchToProps = dispatch => {
     ...bindActionCreators(
       {
         updateEditorState,
-        addSelectedChart
+        addSelectedChart,
+        updateCursorPosition,
+        updateEditorPosition,
+        updateSuggestionList
       },
       dispatch
     )

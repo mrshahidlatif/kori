@@ -1,0 +1,9 @@
+.suggestionPanel {
+  position: absolute;
+  background-color: yellowgreen;
+  min-width: 150px;
+  opacity: 0.75;
+}
+.suggestionList {
+  list-style-type: none;
+}
