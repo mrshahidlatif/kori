@@ -29,15 +29,20 @@ class Suggestion extends Component {
           }}
           className={css.suggestionPanel}
         >
-          <ul className={css.suggestionList}>
+          <ul className={"list-group"}>
             {this.props.ui.listOfSuggestions.map(s => (
-              <li>{s}</li>
+              <button
+                type="button"
+                class="list-group-item list-group-item-action"
+              >
+                {s}
+              </button>
             ))}
           </ul>
         </div>
       );
     }
-    return <div>No Suggestions!</div>;
+    return null;
   }
 }
 

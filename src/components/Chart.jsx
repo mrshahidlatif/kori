@@ -8,17 +8,24 @@ class Chart extends Component {
   constructor(props) {
     super(props);
   }
+
   state = {
     id: this.props.id,
     specs: this.props.specs,
     data: this.props.data
   };
-  render() {
-    //This is a hack. Find a better solution!
-    const Cspecs = JSON.parse(JSON.stringify(this.props.specs));
-    const Cdata = JSON.parse(JSON.stringify(this.props.data));
+  handleView(...args) {
+    let view = args[0];
+    console.log("View Instance!", view.signal("signal_highlight"));
+    var d = { hColor: "yellow", hData: ["D", "E"] };
+    view.signal("signal_highlight", d).run();
+  }
 
-    return <VegaLite spec={Cspecs} data={Cdata} />;
+  render() {
+    const Cspecs = JSON.parse(JSON.stringify(this.state.specs));
+    const Cdata = JSON.parse(JSON.stringify(this.state.data));
+
+    return <Vega spec={Cspecs} data={Cdata} onNewView={this.handleView} />;
   }
 }
 

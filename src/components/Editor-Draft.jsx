@@ -132,24 +132,24 @@ class MyEditor extends React.Component {
       .join("\n");
 
     // console.log("Typed Text in Editor", allText);
-    var allFeatures = [];
-    if (
-      Object.keys(rawContent.entityMap).length !=
-        Object.keys(this.props.editor.entityMap).length &&
-      Object.keys(rawContent.entityMap).length > 0
-    ) {
-      //get chart features and update them in the Redux Store
-      Object.keys(rawContent.entityMap).map(function(key) {
-        var id = rawContent.entityMap[key].data.content.id;
+    // var allFeatures = [];
+    // if (
+    //   Object.keys(rawContent.entityMap).length !=
+    //     Object.keys(this.props.editor.entityMap).length &&
+    //   Object.keys(rawContent.entityMap).length > 0
+    // ) {
+    //   //get chart features and update them in the Redux Store
+    //   Object.keys(rawContent.entityMap).map(function(key) {
+    //     var id = rawContent.entityMap[key].data.content.id;
 
-        var featuers = this.parseChartForFeatures(id);
+    //     var featuers = this.parseChartForFeatures(id);
 
-        allFeatures = allFeatures.concat(featuers);
-      }, this);
-      this.props.updateSuggestionList(allFeatures);
-    } else if (Object.keys(rawContent.entityMap).length == 0) {
-      this.props.updateSuggestionList();
-    }
+    //     allFeatures = allFeatures.concat(featuers);
+    //   }, this);
+    //   this.props.updateSuggestionList(allFeatures);
+    // } else if (Object.keys(rawContent.entityMap).length == 0) {
+    //   this.props.updateSuggestionList();
+    // }
 
     //Computing the position of cursor relative to viewport for showing suggestions
     //https://github.com/facebook/draft-js/issues/45
@@ -244,7 +244,8 @@ class MyEditor extends React.Component {
 
     //Adding a random chart on button click!
     //Needs to replace with drag and drop feature!
-    var chartId = Math.floor(Math.random() * 2) + 1;
+    // var chartId = Math.floor(Math.random() * 2) + 1;
+    var chartId = 4;
     this.props.addSelectedChart(chartId);
 
     content = content.createEntity("CHART", "IMMUTABLE", {
