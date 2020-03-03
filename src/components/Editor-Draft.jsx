@@ -23,7 +23,8 @@ import {
   RichUtils,
   convertToRaw,
   convertFromRaw,
-  ContentState
+  ContentState,
+  CompositeDecorator
 } from "draft-js";
 import Editor, { createEditorStateWithText } from "draft-js-plugins-editor";
 import createToolbarPlugin, { Separator } from "draft-js-static-toolbar-plugin";
@@ -43,6 +44,7 @@ import {
 import Chart from "./Chart";
 import VisPanel from "./VisPanel";
 import Suggestion from "./Suggestion";
+import LinkText from "./LinkText";
 
 class HeadlinesPicker extends Component {
   componentDidMount() {
@@ -112,8 +114,14 @@ const ChartBlock = ({
 class MyEditor extends React.Component {
   constructor(props) {
     super(props);
+    const compositeDecorator = new CompositeDecorator([
+      {
+        strategy: handleStrategy,
+        component: LinkText
+      }
+    ]);
     this.state = {
-      editorState: EditorState.createEmpty(),
+      editorState: EditorState.createEmpty(compositeDecorator),
       cursorPositionInEditor: {},
       editorPosition: {}
     };
@@ -281,6 +289,26 @@ class MyEditor extends React.Component {
     }
   };
 }
+
+/**
+ * Super simple decorators for handles and hashtags, for demonstration
+ * purposes only. Don't reuse these regexes.
+ */
+const HANDLE_REGEX = /\@[\w]+/g;
+
+function handleStrategy(contentBlock, callback, contentState) {
+  findWithRegex(HANDLE_REGEX, contentBlock, callback);
+}
+
+function findWithRegex(regex, contentBlock, callback) {
+  const text = contentBlock.getText();
+  let matchArr, start;
+  while ((matchArr = regex.exec(text)) !== null) {
+    start = matchArr.index;
+    callback(start, start + matchArr[0].length);
+  }
+}
+
 //Define the public proptypes of this componenet
 Editor.propTypes = {
   editor: PropTypes.object,
