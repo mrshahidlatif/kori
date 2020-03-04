@@ -82,7 +82,6 @@ const initialState = {
     },
     3: {
       specs: {
-        $schema: "https://vega.github.io/schema/vega/v4.json",
         width: 100,
         height: 50,
         padding: 5,
@@ -293,7 +292,8 @@ const initialState = {
               update: {
                 fill: [
                   {
-                    test: "indexof(signal_highlight.hData,datum.category) >= 0",
+                    test:
+                      "indexof(signal_highlight.hData,datum.category) >= 0 || (datum.amount > signal_highlight.hData[0] && datum.amount < signal_highlight.hData[1])",
                     value: "yellow"
                   },
                   { value: "grey" }

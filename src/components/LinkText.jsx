@@ -23,9 +23,23 @@ class LinkText extends Component {
     this.props.deactivateTextLink(text);
   }
   componentDidMount() {
+    //TODO: Find a better place to update *link* to store. It only updates first letter of handle
     let text = this.props.children[0].props.text;
     text = text.substring(1, text.length);
-    let link = { text: text, chartId: 4, active: false };
+    //Types of possible links: point, multipoint, group, range, series
+    //TODO: Replace this logic with the suggestion functionality
+    //The following logic is just to text various link types for generalizing vega signals
+    var data = text;
+    if (text == "Z") data = ["A", "B"];
+    else if (text == "R") data = [50, 100];
+
+    let link = {
+      linkId: text,
+      data: data,
+      chartId: 4,
+      active: false,
+      type: "point"
+    };
     this.props.addTextLink(link);
   }
   render() {

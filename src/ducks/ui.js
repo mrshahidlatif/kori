@@ -57,7 +57,7 @@ export default (state = initialUi, action) => {
         ...state,
         links: {
           ...state.links,
-          [action.textLink.text]: action.textLink
+          [action.textLink.linkId]: action.textLink
         }
       };
     case ACTIVATE_TEXT_LINK:

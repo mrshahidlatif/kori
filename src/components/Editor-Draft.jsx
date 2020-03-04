@@ -258,10 +258,11 @@ class MyEditor extends React.Component {
     //Needs to replace with drag and drop feature!
     // var chartId = Math.floor(Math.random() * 2) + 1;
     var chartId = 4;
-    this.props.addSelectedChart(chartId);
+    var editorChartId = "e4";
+    this.props.addSelectedChart(editorChartId);
 
     content = content.createEntity("CHART", "IMMUTABLE", {
-      content: { chartData: this.props.charts.byId[chartId], id: chartId }
+      content: { chartData: this.props.charts.byId[chartId], id: editorChartId }
     });
     const entityKey = content.getLastCreatedEntityKey();
     this.setState({

@@ -18,18 +18,34 @@ class Chart extends Component {
 
   handleView(...args) {
     let view = args[0];
-    let links = this.props.ui.links;
-    if (links != undefined) {
+    if (this.props.ui.links != undefined) {
+      let links = this.props.ui.links;
       Object.keys(links).map(function(key) {
         if (links[key].active) {
           var d = {
             hColor: "yellow",
-            hData: links[key].text
+            hData: links[key].data
           };
-          view.signal("signal_highlight", d).run();
+          this.sendSignalToChart("signal_highlight", links[key].type, d, view);
         }
-      });
+      }, this);
     }
+    //enlarging the charts that have been added to Editor
+    //TODO: Find a way to make a new copy of the chart that is in the editor. It should have a different ID than the one in VisPanel
+    this.props.ui.chartsInEditor.map(c => {
+      if (c == this.state.id) this.enlargeChart(c, view);
+    });
+  }
+  sendSignalToChart(signalName, signalType, signalData, view) {
+    switch (signalType) {
+      case "point":
+        view.signal(signalName, signalData).run();
+    }
+  }
+  enlargeChart(chart, view) {
+    //TODO: Fix it. Not running properly. It has something to do with copy of chart in editor
+    view.width(300).run();
+    view.height(150).run();
   }
 
   render() {
