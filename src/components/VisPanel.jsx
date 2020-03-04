@@ -23,6 +23,7 @@ class VisPanel extends Component {
         {this.props.allIds.map(id => (
           <Chart
             key={id}
+            id={id}
             specs={allCharts[id].specs}
             data={allCharts[id].data}
           />

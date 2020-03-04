@@ -106,7 +106,11 @@ const ChartBlock = ({
 }) => {
   return (
     <div>
-      <Chart specs={content.chartData.specs} data={content.chartData.data} />
+      <Chart
+        id={content.id}
+        specs={content.chartData.specs}
+        data={content.chartData.data}
+      />
     </div>
   );
 };

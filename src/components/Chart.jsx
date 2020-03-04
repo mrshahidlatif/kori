@@ -7,6 +7,7 @@ import PropTypes from "prop-types";
 class Chart extends Component {
   constructor(props) {
     super(props);
+    this.handleView = this.handleView.bind(this);
   }
 
   state = {
@@ -14,11 +15,21 @@ class Chart extends Component {
     specs: this.props.specs,
     data: this.props.data
   };
+
   handleView(...args) {
     let view = args[0];
-    console.log("View Instance!", view.signal("signal_highlight"));
-    var d = { hColor: "yellow", hData: ["D", "E"] };
-    view.signal("signal_highlight", d).run();
+    let links = this.props.ui.links;
+    if (links != undefined) {
+      Object.keys(links).map(function(key) {
+        if (links[key].active) {
+          var d = {
+            hColor: "yellow",
+            hData: links[key].text
+          };
+          view.signal("signal_highlight", d).run();
+        }
+      });
+    }
   }
 
   render() {
