@@ -26,19 +26,31 @@ class Chart extends Component {
             hColor: "yellow",
             hData: links[key].data
           };
-          this.sendSignalToChart("signal_highlight", links[key].type, d, view);
+          this.props.ui.chartsInEditor.map(c => {
+            if (c == this.state.id)
+              this.sendSignalToChart(
+                "signal_highlight",
+                links[key].type,
+                d,
+                view
+              );
+          });
         }
       }, this);
     }
     //enlarging the charts that have been added to Editor
     //TODO: Find a way to make a new copy of the chart that is in the editor. It should have a different ID than the one in VisPanel
-    this.props.ui.chartsInEditor.map(c => {
-      if (c == this.state.id) this.enlargeChart(c, view);
-    });
+    // this.props.ui.chartsInEditor.map(c => {
+    //   if (c == this.state.id) this.enlargeChart(c, view);
+    // });
   }
   sendSignalToChart(signalName, signalType, signalData, view) {
     switch (signalType) {
       case "point":
+        view.signal(signalName, signalData).run();
+      case "multipoint":
+        view.signal(signalName, signalData).run();
+      case "range":
         view.signal(signalName, signalData).run();
     }
   }

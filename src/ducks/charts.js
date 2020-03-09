@@ -89,7 +89,7 @@ const initialState = {
         signals: [
           {
             name: "signal_highlight",
-            value: { cat: 3 }
+            value: { hData: 3 }
           }
         ],
 
@@ -173,10 +173,10 @@ const initialState = {
                 fillOpacity: [
                   {
                     test:
-                      "signal_highlight.cat != 3 && datum.c == signal_highlight.cat",
-                    value: 0.7
+                      "signal_highlight.hData != 3 && datum.c == signal_highlight.hData",
+                    value: 1
                   },
-                  { value: 1 }
+                  { value: 0.6 }
                 ]
               },
               hover: {

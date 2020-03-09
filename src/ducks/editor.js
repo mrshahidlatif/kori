@@ -18,10 +18,11 @@ export default (state = rawContent, action) => {
 const rawContent = {
   blocks: [
     {
-      text: "I'm just a doc you can edit me."
+      text: "Welcome to GORI. You can compose interactive articles!"
     },
     {
-      text: "But you can also draw!!!"
+      text:
+        "You can add Visualizations to the document by dragging them from the left panel on to the editor!"
     },
     {
       type: "atomic",
@@ -34,7 +35,7 @@ const rawContent = {
       ]
     },
     {
-      text: "Press the button in the top right to insert a new sticky note"
+      text: "Type @ to establish a link between text and parts of a chart!"
     }
   ],
   entityMap: {

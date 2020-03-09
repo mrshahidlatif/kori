@@ -30,15 +30,27 @@ class LinkText extends Component {
     //TODO: Replace this logic with the suggestion functionality
     //The following logic is just to text various link types for generalizing vega signals
     var data = text;
-    if (text == "Z") data = ["A", "B"];
-    else if (text == "R") data = [50, 100];
+    var type = "point";
+    var chartId = 4;
+
+    if (text == "M") {
+      data = ["A", "B"];
+      type = "multipoint";
+    } else if (text == "R") {
+      data = [50, 100];
+      type = "range";
+    } else if (text == "S") {
+      data = 1;
+      chartId = 3;
+      type = "point";
+    }
 
     let link = {
       linkId: text,
       data: data,
-      chartId: 4,
+      chartId: chartId,
       active: false,
-      type: "point"
+      type: type
     };
     this.props.addTextLink(link);
   }

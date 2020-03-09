@@ -256,9 +256,9 @@ class MyEditor extends React.Component {
 
     //Adding a random chart on button click!
     //Needs to replace with drag and drop feature!
-    // var chartId = Math.floor(Math.random() * 2) + 1;
-    var chartId = 4;
-    var editorChartId = "e4";
+    var chartId = Math.floor(Math.random() * (4 - 3 + 1) + 3);
+    // var chartId = 4;
+    var editorChartId = "e" + chartId;
     this.props.addSelectedChart(editorChartId);
 
     content = content.createEntity("CHART", "IMMUTABLE", {
