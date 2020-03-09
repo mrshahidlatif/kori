@@ -1,4 +1,9 @@
 .linkText {
   color: green;
   cursor: pointer;
+  font-weight: bold;
+  text-decoration: green;
+}
+.linkText:hover {
+  text-decoration: underline;
 }

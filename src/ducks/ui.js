@@ -35,7 +35,7 @@ export default (state = initialUi, action) => {
     case ADD_SELECTED_CHART:
       return {
         ...state,
-        chartsInEditor: state.chartsInEditor.concat(action.chartId)
+        chartsInEditor: action.chartId
       };
     case UPDATE_CURSOR_POSITION:
       return {

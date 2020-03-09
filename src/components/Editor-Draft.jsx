@@ -143,6 +143,14 @@ class MyEditor extends React.Component {
       .map(block => (!block.text.trim() && "\n") || block.text)
       .join("\n");
 
+    //Updating chartsInEditor to store
+    var ids = [];
+    Object.keys(rawContent.entityMap).map(function(key) {
+      var id = rawContent.entityMap[key].data.content.id;
+      ids.push(id);
+    }, this);
+    this.props.addSelectedChart(ids);
+
     // console.log("Typed Text in Editor", allText);
     // var allFeatures = [];
     // if (
@@ -259,7 +267,7 @@ class MyEditor extends React.Component {
     var chartId = Math.floor(Math.random() * (4 - 3 + 1) + 3);
     // var chartId = 4;
     var editorChartId = "e" + chartId;
-    this.props.addSelectedChart(editorChartId);
+    // this.props.addSelectedChart(editorChartId);
 
     content = content.createEntity("CHART", "IMMUTABLE", {
       content: { chartData: this.props.charts.byId[chartId], id: editorChartId }
