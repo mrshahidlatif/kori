@@ -13,6 +13,7 @@ class VisPanel extends Component {
   state = {};
 
   componentDidMount() {
+    //TODO: Should not send a function to the redux store!
     this.props.updateCharts(this.props);
   }
   render() {

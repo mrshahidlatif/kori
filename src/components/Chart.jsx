@@ -62,8 +62,7 @@ class Chart extends Component {
 
   render() {
     const Cspecs = JSON.parse(JSON.stringify(this.state.specs));
-    const Cdata = JSON.parse(JSON.stringify(this.state.data));
-
+    const Cdata = JSON.parse(JSON.stringify(this.state.specs.data));
     return <Vega spec={Cspecs} data={Cdata} onNewView={this.handleView} />;
   }
 }
