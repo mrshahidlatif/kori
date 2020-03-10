@@ -209,8 +209,11 @@ class MyEditor extends React.Component {
       <div className="row">
         <div className="col">
           <VisPanel />
+          <button className={"btn btn-primary"} onClick={this.insertChart}>
+            Add VIS
+          </button>
         </div>
-        <div className="col-10 editor" id="mainEditor">
+        <div className="col-9 editor" id="mainEditor">
           <Editor
             editorState={this.state.editorState}
             placeholder="Start composing an interactive article!"
@@ -239,7 +242,6 @@ class MyEditor extends React.Component {
             )}
           </Toolbar>
         </div>
-        <button onClick={this.insertChart}>Add VIS</button>
         <Suggestion />
       </div>
     );
