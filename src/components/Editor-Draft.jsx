@@ -209,7 +209,10 @@ class MyEditor extends React.Component {
       <div className="row">
         <div className="col">
           <VisPanel />
-          <button className={"btn btn-primary"} onClick={this.insertChart}>
+          <button
+            className={"btn btn-primary btn-lg"}
+            onClick={this.insertChart}
+          >
             Add VIS
           </button>
         </div>

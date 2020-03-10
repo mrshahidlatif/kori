@@ -14,7 +14,8 @@ class VisPanel extends Component {
 
   componentDidMount() {
     //TODO: Should not send a function to the redux store!
-    this.props.updateCharts(this.props);
+    // console.log("Vis Panel Props:", this.props);
+    // this.props.updateCharts(this.props);
   }
   render() {
     var allCharts = this.props.byId;
