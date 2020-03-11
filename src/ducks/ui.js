@@ -5,6 +5,10 @@ export const UPDATE_SUGGESTION_LIST = "UPDATE_SUGGESTION_LIST";
 export const ADD_TEXT_LINK = "ADD_TEXT_LINK";
 export const ACTIVATE_TEXT_LINK = "ACTIVATE_TEXT_LINK";
 export const DEACTIVATE_TEXT_LINK = "DEACTIVATE_TEXT_LINK";
+export const ACTIVATE_SUGGESTIONS = "ACTIVATE_SUGGESTIONS";
+export const DEACTIVATE_SUGGESTIONS = "DEACTIVATE_SUGGESTIONS";
+export const UPDATE_CURRENT_TEXT_LINK = "UPDATE_CURRENT_TEXT_LINK";
+export const CLEAR_CURRENT_TEXT_LINK = "CLEAR_CURRENT_TEXT_LINK";
 
 export const addSelectedChart = chartId => {
   return { type: ADD_SELECTED_CHART, chartId };
@@ -27,6 +31,19 @@ export const activateTextLink = textLink => {
 };
 export const deactivateTextLink = textLink => {
   return { type: DEACTIVATE_TEXT_LINK, textLink };
+};
+
+export const activateSuggestions = () => {
+  return { type: ACTIVATE_SUGGESTIONS };
+};
+export const deactivateSuggestions = () => {
+  return { type: DEACTIVATE_SUGGESTIONS };
+};
+export const updateCurrentTextLink = textLink => {
+  return { type: UPDATE_CURRENT_TEXT_LINK, textLink };
+};
+export const clearCurrentTextLink = () => {
+  return { type: CLEAR_CURRENT_TEXT_LINK };
 };
 
 //reducers
@@ -82,6 +99,33 @@ export default (state = initialUi, action) => {
           }
         }
       };
+    case ACTIVATE_SUGGESTIONS:
+      return {
+        ...state,
+        suggestions: {
+          ...state.suggestions,
+          isActive: true
+        }
+      };
+    case DEACTIVATE_SUGGESTIONS:
+      return {
+        ...state,
+        suggestions: {
+          ...state.suggestions,
+          isActive: false
+        }
+      };
+    case UPDATE_CURRENT_TEXT_LINK:
+      return {
+        ...state,
+        currentLink: action.textLink
+      };
+    case CLEAR_CURRENT_TEXT_LINK:
+      return {
+        ...state,
+        currentLink: ""
+      };
+
     default:
       return state;
   }
@@ -91,6 +135,10 @@ const initialUi = {
   chartsInEditor: [],
   cursorPositionInEditor: {},
   editorPosition: {},
-  listOfSuggestions: [],
-  links: {}
+  suggestions: {
+    listOfSuggestions: ["A", "B", "R", "M", "S"],
+    isActive: false
+  },
+  links: {},
+  currentLink: ""
 };

@@ -9,7 +9,8 @@ import {
   addSelectedChart,
   updateCursorPosition,
   updateEditorPosition,
-  updateSuggestionList
+  updateSuggestionList,
+  clearCurrentTextLink
 } from "../ducks/ui";
 
 import { connect } from "react-redux";
@@ -18,12 +19,9 @@ import PropTypes from "prop-types";
 
 import {
   EditorState,
-  EditorBlock,
   AtomicBlockUtils,
-  RichUtils,
   convertToRaw,
   convertFromRaw,
-  ContentState,
   CompositeDecorator
 } from "draft-js";
 import Editor, { createEditorStateWithText } from "draft-js-plugins-editor";
@@ -45,6 +43,7 @@ import Chart from "./Chart";
 import VisPanel from "./VisPanel";
 import Suggestion from "./Suggestion";
 import LinkText from "./LinkText";
+import decorateComponentWithProps from "../utils/decorate_component_with_props";
 
 class HeadlinesPicker extends Component {
   componentDidMount() {
@@ -121,7 +120,7 @@ class MyEditor extends React.Component {
     const compositeDecorator = new CompositeDecorator([
       {
         strategy: handleStrategy,
-        component: LinkText
+        component: decorateComponentWithProps(LinkText, EditorState)
       }
     ]);
     this.state = {
@@ -131,11 +130,13 @@ class MyEditor extends React.Component {
     };
     this.handleEditorChange = this.handleEditorChange.bind(this);
   }
+  callbackFunction = (newEditorState, newContent) => {
+    this.setState({ editorState: newEditorState });
+  };
   handleEditorChange = editorState => {
     this.setState({ editorState });
     const rawContent = convertToRaw(editorState.getCurrentContent());
     //Only storing the RAW data of the editor
-
     this.props.updateEditorState(rawContent);
 
     const blocks = rawContent.blocks;
@@ -150,26 +151,6 @@ class MyEditor extends React.Component {
       ids.push(id);
     }, this);
     this.props.addSelectedChart(ids);
-
-    // console.log("Typed Text in Editor", allText);
-    // var allFeatures = [];
-    // if (
-    //   Object.keys(rawContent.entityMap).length !=
-    //     Object.keys(this.props.editor.entityMap).length &&
-    //   Object.keys(rawContent.entityMap).length > 0
-    // ) {
-    //   //get chart features and update them in the Redux Store
-    //   Object.keys(rawContent.entityMap).map(function(key) {
-    //     var id = rawContent.entityMap[key].data.content.id;
-
-    //     var featuers = this.parseChartForFeatures(id);
-
-    //     allFeatures = allFeatures.concat(featuers);
-    //   }, this);
-    //   this.props.updateSuggestionList(allFeatures);
-    // } else if (Object.keys(rawContent.entityMap).length == 0) {
-    //   this.props.updateSuggestionList();
-    // }
 
     //Computing the position of cursor relative to viewport for showing suggestions
     //https://github.com/facebook/draft-js/issues/45
@@ -245,7 +226,10 @@ class MyEditor extends React.Component {
             )}
           </Toolbar>
         </div>
-        <Suggestion />
+        <Suggestion
+          suggestionCallback={this.callbackFunction}
+          suggestionState={this.state.editorState}
+        />
       </div>
     );
   }
@@ -262,7 +246,6 @@ class MyEditor extends React.Component {
     });
     return features;
   };
-
   insertChart = () => {
     const { editorState } = this.state;
     let content = editorState.getCurrentContent();
@@ -345,7 +328,8 @@ const mapDispatchToProps = dispatch => {
         addSelectedChart,
         updateCursorPosition,
         updateEditorPosition,
-        updateSuggestionList
+        updateSuggestionList,
+        clearCurrentTextLink
       },
       dispatch
     )
