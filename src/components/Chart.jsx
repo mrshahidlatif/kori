@@ -15,7 +15,12 @@ class Chart extends Component {
     specs: this.props.specs,
     data: this.props.data
   };
-
+  //TODO: BUG: At each key press every chart is re-rendered! That is why the whole system was slowing down!
+  // It should only update when there is a signal being sent!
+  shouldComponentUpdate(nextProps, nextState) {
+    // console.log("PROPS", nextProps, nextState);
+    // return nextProps.specs != nextState.specs;
+  }
   handleView(...args) {
     let view = args[0];
     if (this.props.ui.links != undefined) {

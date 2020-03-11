@@ -9,8 +9,7 @@ import {
   addSelectedChart,
   updateCursorPosition,
   updateEditorPosition,
-  updateSuggestionList,
-  clearCurrentTextLink
+  updateSuggestionList
 } from "../ducks/ui";
 
 import { connect } from "react-redux";
@@ -145,6 +144,7 @@ class MyEditor extends React.Component {
       .join("\n");
 
     //Updating chartsInEditor to store
+    //TODO: It calls addSelectedChart fucntion on each key process! It shouldn't happen!
     var ids = [];
     Object.keys(rawContent.entityMap).map(function(key) {
       var id = rawContent.entityMap[key].data.content.id;
@@ -328,8 +328,7 @@ const mapDispatchToProps = dispatch => {
         addSelectedChart,
         updateCursorPosition,
         updateEditorPosition,
-        updateSuggestionList,
-        clearCurrentTextLink
+        updateSuggestionList
       },
       dispatch
     )

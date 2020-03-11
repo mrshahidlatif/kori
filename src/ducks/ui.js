@@ -7,8 +7,6 @@ export const ACTIVATE_TEXT_LINK = "ACTIVATE_TEXT_LINK";
 export const DEACTIVATE_TEXT_LINK = "DEACTIVATE_TEXT_LINK";
 export const ACTIVATE_SUGGESTIONS = "ACTIVATE_SUGGESTIONS";
 export const DEACTIVATE_SUGGESTIONS = "DEACTIVATE_SUGGESTIONS";
-export const UPDATE_CURRENT_TEXT_LINK = "UPDATE_CURRENT_TEXT_LINK";
-export const CLEAR_CURRENT_TEXT_LINK = "CLEAR_CURRENT_TEXT_LINK";
 
 export const addSelectedChart = chartId => {
   return { type: ADD_SELECTED_CHART, chartId };
@@ -38,12 +36,6 @@ export const activateSuggestions = () => {
 };
 export const deactivateSuggestions = () => {
   return { type: DEACTIVATE_SUGGESTIONS };
-};
-export const updateCurrentTextLink = textLink => {
-  return { type: UPDATE_CURRENT_TEXT_LINK, textLink };
-};
-export const clearCurrentTextLink = () => {
-  return { type: CLEAR_CURRENT_TEXT_LINK };
 };
 
 //reducers
@@ -115,17 +107,6 @@ export default (state = initialUi, action) => {
           isActive: false
         }
       };
-    case UPDATE_CURRENT_TEXT_LINK:
-      return {
-        ...state,
-        currentLink: action.textLink
-      };
-    case CLEAR_CURRENT_TEXT_LINK:
-      return {
-        ...state,
-        currentLink: ""
-      };
-
     default:
       return state;
   }
@@ -139,6 +120,5 @@ const initialUi = {
     listOfSuggestions: ["A", "B", "R", "M", "S"],
     isActive: false
   },
-  links: {},
-  currentLink: ""
+  links: {}
 };

@@ -118,7 +118,6 @@ const initialState = {
     },
     2: {
       specs: {
-        $schema: "https://vega.github.io/schema/vega/v5.json",
         description: "A basic line chart example.",
         width: 200,
         height: 100,
@@ -446,26 +445,10 @@ const initialState = {
             }
           }
         ]
-      },
-      data: [
-        {
-          name: "table",
-          values: [
-            { category: "A", amount: 28 },
-            { category: "B", amount: 55 },
-            { category: "C", amount: 43 },
-            { category: "D", amount: 91 },
-            { category: "E", amount: 81 },
-            { category: "F", amount: 53 },
-            { category: "G", amount: 19 },
-            { category: "H", amount: 87 }
-          ]
-        }
-      ]
+      }
     },
     5: {
       specs: {
-        $schema: "https://vega.github.io/schema/vega/v5.json",
         description:
           "A scatter plot example with interactive legend and x-axis.",
         width: 200,
@@ -787,7 +770,77 @@ const initialState = {
           }
         ]
       }
+    },
+    6: {
+      specs: {
+        description:
+          "A choropleth map depicting U.S. unemployment rates by county in 2009.",
+        width: 200,
+        height: 200,
+        autosize: "none",
+
+        data: [
+          {
+            name: "unemp",
+            url: process.env.PUBLIC_URL + "datasets/unemployment.tsv",
+            format: { type: "tsv", parse: "auto" }
+          },
+          {
+            name: "counties",
+            url: process.env.PUBLIC_URL + "datasets/us-10m.json",
+            format: { type: "topojson", feature: "counties" },
+            transform: [
+              {
+                type: "lookup",
+                from: "unemp",
+                key: "id",
+                fields: ["id"],
+                values: ["rate"]
+              },
+              { type: "filter", expr: "datum.rate != null" }
+            ]
+          }
+        ],
+
+        projections: [
+          {
+            name: "projection",
+            type: "albersUsa"
+          }
+        ],
+
+        scales: [
+          {
+            name: "color",
+            type: "quantize",
+            domain: [0, 0.15],
+            range: { scheme: "blues", count: 7 }
+          }
+        ],
+
+        legends: [
+          {
+            fill: "color",
+            orient: "bottom-right",
+            title: "Unemployment",
+            format: "0.1%"
+          }
+        ],
+
+        marks: [
+          {
+            type: "shape",
+            from: { data: "counties" },
+            encode: {
+              enter: { tooltip: { signal: "format(datum.rate, '0.1%')" } },
+              update: { fill: { scale: "color", field: "rate" } },
+              hover: { fill: { value: "red" } }
+            },
+            transform: [{ type: "geoshape", projection: "projection" }]
+          }
+        ]
+      }
     }
   },
-  allIds: [1, 2, 3, 4, 5]
+  allIds: [1, 2, 3, 4, 5, 6]
 };

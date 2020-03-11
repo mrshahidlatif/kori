@@ -2,11 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import css from "./Suggestion.module.css";
-import {
-  addTextLink,
-  deactivateSuggestions,
-  updateCurrentTextLink
-} from "../ducks/ui";
+import { addTextLink, deactivateSuggestions } from "../ducks/ui";
 import { EditorState, Modifier } from "draft-js";
 
 class Suggestion extends Component {
@@ -128,10 +124,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    ...bindActionCreators(
-      { addTextLink, deactivateSuggestions, updateCurrentTextLink },
-      dispatch
-    )
+    ...bindActionCreators({ addTextLink, deactivateSuggestions }, dispatch)
   };
 };
 

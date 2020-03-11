@@ -24,27 +24,19 @@ const rawContent = {
       text:
         "You can add Visualizations to the document by dragging them from the left panel on to the editor!"
     },
-    {
-      type: "atomic",
-      text: " ",
-      entityRanges: [
-        {
-          key: "1",
-          offset: 0
-        }
-      ]
-    },
+    // {
+    //   type: "atomic",
+    //   text: " ",
+    //   entityRanges: [
+    //     {
+    //       key: "1",
+    //       offset: 0
+    //     }
+    //   ]
+    // },
     {
       text: "Type @ to establish a link between text and parts of a chart!"
     }
   ],
-  entityMap: {
-    "1": {
-      type: "Chart",
-      mutability: "IMMUTABLE",
-      data: {
-        content: ""
-      }
-    }
-  }
+  entityMap: {}
 };
