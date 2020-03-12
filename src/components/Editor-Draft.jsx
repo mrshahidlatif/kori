@@ -104,11 +104,7 @@ const ChartBlock = ({
 }) => {
   return (
     <div>
-      <Chart
-        id={content.id}
-        specs={content.chartData.specs}
-        data={content.chartData.data}
-      />
+      <Chart id={content.id} specs={content.chartData} shouldUpdate={true} />
     </div>
   );
 };
@@ -252,13 +248,21 @@ class MyEditor extends React.Component {
 
     //Adding a random chart on button click!
     //Needs to replace with drag and drop feature!
-    var chartId = Math.floor(Math.random() * (4 - 3 + 1) + 3);
-    // var chartId = 4;
+    // var chartId = Math.floor(Math.random() * (4 - 3 + 1) + 3);
+    var chartId = 1;
     var editorChartId = "e" + chartId;
-    // this.props.addSelectedChart(editorChartId);
+
+    //Update Chart Specs with Signal Information
+    var newChartSpecs = updateChartSpecsWithSignals(
+      this.props.charts.byId[chartId].specs,
+      this.props.charts.byId[chartId].type
+    );
 
     content = content.createEntity("CHART", "IMMUTABLE", {
-      content: { chartData: this.props.charts.byId[chartId], id: editorChartId }
+      content: {
+        chartData: newChartSpecs,
+        id: editorChartId
+      }
     });
     const entityKey = content.getLastCreatedEntityKey();
     this.setState({
@@ -308,6 +312,86 @@ function findWithRegex(regex, contentBlock, callback) {
     start = matchArr.index;
     callback(start, start + matchArr[0].length);
   }
+}
+
+function updateChartSpecsWithSignals(oldChartSpecs, chartType) {
+  // console.log("Old Chart Specs:", oldChartSpecs);
+
+  //I think this is not the right way to work with data cloning in Reactjs!
+  //soultion Source: https://stackoverflow.com/questions/55567386/react-cannot-add-property-x-object-is-not-extensible
+  let newChartSpecs = JSON.parse(JSON.stringify(oldChartSpecs));
+  newChartSpecs.width = 300;
+  newChartSpecs.height = 200;
+
+  const hasAlreadySignalsField = newChartSpecs.hasOwnProperty("signals");
+  if (hasAlreadySignalsField) {
+    newChartSpecs.signals.push({
+      name: "signal_highlight",
+      value: { data: ["Z"], start: 0, end: 100 }
+    });
+  } else {
+    newChartSpecs.signals = [
+      {
+        name: "signal_highlight",
+        value: { data: ["Z"], start: 0, end: 100 }
+      }
+    ];
+  }
+  if (chartType == "stack-bar") {
+    const x = getVariableNameFromScale(newChartSpecs, "x");
+    const y = getVariableNameFromScale(newChartSpecs, "y");
+    const color = getVariableNameFromScale(newChartSpecs, "color");
+
+    newChartSpecs.marks[0].encode.update = {
+      fillOpacity: [
+        {
+          test:
+            "indexof(signal_highlight.data,datum." +
+            x +
+            ") >= 0 || (datum." +
+            y +
+            " > signal_highlight.data[0] && datum." +
+            y +
+            " < signal_highlight.data[1]) || indexof(signal_highlight.data[0],datum." +
+            color +
+            ") >= 0",
+          value: 1.0
+        },
+        { value: 0.6 }
+      ]
+    };
+  } else if (chartType == "bar") {
+    const x = getVariableNameFromScale(newChartSpecs, "xscale");
+    const y = getVariableNameFromScale(newChartSpecs, "yscale");
+
+    newChartSpecs.marks[0].encode.update = {
+      fill: { value: "steelblue" },
+      fillOpacity: [
+        {
+          test:
+            "indexof(signal_highlight.data,datum." +
+            x +
+            ") >= 0 || (datum." +
+            y +
+            " > signal_highlight.data[0] && datum." +
+            y +
+            " < signal_highlight.data[1])",
+          value: 1.0
+        },
+        { value: 0.6 }
+      ]
+    };
+  }
+  // console.log("New Chart Specs:", newChartSpecs);
+  return newChartSpecs;
+}
+function getVariableNameFromScale(specs, scaleName) {
+  let varName = "infinity";
+  const varScale = specs.scales.filter(s => {
+    return s.name == scaleName;
+  });
+  if (varScale.length > 0) varName = varScale[0].domain.field;
+  return varName;
 }
 
 //Define the public proptypes of this componenet

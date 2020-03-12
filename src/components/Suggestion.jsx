@@ -58,17 +58,17 @@ class Suggestion extends Component {
     //create and store the link
     var data = text;
     var type = "point";
-    var chartId = 4;
+    var chartId = 7;
 
-    if (text == "M") {
-      data = ["A", "B"];
+    if (text == "ACH") {
+      data = ["A", "C", "H"];
       type = "multipoint";
-    } else if (text == "R") {
+    } else if (text == "50To100") {
       data = [50, 100];
       type = "range";
-    } else if (text == "S") {
-      data = 1;
-      chartId = 3;
+    } else if (text == "OrangeSeries") {
+      data = "0";
+      chartId = 7;
       type = "point";
     }
 

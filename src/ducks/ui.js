@@ -117,7 +117,17 @@ const initialUi = {
   cursorPositionInEditor: {},
   editorPosition: {},
   suggestions: {
-    listOfSuggestions: ["A", "B", "R", "M", "S"],
+    listOfSuggestions: [
+      "A",
+      "B",
+      "50To100",
+      "ACH",
+      "OrangeSeries",
+      "1",
+      "2",
+      "3",
+      "0"
+    ],
     isActive: false
   },
   links: {}

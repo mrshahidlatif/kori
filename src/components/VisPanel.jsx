@@ -23,12 +23,7 @@ class VisPanel extends Component {
       <div>
         <h3>Available Charts</h3>
         {this.props.allIds.map(id => (
-          <Chart
-            key={id}
-            id={id}
-            specs={allCharts[id].specs}
-            data={allCharts[id].data}
-          />
+          <Chart key={id} id={id} specs={allCharts[id].specs} />
         ))}
       </div>
     );

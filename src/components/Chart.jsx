@@ -12,14 +12,16 @@ class Chart extends Component {
 
   state = {
     id: this.props.id,
-    specs: this.props.specs,
-    data: this.props.data
+    specs: this.props.specs
   };
   //TODO: BUG: At each key press every chart is re-rendered! That is why the whole system was slowing down!
   // It should only update when there is a signal being sent!
-  shouldComponentUpdate(nextProps, nextState) {
+  //PARTIAL FIX: Now I only update the charts that are in the editor. But still they keep on updating on each keypress which is very inefficient
+  shouldComponentUpdate(nextProps, nextState, prevProps) {
     // console.log("PROPS", nextProps, nextState);
     // return nextProps.specs != nextState.specs;
+
+    return this.props.shouldUpdate;
   }
   handleView(...args) {
     let view = args[0];
@@ -28,17 +30,17 @@ class Chart extends Component {
       Object.keys(links).map(function(key) {
         if (links[key].active) {
           var d = {
-            hColor: "yellow",
-            hData: links[key].data
+            data: links[key].data
           };
           this.props.ui.chartsInEditor.map(c => {
-            if (c == this.state.id)
+            if (c == this.state.id) {
               this.sendSignalToChart(
                 "signal_highlight",
                 links[key].type,
                 d,
                 view
               );
+            }
           });
         }
       }, this);
