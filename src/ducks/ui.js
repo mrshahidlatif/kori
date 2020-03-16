@@ -126,7 +126,9 @@ const initialUi = {
       "1",
       "2",
       "3",
-      "0"
+      "0",
+      "OrangeLine",
+      "Apple"
     ],
     isActive: false
   },

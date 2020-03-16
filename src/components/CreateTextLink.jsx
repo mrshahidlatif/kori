@@ -5,7 +5,7 @@ const createTextLink = text => {
   //create and store the link
   var data = text;
   var type = "point";
-  var chartId = 7;
+  var chartId = 6;
 
   if (text == "ACH") {
     data = ["A", "C", "H"];
@@ -14,11 +14,18 @@ const createTextLink = text => {
     data = [50, 100];
     type = "range";
   } else if (text == "OrangeSeries") {
-    data = "0";
-    chartId = 7;
+    data = [0];
+    chartId = 5;
+    type = "point";
+  } else if (text == "OrangeLine") {
+    data = [1];
+    chartId = 2;
+    type = "point";
+  } else if (text == "Apple") {
+    data = ["AAPL"];
+    chartId = 6;
     type = "point";
   }
-
   let link = {
     linkId: text,
     data: data,

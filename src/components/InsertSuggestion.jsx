@@ -20,7 +20,6 @@ const insertSuggestion = (suggestionText, editorState) => {
     insertTextSelection,
     "@" + suggestionText + " "
   );
-  console.log("new content", newContent);
   const newEditorState = EditorState.push(
     editorState,
     newContent,

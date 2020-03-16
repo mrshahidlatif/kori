@@ -343,7 +343,7 @@ class MyEditor extends React.Component {
     //Adding a random chart on button click!
     //Needs to replace with drag and drop feature!
     // var chartId = Math.floor(Math.random() * (4 - 3 + 1) + 3);
-    var chartId = 7;
+    var chartId = 2;
     var editorChartId = "e" + chartId;
 
     //Update Chart Specs with Signal Information
@@ -414,24 +414,26 @@ function updateChartSpecsWithSignals(oldChartSpecs, chartType) {
   //I think this is not the right way to work with data cloning in Reactjs!
   //soultion Source: https://stackoverflow.com/questions/55567386/react-cannot-add-property-x-object-is-not-extensible
   let newChartSpecs = JSON.parse(JSON.stringify(oldChartSpecs));
-  newChartSpecs.width = 300;
+  newChartSpecs.width = 350;
   newChartSpecs.height = 200;
 
+  //Create a Highlight signal if doesn't exist already, else append it in signals
   const hasAlreadySignalsField = newChartSpecs.hasOwnProperty("signals");
   if (hasAlreadySignalsField) {
     newChartSpecs.signals.push({
       name: "signal_highlight",
-      value: { data: ["Z"], start: 0, end: 100 }
+      value: { data: [], start: 0, end: 100 }
     });
   } else {
     newChartSpecs.signals = [
       {
         name: "signal_highlight",
-        value: { data: ["Z"], start: 0, end: 100 }
+        value: { data: [], start: 0, end: 100 }
       }
     ];
   }
-  if (chartType == "stack-bar") {
+  //Case Stack-Bar chart
+  if (chartType === "stack-bar") {
     const x = getVariableNameFromScale(newChartSpecs, "x");
     const y = getVariableNameFromScale(newChartSpecs, "y");
     const color = getVariableNameFromScale(newChartSpecs, "color");
@@ -442,19 +444,21 @@ function updateChartSpecsWithSignals(oldChartSpecs, chartType) {
           test:
             "indexof(signal_highlight.data,datum." +
             x +
-            ") >= 0 || (datum." +
+            ") != -1 || (datum." +
             y +
             " > signal_highlight.data[0] && datum." +
             y +
-            " < signal_highlight.data[1]) || indexof(signal_highlight.data[0],datum." +
+            " < signal_highlight.data[1]) || indexof(signal_highlight.data,datum." +
             color +
-            ") >= 0",
+            ") != -1",
           value: 1.0
         },
         { value: 0.6 }
       ]
     };
-  } else if (chartType == "bar") {
+  }
+  // Case Simple Bar chart
+  else if (chartType === "bar") {
     const x = getVariableNameFromScale(newChartSpecs, "xscale");
     const y = getVariableNameFromScale(newChartSpecs, "yscale");
 
@@ -476,7 +480,52 @@ function updateChartSpecsWithSignals(oldChartSpecs, chartType) {
       ]
     };
   }
-  // console.log("New Chart Specs:", newChartSpecs);
+  // Case Multi-Line Chart
+  else if (chartType === "multi-line") {
+    const x = getVariableNameFromScale(newChartSpecs, "x");
+    const y = getVariableNameFromScale(newChartSpecs, "y");
+    const color = getVariableNameFromScale(newChartSpecs, "color");
+
+    if (newChartSpecs.marks[0].marks[0].encode.hasOwnProperty("update")) {
+      newChartSpecs.marks[0].marks[0].encode.update.strokeOpacity = [
+        {
+          test:
+            "indexof(signal_highlight.data,datum." +
+            x +
+            ") !== -1 || (datum." +
+            y +
+            " > signal_highlight.data[0] && datum." +
+            y +
+            " < signal_highlight.data[1]) || indexof(signal_highlight.data,datum." +
+            color +
+            ") !== -1",
+          value: 1.0
+        },
+        { value: 0.6 }
+      ];
+    } else {
+      newChartSpecs.marks[0].marks[0].encode.update = {
+        //TODO: BUG: When value is 0, it highlights both the lines!
+        strokeOpacity: [
+          {
+            test:
+              "indexof(signal_highlight.data,datum." +
+              x +
+              ") != -1 || (datum." +
+              y +
+              " > signal_highlight.data[0] && datum." +
+              y +
+              " < signal_highlight.data[1]) || indexof(signal_highlight.data,datum." +
+              color +
+              ") !== -1",
+            value: 1.0
+          },
+          { value: 0.4 }
+        ]
+      };
+    }
+  }
+  console.log("New Chart Specs:", newChartSpecs);
   return newChartSpecs;
 }
 function getVariableNameFromScale(specs, scaleName) {
