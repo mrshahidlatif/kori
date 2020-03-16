@@ -5,6 +5,7 @@ import css from "./Suggestion.module.css";
 import { addTextLink, deactivateSuggestions } from "../ducks/ui";
 import { EditorState, Modifier } from "draft-js";
 import insertSuggestion from "./InsertSuggestion";
+import createTextLink from "./CreateTextLink";
 
 class Suggestion extends Component {
   constructor(props) {
@@ -16,34 +17,8 @@ class Suggestion extends Component {
     this.props.suggestionCallback(newEditorState, newContent);
   };
   handleClick(event) {
-    var text = event.target.textContent;
-    //Types of possible links: point, multipoint, group, range, series
-    //TODO: Replace this logic with the suggestion functionality
-    //The following logic is just to text various link types for generalizing vega signals
-    //create and store the link
-    var data = text;
-    var type = "point";
-    var chartId = 7;
-
-    if (text == "ACH") {
-      data = ["A", "C", "H"];
-      type = "multipoint";
-    } else if (text == "50To100") {
-      data = [50, 100];
-      type = "range";
-    } else if (text == "OrangeSeries") {
-      data = "0";
-      chartId = 7;
-      type = "point";
-    }
-
-    let link = {
-      linkId: text,
-      data: data,
-      chartId: chartId,
-      active: false,
-      type: type
-    };
+    const text = event.target.textContent;
+    const link = createTextLink(text);
     this.props.addTextLink(link);
     // this.insertTextLinkToEditor(text);
     const updatedEditorState = insertSuggestion(

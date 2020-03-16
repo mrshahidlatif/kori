@@ -11,7 +11,8 @@ import {
   updateCursorPosition,
   updateEditorPosition,
   updateSuggestionList,
-  deactivateSuggestions
+  deactivateSuggestions,
+  addTextLink
 } from "../ducks/ui";
 
 import { connect } from "react-redux";
@@ -45,6 +46,7 @@ import VisPanel from "./VisPanel";
 import Suggestion from "./Suggestion";
 import LinkText from "./LinkText";
 import decorateComponentWithProps from "../utils/decorate_component_with_props";
+import createTextLink from "./CreateTextLink";
 
 class HeadlinesPicker extends Component {
   componentDidMount() {
@@ -124,11 +126,7 @@ class MyEditor extends React.Component {
       editorState: EditorState.createEmpty(compositeDecorator),
       cursorPositionInEditor: {},
       editorPosition: {},
-      autocompleteSuggestions: [],
-      focusedHashtagIndex: 0,
-      focussedSuggestionIndex: 0,
-      displaySuggestions: false,
-      styles: styles
+      focussedSuggestionIndex: 0
     };
     this.handleEditorChange = this.handleEditorChange.bind(this);
     this.onDownArrow = this.onDownArrow.bind(this);
@@ -213,6 +211,7 @@ class MyEditor extends React.Component {
   }
 
   onTab(keyboardEvent) {
+    keyboardEvent.preventDefault();
     const suggestionText = this.props.ui.suggestions.listOfSuggestions[
       this.state.focussedSuggestionIndex
     ];
@@ -222,9 +221,10 @@ class MyEditor extends React.Component {
     );
     this.setState({ editorState: newEditorState });
     this.props.deactivateSuggestions();
-    keyboardEvent.preventDefault();
-  }
 
+    const link = createTextLink(suggestionText);
+    this.props.addTextLink(link);
+  }
   onEscape(keyboardEvent) {
     keyboardEvent && keyboardEvent.preventDefault();
     this.props.deactivateSuggestions();
@@ -394,11 +394,6 @@ class MyEditor extends React.Component {
  * purposes only. Don't reuse these regexes.
  */
 const HANDLE_REGEX = /\@[\w]+/g;
-const HASHTAG_REGEX = /\#[\w\u0590-\u05ff]+/g;
-
-function hashtagStrategy(contentBlock, callback) {
-  findWithRegex(HASHTAG_REGEX, contentBlock, callback);
-}
 
 function handleStrategy(contentBlock, callback, contentState) {
   findWithRegex(HANDLE_REGEX, contentBlock, callback);
@@ -512,21 +507,11 @@ const mapDispatchToProps = dispatch => {
         updateCursorPosition,
         updateEditorPosition,
         updateSuggestionList,
-        deactivateSuggestions
+        deactivateSuggestions,
+        addTextLink
       },
       dispatch
     )
   };
-};
-const styles = {
-  editorContainer: {
-    position: "relative"
-  },
-  popover: {
-    position: "absolute",
-    background: "white",
-    border: "1px solid black",
-    zIndex: 5
-  }
 };
 export default connect(mapStateToProps, mapDispatchToProps)(MyEditor);
