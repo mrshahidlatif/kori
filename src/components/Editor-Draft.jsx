@@ -5,11 +5,13 @@ import "../css-draftjs/static-toolbar-plugin.css";
 import "../css-draftjs/editorStyles.css";
 
 import { updateEditorState } from "../ducks/editor";
+import insertSuggestion from "./InsertSuggestion";
 import {
   addSelectedChart,
   updateCursorPosition,
   updateEditorPosition,
-  updateSuggestionList
+  updateSuggestionList,
+  deactivateSuggestions
 } from "../ducks/ui";
 
 import { connect } from "react-redux";
@@ -121,15 +123,27 @@ class MyEditor extends React.Component {
     this.state = {
       editorState: EditorState.createEmpty(compositeDecorator),
       cursorPositionInEditor: {},
-      editorPosition: {}
+      editorPosition: {},
+      autocompleteSuggestions: [],
+      focusedHashtagIndex: 0,
+      focussedSuggestionIndex: 0,
+      displaySuggestions: false,
+      styles: styles
     };
     this.handleEditorChange = this.handleEditorChange.bind(this);
+    this.onDownArrow = this.onDownArrow.bind(this);
+    this.onUpArrow = this.onUpArrow.bind(this);
+    this.handleReturn = this.handleReturn.bind(this);
+    this.onTab = this.onTab.bind(this);
+    this.onEscape = this.onEscape.bind(this);
+    this.onBlur = this.onBlur.bind(this);
+    this.onFocus = this.onFocus.bind(this);
   }
   callbackFunction = (newEditorState, newContent) => {
     this.setState({ editorState: newEditorState });
   };
   handleEditorChange = editorState => {
-    this.setState({ editorState });
+    this.setState({ editorState: editorState });
     const rawContent = convertToRaw(editorState.getCurrentContent());
     //Only storing the RAW data of the editor
     this.props.updateEditorState(rawContent);
@@ -168,6 +182,60 @@ class MyEditor extends React.Component {
       this.props.updateCursorPosition(cursorPosition);
     }
   };
+  onUpArrow(keyboardEvent) {
+    keyboardEvent.preventDefault();
+
+    if (this.state.focussedSuggestionIndex - 1 < 0) {
+      this.setState({
+        focussedSuggestionIndex:
+          this.props.ui.suggestions.listOfSuggestions.length - 1
+      });
+    } else {
+      this.setState({
+        focussedSuggestionIndex:
+          (this.state.focussedSuggestionIndex - 1) %
+          this.props.ui.suggestions.listOfSuggestions.length
+      });
+    }
+  }
+
+  onDownArrow(keyboardEvent) {
+    keyboardEvent.preventDefault();
+    this.setState({
+      focussedSuggestionIndex:
+        (this.state.focussedSuggestionIndex + 1) %
+        this.props.ui.suggestions.listOfSuggestions.length
+    });
+  }
+  handleReturn() {
+    //TODO: Fix this! It is not working at the moment!
+    return true;
+  }
+
+  onTab(keyboardEvent) {
+    const suggestionText = this.props.ui.suggestions.listOfSuggestions[
+      this.state.focussedSuggestionIndex
+    ];
+    const newEditorState = insertSuggestion(
+      suggestionText,
+      this.state.editorState
+    );
+    this.setState({ editorState: newEditorState });
+    this.props.deactivateSuggestions();
+    keyboardEvent.preventDefault();
+  }
+
+  onEscape(keyboardEvent) {
+    keyboardEvent && keyboardEvent.preventDefault();
+    this.props.deactivateSuggestions();
+  }
+
+  onBlur() {
+    //TODO: BUG The following logic doesn't work well with the click on suggestion item. Probably because that is implemented in a different Component
+    // this.props.deactivateSuggestions();
+  }
+
+  onFocus() {}
   componentDidMount() {
     const rawEditorData = this.props.editor;
     const contentState = convertFromRaw(rawEditorData);
@@ -182,6 +250,29 @@ class MyEditor extends React.Component {
     this.props.updateEditorPosition(editorPosition);
   }
   render() {
+    const additionalProps = (() => {
+      if (this.props.ui.suggestions.isActive) {
+        return {
+          onDownArrow: this.onDownArrow,
+          onUpArrow: this.onUpArrow,
+          handleReturn: this.handleReturn,
+          onEscape: this.onEscape,
+          onBlur: this.onBlur,
+          onFocus: this.onFocus,
+          onTab: this.onTab
+        };
+      } else {
+        return {
+          onDownArrow: undefined,
+          onUpArrow: undefined,
+          handleReturn: undefined,
+          onEscape: undefined,
+          onTab: undefined,
+          onBlur: this.onBlur,
+          onFocus: this.onFocus
+        };
+      }
+    })();
     return (
       <div className="row">
         <div className="col">
@@ -198,8 +289,10 @@ class MyEditor extends React.Component {
             editorState={this.state.editorState}
             placeholder="Start composing an interactive article!"
             onChange={this.handleEditorChange}
+            stripPastedStyles={true}
             blockRendererFn={this.blockRendererFn}
             plugins={plugins}
+            {...additionalProps}
             ref={element => {
               this.editor = element;
             }}
@@ -225,6 +318,7 @@ class MyEditor extends React.Component {
         <Suggestion
           suggestionCallback={this.callbackFunction}
           suggestionState={this.state.editorState}
+          focussedSuggestionIndex={this.state.focussedSuggestionIndex}
         />
       </div>
     );
@@ -249,7 +343,7 @@ class MyEditor extends React.Component {
     //Adding a random chart on button click!
     //Needs to replace with drag and drop feature!
     // var chartId = Math.floor(Math.random() * (4 - 3 + 1) + 3);
-    var chartId = 1;
+    var chartId = 7;
     var editorChartId = "e" + chartId;
 
     //Update Chart Specs with Signal Information
@@ -300,6 +394,11 @@ class MyEditor extends React.Component {
  * purposes only. Don't reuse these regexes.
  */
 const HANDLE_REGEX = /\@[\w]+/g;
+const HASHTAG_REGEX = /\#[\w\u0590-\u05ff]+/g;
+
+function hashtagStrategy(contentBlock, callback) {
+  findWithRegex(HASHTAG_REGEX, contentBlock, callback);
+}
 
 function handleStrategy(contentBlock, callback, contentState) {
   findWithRegex(HANDLE_REGEX, contentBlock, callback);
@@ -412,10 +511,22 @@ const mapDispatchToProps = dispatch => {
         addSelectedChart,
         updateCursorPosition,
         updateEditorPosition,
-        updateSuggestionList
+        updateSuggestionList,
+        deactivateSuggestions
       },
       dispatch
     )
   };
+};
+const styles = {
+  editorContainer: {
+    position: "relative"
+  },
+  popover: {
+    position: "absolute",
+    background: "white",
+    border: "1px solid black",
+    zIndex: 5
+  }
 };
 export default connect(mapStateToProps, mapDispatchToProps)(MyEditor);

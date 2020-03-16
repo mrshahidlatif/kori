@@ -4,6 +4,7 @@ import { bindActionCreators } from "redux";
 import css from "./Suggestion.module.css";
 import { addTextLink, deactivateSuggestions } from "../ducks/ui";
 import { EditorState, Modifier } from "draft-js";
+import insertSuggestion from "./InsertSuggestion";
 
 class Suggestion extends Component {
   constructor(props) {
@@ -14,44 +15,8 @@ class Suggestion extends Component {
   sendUpdatedEditorStateToEditor = (newEditorState, newContent) => {
     this.props.suggestionCallback(newEditorState, newContent);
   };
-
-  insertTextLinkToEditor(text) {
-    const editorState = this.props.suggestionState;
-    const currentContent = editorState.getCurrentContent(),
-      currentSelection = editorState.getSelection();
-    const end = currentSelection.getAnchorOffset();
-
-    const anchorKey = currentSelection.getAnchorKey();
-    const currentBlock = currentContent.getBlockForKey(anchorKey);
-    const blockText = currentBlock.getText();
-    const start = blockText.substring(0, end).lastIndexOf("@");
-
-    const insertTextSelection = currentSelection.merge({
-      anchorOffset: start,
-      focusOffset: end
-    });
-
-    const newContent = Modifier.replaceText(
-      currentContent,
-      insertTextSelection,
-      "@" + text + " "
-    );
-    const newEditorState = EditorState.push(
-      editorState,
-      newContent,
-      "insert-characters"
-    );
-
-    const updatedEditorState = EditorState.forceSelection(
-      newEditorState,
-      newContent.getSelectionAfter()
-    );
-    this.sendUpdatedEditorStateToEditor(updatedEditorState, newContent);
-  }
   handleClick(event) {
     var text = event.target.textContent;
-
-    // this.props.updateCurrentTextLink(text);
     //Types of possible links: point, multipoint, group, range, series
     //TODO: Replace this logic with the suggestion functionality
     //The following logic is just to text various link types for generalizing vega signals
@@ -80,7 +45,12 @@ class Suggestion extends Component {
       type: type
     };
     this.props.addTextLink(link);
-    this.insertTextLinkToEditor(text);
+    // this.insertTextLinkToEditor(text);
+    const updatedEditorState = insertSuggestion(
+      text,
+      this.props.suggestionState
+    );
+    this.sendUpdatedEditorStateToEditor(updatedEditorState);
     //deactivating the suggestions panels
     this.props.deactivateSuggestions();
   }
@@ -104,7 +74,12 @@ class Suggestion extends Component {
               <button
                 onClick={this.handleClick}
                 type="button"
-                class="list-group-item list-group-item-action"
+                className={
+                  this.props.ui.suggestions.listOfSuggestions.indexOf(s) ==
+                  this.props.focussedSuggestionIndex
+                    ? "list-group-item list-group-item-action active"
+                    : "list-group-item list-group-item-action"
+                }
               >
                 {s}
               </button>

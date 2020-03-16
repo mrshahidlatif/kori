@@ -17,7 +17,7 @@ class Chart extends Component {
   //TODO: BUG: At each key press every chart is re-rendered! That is why the whole system was slowing down!
   // It should only update when there is a signal being sent!
   //PARTIAL FIX: Now I only update the charts that are in the editor. But still they keep on updating on each keypress which is very inefficient
-  shouldComponentUpdate(nextProps, nextState, prevProps) {
+  shouldComponentUpdate(nextProps, nextState) {
     // console.log("PROPS", nextProps, nextState);
     // return nextProps.specs != nextState.specs;
 
