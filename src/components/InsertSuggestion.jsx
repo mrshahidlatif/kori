@@ -1,9 +1,11 @@
-import { EditorState, Modifier } from "draft-js";
+import { EditorState, Modifier, Entity } from "draft-js";
 
 const insertSuggestion = (suggestionText, editorState) => {
+  const entityKey = Entity.create("Link", "MUTABLE", "");
+
   const currentContent = editorState.getCurrentContent(),
-    currentSelection = editorState.getSelection();
-  const end = currentSelection.getAnchorOffset();
+    currentSelection = editorState.getSelection(),
+    end = currentSelection.getAnchorOffset();
 
   const anchorKey = currentSelection.getAnchorKey();
   const currentBlock = currentContent.getBlockForKey(anchorKey);
@@ -15,15 +17,39 @@ const insertSuggestion = (suggestionText, editorState) => {
     focusOffset: end
   });
 
-  const newContent = Modifier.replaceText(
-    currentContent,
+  let newContent = Modifier.replaceText(
+    editorState.getCurrentContent(),
     insertTextSelection,
-    "@" + suggestionText + " "
+    suggestionText,
+    ["BOLD"],
+    entityKey
   );
+
+  //add a white space after the entity
+  //Recommendation by Draftjs community!
+  const blockKey = insertTextSelection.getAnchorKey();
+  const blockSize = editorState
+    .getCurrentContent()
+    .getBlockForKey(blockKey)
+    .getLength();
+  if (blockSize === end) {
+    newContent = Modifier.insertText(
+      newContent,
+      newContent.getSelectionAfter(),
+      " "
+    );
+  }
+
+  // const newContent = Modifier.replaceText(
+  //   currentContent,
+  //   insertTextSelection,
+  //   "@" + suggestionText + " "
+  // );
+
   const newEditorState = EditorState.push(
     editorState,
     newContent,
-    "insert-characters"
+    "insert-link"
   );
 
   const updatedEditorState = EditorState.forceSelection(

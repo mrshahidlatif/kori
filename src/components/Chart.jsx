@@ -45,11 +45,7 @@ class Chart extends Component {
         }
       }, this);
     }
-    //enlarging the charts that have been added to Editor
-    //TODO: Find a way to make a new copy of the chart that is in the editor. It should have a different ID than the one in VisPanel
-    // this.props.ui.chartsInEditor.map(c => {
-    //   if (c == this.state.id) this.enlargeChart(c, view);
-    // });
+    return view;
   }
   sendSignalToChart(signalName, signalType, signalData, view) {
     switch (signalType) {
@@ -61,12 +57,6 @@ class Chart extends Component {
         view.signal(signalName, signalData).run();
     }
   }
-  enlargeChart(chart, view) {
-    //TODO: Fix it. Not running properly. It has something to do with copy of chart in editor
-    view.width(300).run();
-    view.height(150).run();
-  }
-
   render() {
     const Cspecs = JSON.parse(JSON.stringify(this.state.specs));
     const Cdata = JSON.parse(JSON.stringify(this.state.specs.data));

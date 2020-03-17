@@ -47,7 +47,7 @@ import Suggestion from "./Suggestion";
 import LinkText from "./LinkText";
 import decorateComponentWithProps from "../utils/decorate_component_with_props";
 import createTextLink from "./CreateTextLink";
-
+import Link from "./Link";
 class HeadlinesPicker extends Component {
   componentDidMount() {
     setTimeout(() => {
@@ -120,6 +120,10 @@ class MyEditor extends React.Component {
       {
         strategy: handleStrategy,
         component: decorateComponentWithProps(LinkText, EditorState)
+      },
+      {
+        strategy: findLinkEntities,
+        component: Link
       }
     ]);
     this.state = {
@@ -153,10 +157,13 @@ class MyEditor extends React.Component {
 
     //Updating chartsInEditor to store
     //TODO: It calls addSelectedChart fucntion on each key process! It shouldn't happen!
+    //TODO: Explicity check if the entity contains a chart. now Links will also be entites!
     var ids = [];
     Object.keys(rawContent.entityMap).map(function(key) {
-      var id = rawContent.entityMap[key].data.content.id;
-      ids.push(id);
+      if (rawContent.entityMap[key].type === "CHART") {
+        var id = rawContent.entityMap[key].data.content.id;
+        ids.push(id);
+      }
     }, this);
     this.props.addSelectedChart(ids);
 
@@ -343,7 +350,7 @@ class MyEditor extends React.Component {
     //Adding a random chart on button click!
     //Needs to replace with drag and drop feature!
     // var chartId = Math.floor(Math.random() * (4 - 3 + 1) + 3);
-    var chartId = 2;
+    var chartId = 5;
     var editorChartId = "e" + chartId;
 
     //Update Chart Specs with Signal Information
@@ -406,6 +413,16 @@ function findWithRegex(regex, contentBlock, callback) {
     start = matchArr.index;
     callback(start, start + matchArr[0].length);
   }
+}
+
+function findLinkEntities(contentBlock, callback, contentState) {
+  contentBlock.findEntityRanges(character => {
+    const entityKey = character.getEntity();
+    return (
+      entityKey !== null &&
+      contentState.getEntity(entityKey).getType() === "Link"
+    );
+  }, callback);
 }
 
 function updateChartSpecsWithSignals(oldChartSpecs, chartType) {

@@ -1,7 +1,5 @@
-//ThisComponent handles the look and feel of text that appears after the user presses @.
-//It's functionality has been mostly replaced by 'Link' Component.
 import React, { Component } from "react";
-import css from "./LinkText.module.css";
+import css from "./Link.module.css";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import PropTypes from "prop-types";
@@ -13,19 +11,25 @@ import {
   deactivateSuggestions
 } from "../ducks/ui";
 
-class LinkText extends Component {
+class Link extends Component {
   constructor(props) {
     super(props);
+    this.handleMouseOver = this.handleMouseOver.bind(this);
+    this.handleMouseLeave = this.handleMouseLeave.bind(this);
   }
   state = {};
-  componentDidMount() {
-    //activate the suggestion dropdown as soon as user presses '@'
-    this.props.activateSuggestions();
+  handleMouseOver() {
+    let text = this.props.children[0].props.text;
+    this.props.activateTextLink(text);
+  }
+  handleMouseLeave() {
+    let text = this.props.children[0].props.text;
+    this.props.deactivateTextLink(text);
   }
   render() {
     return (
       <span
-        className={css.linkText}
+        className={css.link}
         onMouseOver={this.handleMouseOver}
         onMouseLeave={this.handleMouseLeave}
         data-offset-key={this.props.offsetKey}
@@ -56,4 +60,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(LinkText);
+export default connect(mapStateToProps, mapDispatchToProps)(Link);
