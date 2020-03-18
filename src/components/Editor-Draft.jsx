@@ -3,6 +3,7 @@ import "../css-draftjs/Draft.css";
 // import "../css-draftjs/inline-toolbar-plugin.css";
 import "../css-draftjs/static-toolbar-plugin.css";
 import "../css-draftjs/editorStyles.css";
+import FuzzySet from "fuzzyset.js";
 
 import { updateEditorState } from "../ducks/editor";
 import insertSuggestion from "./InsertSuggestion";
@@ -173,13 +174,21 @@ class MyEditor extends React.Component {
       .slice(-2)[0];
 
     //check if the word exists in list of suggestions
-    const suggestionList = this.props.ui.suggestions.listOfSuggestions;
-    if (
-      suggestionList.indexOf(lastWord) !== -1 &&
-      lastWord !== this.state.lastTypedWord
-    ) {
-      this.insertAutomaticLink(lastWord);
-      this.setState({ lastTypedWord: lastWord });
+
+    if (this.props.ui.suggestions.listOfSuggestions.length > 0) {
+      const suggestionList = this.props.ui.suggestions.listOfSuggestions;
+      let fs = FuzzySet(suggestionList);
+      let closestSuggestion =
+        fs.get(lastWord, "", 0.4).length > 0
+          ? fs.get(lastWord, "", 0.4)[0][1]
+          : lastWord;
+      if (
+        suggestionList.indexOf(closestSuggestion) !== -1 &&
+        lastWord !== this.state.lastTypedWord
+      ) {
+        this.insertAutomaticLink(lastWord);
+        this.setState({ lastTypedWord: lastWord });
+      }
     }
     //Updating chartsInEditor to store
     //TODO: It calls addSelectedChart fucntion on each key process! It shouldn't happen!
@@ -321,7 +330,10 @@ class MyEditor extends React.Component {
     this.setState({
       editorState: newEditorState
     });
-    const link = createTextLink(text);
+    const link = createTextLink(
+      text,
+      this.props.ui.suggestions.listOfSuggestions
+    );
     this.props.addTextLink(link);
   }
 
