@@ -59,7 +59,13 @@ export default (state = initialUi, action) => {
     case UPDATE_SUGGESTION_LIST:
       return {
         ...state,
-        listOfSuggestions: action.suggestionList
+        suggestions: {
+          ...state.suggestions,
+          listOfSuggestions: action.suggestionList
+          // listOfSuggestions: state.suggestions.listOfSuggestions.concat(
+          //   action.suggestionList
+          //)
+        }
       };
     case ADD_TEXT_LINK:
       return {
@@ -118,10 +124,7 @@ const initialUi = {
   editorPosition: {},
   suggestions: {
     listOfSuggestions: [
-      "A",
-      "B",
       "50To100",
-      "ACH",
       "OrangeSeries",
       "1",
       "2",

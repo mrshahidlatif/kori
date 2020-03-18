@@ -139,7 +139,8 @@ class MyEditor extends React.Component {
       cursorPositionInEditor: {},
       editorPosition: {},
       focussedSuggestionIndex: 0,
-      lastTypedWord: ""
+      lastTypedWord: "",
+      numberOfChartsInEditor: 0
     };
     this.handleEditorChange = this.handleEditorChange.bind(this);
     this.onDownArrow = this.onDownArrow.bind(this);
@@ -174,7 +175,7 @@ class MyEditor extends React.Component {
     //check if the word exists in list of suggestions
     const suggestionList = this.props.ui.suggestions.listOfSuggestions;
     if (
-      suggestionList.indexOf(lastWord) != -1 &&
+      suggestionList.indexOf(lastWord) !== -1 &&
       lastWord !== this.state.lastTypedWord
     ) {
       this.insertAutomaticLink(lastWord);
@@ -183,14 +184,20 @@ class MyEditor extends React.Component {
     //Updating chartsInEditor to store
     //TODO: It calls addSelectedChart fucntion on each key process! It shouldn't happen!
     //TODO: Explicity check if the entity contains a chart. now Links will also be entites!
-    var ids = [];
-    Object.keys(rawContent.entityMap).map(function(key) {
-      if (rawContent.entityMap[key].type === "CHART") {
-        var id = rawContent.entityMap[key].data.content.id;
-        ids.push(id);
-      }
-    }, this);
-    this.props.addSelectedChart(ids);
+
+    //Do this only when Chart has been added or removed in the Editor
+    let updatedNumberOfCharts = Object.keys(rawContent.entityMap).length;
+    if (updatedNumberOfCharts !== this.state.numberOfChartsInEditor) {
+      var ids = [];
+      Object.keys(rawContent.entityMap).map(function(key) {
+        if (rawContent.entityMap[key].type === "CHART") {
+          var id = rawContent.entityMap[key].data.content.id;
+          ids.push(id);
+        }
+      }, this);
+      this.props.addSelectedChart(ids);
+      this.setState({ numberOfChartsInEditor: updatedNumberOfCharts });
+    }
 
     //Computing the position of cursor relative to viewport for showing suggestions
     //https://github.com/facebook/draft-js/issues/45
@@ -286,7 +293,6 @@ class MyEditor extends React.Component {
       anchorOffset: start,
       focusOffset: end
     });
-
     let newContent = Modifier.replaceText(
       editorState.getCurrentContent(),
       insertTextSelection,
@@ -294,7 +300,6 @@ class MyEditor extends React.Component {
       [], //inline styling
       entityKey
     );
-
     //add a white space after the entity
     //Recommendation by Draftjs community!
     const blockSize = editorState
@@ -308,17 +313,14 @@ class MyEditor extends React.Component {
         " "
       );
     }
-
     const newEditorState = EditorState.push(
       editorState,
       newContent,
       "insert-auto-link"
     );
-
     this.setState({
       editorState: newEditorState
     });
-
     const link = createTextLink(text);
     this.props.addTextLink(link);
   }
@@ -327,7 +329,8 @@ class MyEditor extends React.Component {
     const rawEditorData = this.props.editor;
     const contentState = convertFromRaw(rawEditorData);
     this.setState({
-      editorState: EditorState.createWithContent(contentState)
+      editorState: EditorState.createWithContent(contentState),
+      lastTypedWord: ""
     });
 
     var editorNode = document.getElementById("mainEditor");
@@ -411,15 +414,17 @@ class MyEditor extends React.Component {
     );
   }
   //Parsing ChartInEditor for extracting chart features from vegalite specs
-  parseChartForFeatures = chartId => {
+  extractChartFeatures = chartId => {
     let chart = this.props.charts.byId[chartId];
-    let encodings = chart.specs.encoding;
-    let data = chart.Data;
+    let specs = chart.specs;
+    let data = chart.specs.data;
     var features = [];
-    //Extract dimensions from Vega Specifications
-    Object.keys(encodings).forEach(function(key) {
-      //   console.log(key, encodings[key].field);
-      features.push(encodings[key].field);
+
+    const x = getVariableNameFromScale(specs, "xscale");
+    const y = getVariableNameFromScale(specs, "yscale");
+
+    data[0].values.map(val => {
+      features.push(val[x]);
     });
     return features;
   };
@@ -430,11 +435,13 @@ class MyEditor extends React.Component {
     //Adding a random chart on button click!
     //Needs to replace with drag and drop feature!
     // var chartId = Math.floor(Math.random() * (4 - 3 + 1) + 3);
-    var chartId = 5;
-    var editorChartId = "e" + chartId;
+    let chartId = 1;
+    let chartFeatures = this.extractChartFeatures(chartId);
+    this.props.updateSuggestionList(chartFeatures);
+    let editorChartId = "e" + chartId; //appending an e to distinguish it from the one in VisPanel
 
     //Update Chart Specs with Signal Information
-    var newChartSpecs = updateChartSpecsWithSignals(
+    let newChartSpecs = updateChartSpecsWithSignals(
       this.props.charts.byId[chartId].specs,
       this.props.charts.byId[chartId].type
     );
@@ -631,7 +638,7 @@ function updateChartSpecsWithSignals(oldChartSpecs, chartType) {
       };
     }
   }
-  console.log("New Chart Specs:", newChartSpecs);
+  // console.log("New Chart Specs:", newChartSpecs);
   return newChartSpecs;
 }
 function getVariableNameFromScale(specs, scaleName) {

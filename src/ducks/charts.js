@@ -30,14 +30,14 @@ const initialState = {
           {
             name: "table",
             values: [
-              { category: "A", amount: 28 },
-              { category: "B", amount: 55 },
-              { category: "C", amount: 43 },
-              { category: "D", amount: 91 },
-              { category: "E", amount: 81 },
-              { category: "F", amount: 53 },
-              { category: "G", amount: 19 },
-              { category: "H", amount: 87 }
+              { category: "Apple", amount: 28 },
+              { category: "Amazon", amount: 55 },
+              { category: "Facebook", amount: 43 },
+              { category: "Netflix", amount: 91 },
+              { category: "Microsoft", amount: 81 },
+              { category: "Samsung", amount: 53 },
+              { category: "Twitter", amount: 19 },
+              { category: "Linkedin", amount: 87 }
             ]
           }
         ],
