@@ -1,0 +1,10 @@
+.link {
+  color: #707070;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: gray;
+}
+.link:hover {
+  color: black;
+  font-weight: bold;
+}

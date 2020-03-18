@@ -21,10 +21,13 @@ import PropTypes from "prop-types";
 
 import {
   EditorState,
+  SelectionState,
+  Modifier,
   AtomicBlockUtils,
   convertToRaw,
   convertFromRaw,
-  CompositeDecorator
+  CompositeDecorator,
+  Entity
 } from "draft-js";
 import Editor, { createEditorStateWithText } from "draft-js-plugins-editor";
 import createToolbarPlugin, { Separator } from "draft-js-static-toolbar-plugin";
@@ -47,7 +50,8 @@ import Suggestion from "./Suggestion";
 import LinkText from "./LinkText";
 import decorateComponentWithProps from "../utils/decorate_component_with_props";
 import createTextLink from "./CreateTextLink";
-import Link from "./Link";
+import Link from "./ManualLink";
+import AutoLink from "./AutoLink";
 class HeadlinesPicker extends Component {
   componentDidMount() {
     setTimeout(() => {
@@ -124,13 +128,18 @@ class MyEditor extends React.Component {
       {
         strategy: findLinkEntities,
         component: Link
+      },
+      {
+        strategy: findAutoLinkEntities,
+        component: AutoLink
       }
     ]);
     this.state = {
       editorState: EditorState.createEmpty(compositeDecorator),
       cursorPositionInEditor: {},
       editorPosition: {},
-      focussedSuggestionIndex: 0
+      focussedSuggestionIndex: 0,
+      lastTypedWord: ""
     };
     this.handleEditorChange = this.handleEditorChange.bind(this);
     this.onDownArrow = this.onDownArrow.bind(this);
@@ -151,10 +160,26 @@ class MyEditor extends React.Component {
     this.props.updateEditorState(rawContent);
 
     const blocks = rawContent.blocks;
-    const allText = blocks
-      .map(block => (!block.text.trim() && "\n") || block.text)
-      .join("\n");
+    // const allText = blocks
+    //   .map(block => (!block.text.trim() && "\n") || block.text)
+    //   .join("\n");
 
+    //AUTOMATIC LINKING WHEN THE USER IS TYPING
+    //Get the last word user typed before pressing the space
+    let lastWord = blocks
+      .slice(-1)[0]
+      .text.split(" ")
+      .slice(-2)[0];
+
+    //check if the word exists in list of suggestions
+    const suggestionList = this.props.ui.suggestions.listOfSuggestions;
+    if (
+      suggestionList.indexOf(lastWord) != -1 &&
+      lastWord !== this.state.lastTypedWord
+    ) {
+      this.insertAutomaticLink(lastWord);
+      this.setState({ lastTypedWord: lastWord });
+    }
     //Updating chartsInEditor to store
     //TODO: It calls addSelectedChart fucntion on each key process! It shouldn't happen!
     //TODO: Explicity check if the entity contains a chart. now Links will also be entites!
@@ -226,7 +251,10 @@ class MyEditor extends React.Component {
       suggestionText,
       this.state.editorState
     );
-    this.setState({ editorState: newEditorState });
+    this.setState({
+      editorState: newEditorState,
+      lastTypedWord: suggestionText
+    });
     this.props.deactivateSuggestions();
 
     const link = createTextLink(suggestionText);
@@ -243,6 +271,58 @@ class MyEditor extends React.Component {
   }
 
   onFocus() {}
+  insertAutomaticLink(text) {
+    //TODO: BUGFIX: Doesn't work as expected when block starts with a link or when the link contains one character
+    const { editorState } = this.state;
+    const currentContent = editorState.getCurrentContent();
+    const currentSelection = editorState.getSelection();
+    const blockKey = currentSelection.getAnchorKey();
+    const currentBlock = currentContent.getBlockForKey(blockKey);
+    const end = currentSelection.getAnchorOffset();
+    const start = end - text.length;
+    const entityKey = Entity.create("Auto-Link", "MUTABLE", "");
+
+    const insertTextSelection = currentSelection.merge({
+      anchorOffset: start,
+      focusOffset: end
+    });
+
+    let newContent = Modifier.replaceText(
+      editorState.getCurrentContent(),
+      insertTextSelection,
+      text,
+      [], //inline styling
+      entityKey
+    );
+
+    //add a white space after the entity
+    //Recommendation by Draftjs community!
+    const blockSize = editorState
+      .getCurrentContent()
+      .getBlockForKey(blockKey)
+      .getLength();
+    if (blockSize === end) {
+      newContent = Modifier.insertText(
+        newContent,
+        newContent.getSelectionAfter(),
+        " "
+      );
+    }
+
+    const newEditorState = EditorState.push(
+      editorState,
+      newContent,
+      "insert-auto-link"
+    );
+
+    this.setState({
+      editorState: newEditorState
+    });
+
+    const link = createTextLink(text);
+    this.props.addTextLink(link);
+  }
+
   componentDidMount() {
     const rawEditorData = this.props.editor;
     const contentState = convertFromRaw(rawEditorData);
@@ -421,6 +501,15 @@ function findLinkEntities(contentBlock, callback, contentState) {
     return (
       entityKey !== null &&
       contentState.getEntity(entityKey).getType() === "Link"
+    );
+  }, callback);
+}
+function findAutoLinkEntities(contentBlock, callback, contentState) {
+  contentBlock.findEntityRanges(character => {
+    const entityKey = character.getEntity();
+    return (
+      entityKey !== null &&
+      contentState.getEntity(entityKey).getType() === "Auto-Link"
     );
   }, callback);
 }

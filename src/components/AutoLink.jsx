@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import css from "./Link.module.css";
+import css from "./AutoLink.module.css";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import PropTypes from "prop-types";
@@ -11,7 +11,7 @@ import {
   deactivateSuggestions
 } from "../ducks/ui";
 
-class Link extends Component {
+class AutoLink extends Component {
   constructor(props) {
     super(props);
     this.handleMouseOver = this.handleMouseOver.bind(this);
@@ -60,4 +60,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Link);
+export default connect(mapStateToProps, mapDispatchToProps)(AutoLink);
