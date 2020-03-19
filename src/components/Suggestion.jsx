@@ -30,8 +30,7 @@ class Suggestion extends Component {
     this.props.deactivateSuggestions();
   }
   render() {
-    var editor_position = this.props.ui.editorPosition;
-    var cursor_position = this.props.ui.cursorPositionInEditor;
+    let cursor_position = this.props.caretPosition;
     if (
       this.props.ui.suggestions.isActive &&
       this.props.ui.suggestions.listOfSuggestions != undefined
@@ -39,8 +38,8 @@ class Suggestion extends Component {
       return (
         <div
           style={{
-            left: cursor_position.x,
-            top: cursor_position.y
+            left: cursor_position.x - 10,
+            top: cursor_position.y + 15
           }}
           className={css.suggestionPanel}
         >

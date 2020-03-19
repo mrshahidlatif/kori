@@ -1,6 +1,4 @@
 export const ADD_SELECTED_CHART = "ADD_SELECTED_CHART";
-export const UPDATE_CURSOR_POSITION = "UPDATE_CURSOR_POSITION";
-export const UPDATE_EDITOR_POSITION = "UPDATE_EDITOR_POSITION";
 export const UPDATE_SUGGESTION_LIST = "UPDATE_SUGGESTION_LIST";
 export const ADD_TEXT_LINK = "ADD_TEXT_LINK";
 export const ACTIVATE_TEXT_LINK = "ACTIVATE_TEXT_LINK";
@@ -10,13 +8,6 @@ export const DEACTIVATE_SUGGESTIONS = "DEACTIVATE_SUGGESTIONS";
 
 export const addSelectedChart = chartId => {
   return { type: ADD_SELECTED_CHART, chartId };
-};
-
-export const updateCursorPosition = position => {
-  return { type: UPDATE_CURSOR_POSITION, position };
-};
-export const updateEditorPosition = position => {
-  return { type: UPDATE_EDITOR_POSITION, position };
 };
 export const updateSuggestionList = suggestionList => {
   return { type: UPDATE_SUGGESTION_LIST, suggestionList };
@@ -45,16 +36,6 @@ export default (state = initialUi, action) => {
       return {
         ...state,
         chartsInEditor: action.chartId
-      };
-    case UPDATE_CURSOR_POSITION:
-      return {
-        ...state,
-        cursorPositionInEditor: action.position
-      };
-    case UPDATE_EDITOR_POSITION:
-      return {
-        ...state,
-        editorPosition: action.position
       };
     case UPDATE_SUGGESTION_LIST:
       return {
@@ -120,8 +101,6 @@ export default (state = initialUi, action) => {
 
 const initialUi = {
   chartsInEditor: [],
-  cursorPositionInEditor: {},
-  editorPosition: {},
   suggestions: {
     listOfSuggestions: [
       "50To100",

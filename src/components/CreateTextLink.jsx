@@ -6,7 +6,7 @@ const createTextLink = (text, suggestions) => {
   //create and store the link
   let fs = FuzzySet(suggestions);
   let closestSuggestion =
-    fs.get(text, "", 0.4).length > 0 ? fs.get(text, "", 0.4)[0][1] : text;
+    fs.get(text, "", 0.7).length > 0 ? fs.get(text, "", 0.7)[0][1] : text;
 
   let link = {
     linkId: text,

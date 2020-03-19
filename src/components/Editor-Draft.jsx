@@ -9,8 +9,6 @@ import { updateEditorState } from "../ducks/editor";
 import insertSuggestion from "./InsertSuggestion";
 import {
   addSelectedChart,
-  updateCursorPosition,
-  updateEditorPosition,
   updateSuggestionList,
   deactivateSuggestions,
   addTextLink
@@ -137,8 +135,7 @@ class MyEditor extends React.Component {
     ]);
     this.state = {
       editorState: EditorState.createEmpty(compositeDecorator),
-      cursorPositionInEditor: {},
-      editorPosition: {},
+      caretPosition: {},
       focussedSuggestionIndex: 0,
       lastTypedWord: "",
       numberOfChartsInEditor: 0
@@ -179,8 +176,8 @@ class MyEditor extends React.Component {
       const suggestionList = this.props.ui.suggestions.listOfSuggestions;
       let fs = FuzzySet(suggestionList);
       let closestSuggestion =
-        fs.get(lastWord, "", 0.4).length > 0
-          ? fs.get(lastWord, "", 0.4)[0][1]
+        fs.get(lastWord, "", 0.7).length > 0
+          ? fs.get(lastWord, "", 0.7)[0][1]
           : lastWord;
       if (
         suggestionList.indexOf(closestSuggestion) !== -1 &&
@@ -210,24 +207,31 @@ class MyEditor extends React.Component {
 
     //Computing the position of cursor relative to viewport for showing suggestions
     //https://github.com/facebook/draft-js/issues/45
-
-    var selectionState = editorState.getSelection();
-    var anchorKey = selectionState.getAnchorKey();
-    var currentContent = editorState.getCurrentContent();
-    var currentContentBlock = currentContent.getBlockForKey(anchorKey);
-    var start = selectionState.getStartOffset();
-    var end = selectionState.getEndOffset();
-    var selectedText = currentContentBlock.getText().slice(start, end);
-    if (start > 0) {
-      var selection = window.getSelection();
-      if (selection.anchorNode == null) return;
-      var range = selection.getRangeAt(0);
-      var cursorPosition = range.getBoundingClientRect();
-      cursorPosition = JSON.parse(JSON.stringify(cursorPosition));
-      this.setState({ cursorPositionInEditor: cursorPosition });
-      this.props.updateCursorPosition(cursorPosition);
+    const selection = window.getSelection();
+    let caretPosition = this.getCaretPosition(selection);
+    if (caretPosition !== null) {
+      this.setState({ caretPosition: caretPosition });
     }
   };
+  getCaretPosition(selection) {
+    if (selection.anchorNode === null) return;
+    let range = selection.getRangeAt(0);
+    let cursorPosition = range.getBoundingClientRect();
+    cursorPosition = JSON.parse(JSON.stringify(cursorPosition));
+    //https://github.com/facebook/draft-js/blob/master/src/component/selection/getVisibleSelectionRect.js
+    // When a re-render leads to a node being removed, the DOM selection will
+    // temporarily be placed on an ancestor node, which leads to an invalid
+    // bounding rect. Discard this state.
+    if (
+      cursorPosition.top === 0 &&
+      cursorPosition.right === 0 &&
+      cursorPosition.bottom === 0 &&
+      cursorPosition.left === 0
+    ) {
+      return null;
+    }
+    return cursorPosition;
+  }
   onUpArrow(keyboardEvent) {
     keyboardEvent.preventDefault();
 
@@ -345,11 +349,9 @@ class MyEditor extends React.Component {
       lastTypedWord: ""
     });
 
-    var editorNode = document.getElementById("mainEditor");
-    var editorPosition = editorNode.getBoundingClientRect();
+    let editorNode = document.getElementById("mainEditor");
+    let editorPosition = editorNode.getBoundingClientRect();
     editorPosition = JSON.parse(JSON.stringify(editorPosition));
-    this.setState({ editorPosition: editorPosition });
-    this.props.updateEditorPosition(editorPosition);
   }
   render() {
     const additionalProps = (() => {
@@ -421,6 +423,7 @@ class MyEditor extends React.Component {
           suggestionCallback={this.callbackFunction}
           suggestionState={this.state.editorState}
           focussedSuggestionIndex={this.state.focussedSuggestionIndex}
+          caretPosition={this.state.caretPosition}
         />
       </div>
     );
@@ -678,8 +681,6 @@ const mapDispatchToProps = dispatch => {
       {
         updateEditorState,
         addSelectedChart,
-        updateCursorPosition,
-        updateEditorPosition,
         updateSuggestionList,
         deactivateSuggestions,
         addTextLink
