@@ -2,6 +2,8 @@ import React, { Fragment, Component } from "react";
 import "../css-draftjs/Draft.css";
 // import "../css-draftjs/inline-toolbar-plugin.css";
 import "../css-draftjs/static-toolbar-plugin.css";
+import "../css-draftjs/alignment-tool-plugin.css";
+import "../css-draftjs/focus-plugin.css";
 import "../css-draftjs/editorStyles.css";
 import FuzzySet from "fuzzyset.js";
 
@@ -28,8 +30,13 @@ import {
   CompositeDecorator,
   Entity
 } from "draft-js";
-import Editor, { createEditorStateWithText } from "draft-js-plugins-editor";
+import Editor, {
+  createEditorStateWithText,
+  composeDecorators
+} from "draft-js-plugins-editor";
 import createToolbarPlugin, { Separator } from "draft-js-static-toolbar-plugin";
+import createAlignmentPlugin from "draft-js-alignment-plugin";
+import createFocusPlugin from "draft-js-focus-plugin";
 import {
   ItalicButton,
   BoldButton,
@@ -51,6 +58,7 @@ import decorateComponentWithProps from "../utils/decorate_component_with_props";
 import createTextLink from "./CreateTextLink";
 import Link from "./ManualLink";
 import AutoLink from "./AutoLink";
+
 class HeadlinesPicker extends Component {
   componentDidMount() {
     setTimeout(() => {
@@ -100,21 +108,67 @@ class HeadlinesButton extends Component {
   }
 }
 const toolbarPlugin = createToolbarPlugin();
+const focusPlugin = createFocusPlugin();
+const alignmentPlugin = createAlignmentPlugin();
+const { AlignmentTool } = alignmentPlugin;
 const { Toolbar } = toolbarPlugin;
-const plugins = [toolbarPlugin];
+const decorator = composeDecorators(
+  alignmentPlugin.decorator,
+  focusPlugin.decorator
+);
 
 const ChartBlock = ({
-  contentState,
-  block,
+  block, // eslint-disable-line no-unused-vars
+  blockProps, // eslint-disable-line no-unused-vars
+  customStyleMap, // eslint-disable-line no-unused-vars
+  customStyleFn, // eslint-disable-line no-unused-vars
+  decorator, // eslint-disable-line no-unused-vars
+  forceSelection, // eslint-disable-line no-unused-vars
+  offsetKey, // eslint-disable-line no-unused-vars
+  selection, // eslint-disable-line no-unused-vars
+  tree, // eslint-disable-line no-unused-vars
+  contentState, // eslint-disable-line no-unused-vars
+  style,
   blockProps: { content },
-  ...rest
+  ...elementProps
 }) => {
   return (
-    <div>
+    //TODO: BUG: Text Wrap controls doesn't work as expected! perhaps the problem is with the css files and styles!
+    //TODO: Make the width of this div fit to the contents. At the moment it is hard-coded!
+    <div
+      {...elementProps}
+      style={{ maxWidth: 500, backgroundColor: "none", ...style }}
+    >
       <Chart id={content.id} specs={content.chartData} shouldUpdate={true} />
     </div>
   );
 };
+
+const createChartBlockPlugin = (config = {}) => {
+  const component = config.decorator
+    ? config.decorator(ChartBlock)
+    : ChartBlock;
+  return {
+    blockRendererFn: (block, { getEditorState }) => {
+      if (block.getType() === "atomic") {
+        const contentState = getEditorState().getCurrentContent();
+        const entity = contentState.getEntity(block.getEntityAt(0));
+
+        const type = entity.getType();
+        if (type === "CHART") {
+          return {
+            component,
+            editable: false
+          };
+        }
+      }
+      return null;
+    }
+  };
+};
+
+const colorBlockPlugin = createChartBlockPlugin({ decorator });
+const plugins = [focusPlugin, alignmentPlugin, colorBlockPlugin, toolbarPlugin];
 
 class MyEditor extends React.Component {
   constructor(props) {
@@ -418,6 +472,7 @@ class MyEditor extends React.Component {
               </div>
             )}
           </Toolbar>
+          <AlignmentTool />
         </div>
         <Suggestion
           suggestionCallback={this.callbackFunction}
@@ -476,6 +531,7 @@ class MyEditor extends React.Component {
       )
     });
   };
+
   blockRendererFn = block => {
     const { editorState } = this.state;
     const content = editorState.getCurrentContent();
@@ -488,6 +544,7 @@ class MyEditor extends React.Component {
       if (entity != null && entity.getType() === "CHART") {
         return {
           component: ChartBlock,
+          editable: false,
           props: {
             data: this.props.charts.byId,
             ...entityData
