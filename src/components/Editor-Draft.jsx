@@ -1,6 +1,5 @@
 import React, { Fragment, Component } from "react";
 import "../css-draftjs/Draft.css";
-// import "../css-draftjs/inline-toolbar-plugin.css";
 import "../css-draftjs/static-toolbar-plugin.css";
 import "../css-draftjs/alignment-tool-plugin.css";
 import "../css-draftjs/focus-plugin.css";
@@ -9,6 +8,8 @@ import FuzzySet from "fuzzyset.js";
 
 import { updateEditorState } from "../ducks/editor";
 import insertSuggestion from "./InsertSuggestion";
+import updateChartSpecsWithSignals from "../utils/addSignalToChartSpecs";
+import extractChartFeatures from "../utils/extractChartFeatures";
 import {
   addSelectedChart,
   updateSuggestionList,
@@ -22,7 +23,6 @@ import PropTypes from "prop-types";
 
 import {
   EditorState,
-  SelectionState,
   Modifier,
   AtomicBlockUtils,
   convertToRaw,
@@ -30,10 +30,7 @@ import {
   CompositeDecorator,
   Entity
 } from "draft-js";
-import Editor, {
-  createEditorStateWithText,
-  composeDecorators
-} from "draft-js-plugins-editor";
+import Editor, { composeDecorators } from "draft-js-plugins-editor";
 import createToolbarPlugin, { Separator } from "draft-js-static-toolbar-plugin";
 import createAlignmentPlugin from "draft-js-alignment-plugin";
 import createFocusPlugin from "draft-js-focus-plugin";
@@ -167,8 +164,8 @@ const createChartBlockPlugin = (config = {}) => {
   };
 };
 
-const colorBlockPlugin = createChartBlockPlugin({ decorator });
-const plugins = [focusPlugin, alignmentPlugin, colorBlockPlugin, toolbarPlugin];
+const chartBlockPlugin = createChartBlockPlugin({ decorator });
+const plugins = [focusPlugin, alignmentPlugin, chartBlockPlugin, toolbarPlugin];
 
 class MyEditor extends React.Component {
   constructor(props) {
@@ -225,7 +222,6 @@ class MyEditor extends React.Component {
       .slice(-2)[0];
 
     //check if the word exists in list of suggestions
-
     if (this.props.ui.suggestions.listOfSuggestions.length > 0) {
       const suggestionList = this.props.ui.suggestions.listOfSuggestions;
       let fs = FuzzySet(suggestionList);
@@ -483,21 +479,6 @@ class MyEditor extends React.Component {
       </div>
     );
   }
-  //Parsing ChartInEditor for extracting chart features from vegalite specs
-  extractChartFeatures = chartId => {
-    let chart = this.props.charts.byId[chartId];
-    let specs = chart.specs;
-    let data = chart.specs.data;
-    var features = [];
-
-    const x = getVariableNameFromScale(specs, "xscale");
-    const y = getVariableNameFromScale(specs, "yscale");
-
-    data[0].values.map(val => {
-      features.push(val[x]);
-    });
-    return features;
-  };
   insertChart = () => {
     const { editorState } = this.state;
     let content = editorState.getCurrentContent();
@@ -506,7 +487,8 @@ class MyEditor extends React.Component {
     //Needs to replace with drag and drop feature!
     // var chartId = Math.floor(Math.random() * (4 - 3 + 1) + 3);
     let chartId = 1;
-    let chartFeatures = this.extractChartFeatures(chartId);
+    let chart = this.props.charts.byId[chartId];
+    let chartFeatures = extractChartFeatures(chart);
     this.props.updateSuggestionList(chartFeatures);
     let editorChartId = "e" + chartId; //appending an e to distinguish it from the one in VisPanel
 
@@ -559,6 +541,7 @@ class MyEditor extends React.Component {
  * Super simple decorators for handles and hashtags, for demonstration
  * purposes only. Don't reuse these regexes.
  */
+//TODO: REGEX needs to be improved and crafted to our use case!
 const HANDLE_REGEX = /\@[\w]+/g;
 
 function handleStrategy(contentBlock, callback, contentState) {
@@ -591,135 +574,6 @@ function findAutoLinkEntities(contentBlock, callback, contentState) {
       contentState.getEntity(entityKey).getType() === "Auto-Link"
     );
   }, callback);
-}
-
-function updateChartSpecsWithSignals(oldChartSpecs, chartType) {
-  // console.log("Old Chart Specs:", oldChartSpecs);
-
-  //I think this is not the right way to work with data cloning in Reactjs!
-  //soultion Source: https://stackoverflow.com/questions/55567386/react-cannot-add-property-x-object-is-not-extensible
-  let newChartSpecs = JSON.parse(JSON.stringify(oldChartSpecs));
-  newChartSpecs.width = 350;
-  newChartSpecs.height = 200;
-
-  //Create a Highlight signal if doesn't exist already, else append it in signals
-  const hasAlreadySignalsField = newChartSpecs.hasOwnProperty("signals");
-  if (hasAlreadySignalsField) {
-    newChartSpecs.signals.push({
-      name: "signal_highlight",
-      value: { data: [], start: 0, end: 100 }
-    });
-  } else {
-    newChartSpecs.signals = [
-      {
-        name: "signal_highlight",
-        value: { data: [], start: 0, end: 100 }
-      }
-    ];
-  }
-  //Case Stack-Bar chart
-  if (chartType === "stack-bar") {
-    const x = getVariableNameFromScale(newChartSpecs, "x");
-    const y = getVariableNameFromScale(newChartSpecs, "y");
-    const color = getVariableNameFromScale(newChartSpecs, "color");
-
-    newChartSpecs.marks[0].encode.update = {
-      fillOpacity: [
-        {
-          test:
-            "indexof(signal_highlight.data,datum." +
-            x +
-            ") != -1 || (datum." +
-            y +
-            " > signal_highlight.data[0] && datum." +
-            y +
-            " < signal_highlight.data[1]) || indexof(signal_highlight.data,datum." +
-            color +
-            ") != -1",
-          value: 1.0
-        },
-        { value: 0.6 }
-      ]
-    };
-  }
-  // Case Simple Bar chart
-  else if (chartType === "bar") {
-    const x = getVariableNameFromScale(newChartSpecs, "xscale");
-    const y = getVariableNameFromScale(newChartSpecs, "yscale");
-
-    newChartSpecs.marks[0].encode.update = {
-      fill: { value: "steelblue" },
-      fillOpacity: [
-        {
-          test:
-            "indexof(signal_highlight.data,datum." +
-            x +
-            ") >= 0 || (datum." +
-            y +
-            " > signal_highlight.data[0] && datum." +
-            y +
-            " < signal_highlight.data[1])",
-          value: 1.0
-        },
-        { value: 0.6 }
-      ]
-    };
-  }
-  // Case Multi-Line Chart
-  else if (chartType === "multi-line") {
-    const x = getVariableNameFromScale(newChartSpecs, "x");
-    const y = getVariableNameFromScale(newChartSpecs, "y");
-    const color = getVariableNameFromScale(newChartSpecs, "color");
-
-    if (newChartSpecs.marks[0].marks[0].encode.hasOwnProperty("update")) {
-      newChartSpecs.marks[0].marks[0].encode.update.strokeOpacity = [
-        {
-          test:
-            "indexof(signal_highlight.data,datum." +
-            x +
-            ") !== -1 || (datum." +
-            y +
-            " > signal_highlight.data[0] && datum." +
-            y +
-            " < signal_highlight.data[1]) || indexof(signal_highlight.data,datum." +
-            color +
-            ") !== -1",
-          value: 1.0
-        },
-        { value: 0.6 }
-      ];
-    } else {
-      newChartSpecs.marks[0].marks[0].encode.update = {
-        //TODO: BUG: When value is 0, it highlights both the lines!
-        strokeOpacity: [
-          {
-            test:
-              "indexof(signal_highlight.data,datum." +
-              x +
-              ") != -1 || (datum." +
-              y +
-              " > signal_highlight.data[0] && datum." +
-              y +
-              " < signal_highlight.data[1]) || indexof(signal_highlight.data,datum." +
-              color +
-              ") !== -1",
-            value: 1.0
-          },
-          { value: 0.4 }
-        ]
-      };
-    }
-  }
-  // console.log("New Chart Specs:", newChartSpecs);
-  return newChartSpecs;
-}
-function getVariableNameFromScale(specs, scaleName) {
-  let varName = "infinity";
-  const varScale = specs.scales.filter(s => {
-    return s.name == scaleName;
-  });
-  if (varScale.length > 0) varName = varScale[0].domain.field;
-  return varName;
 }
 
 //Define the public proptypes of this componenet
