@@ -25,14 +25,14 @@ class Chart extends Component {
   }
   handleView(...args) {
     let view = args[0];
-    if (this.props.ui.links !== undefined) {
-      let links = this.props.ui.links;
+    let { links, chartsInEditor } = this.props;
+    if (links !== undefined) {
       Object.keys(links).map(function(key) {
         if (links[key].active) {
           var d = {
             data: links[key].data
           };
-          this.props.ui.chartsInEditor.map(c => {
+          chartsInEditor.map(c => {
             if (c === this.state.id) {
               this.sendSignalToChart(
                 "signal_highlight",
@@ -66,7 +66,7 @@ class Chart extends Component {
 
 //Define the public proptypes of this componenet
 const mapStateToProps = (state, ownProps) => {
-  return state;
+  return { links: state.ui.links, chartsInEditor: state.ui.chartsInEditor };
 };
 
 const mapDispatchToProps = dispatch => {

@@ -263,6 +263,7 @@ class MyEditor extends React.Component {
           ids.push(id);
         }
       }, this);
+      console.log("Chart added or deleted!!!");
       this.props.addSelectedChart(ids);
       this.setState({ numberOfChartsInEditor: updatedNumberOfCharts });
     }
