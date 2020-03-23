@@ -207,6 +207,7 @@ class MyEditor extends React.Component {
     this.setState({ editorState: editorState });
     const rawContent = convertToRaw(editorState.getCurrentContent());
     //Only storing the RAW data of the editor
+    //TODO: PERFORMANCE: Do not push data to store on each key store: It is slowing down the whole thing!
     this.props.updateEditorState(rawContent);
 
     const blocks = rawContent.blocks;
@@ -216,12 +217,17 @@ class MyEditor extends React.Component {
 
     //AUTOMATIC LINKING WHEN THE USER IS TYPING
     //Get the last word user typed before pressing the space
-    let lastWord = blocks
-      .slice(-1)[0]
-      .text.split(" ")
-      .slice(-2)[0];
+    const currentContent = editorState.getCurrentContent();
+    const currentSelection = editorState.getSelection();
+    const blockKey = currentSelection.getAnchorKey();
+    const currentBlock = currentContent.getBlockForKey(blockKey);
+    const caretOffset = currentSelection.getAnchorOffset();
+    let blockTextBeforeCaret = currentBlock.getText().substr(0, caretOffset);
+    let lastWord = blockTextBeforeCaret.split(" ").slice(-2)[0];
 
     //check if the word exists in list of suggestions
+    console.log("Last Typed Word for potential link:", lastWord);
+
     if (this.props.ui.suggestions.listOfSuggestions.length > 0) {
       const suggestionList = this.props.ui.suggestions.listOfSuggestions;
       let fs = FuzzySet(suggestionList);

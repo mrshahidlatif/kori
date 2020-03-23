@@ -12,7 +12,8 @@ class Chart extends Component {
 
   state = {
     id: this.props.id,
-    specs: this.props.specs
+    specs: this.props.specs,
+    shouldUpdate: this.props.shouldUpdate
   };
   //TODO: BUG: At each key press every chart is re-rendered! That is why the whole system was slowing down!
   // It should only update when there is a signal being sent!
@@ -20,12 +21,11 @@ class Chart extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     // console.log("PROPS", nextProps, nextState);
     // return nextProps.specs != nextState.specs;
-
-    return this.props.shouldUpdate;
+    return this.state.shouldUpdate;
   }
   handleView(...args) {
     let view = args[0];
-    if (this.props.ui.links != undefined) {
+    if (this.props.ui.links !== undefined) {
       let links = this.props.ui.links;
       Object.keys(links).map(function(key) {
         if (links[key].active) {
@@ -33,7 +33,7 @@ class Chart extends Component {
             data: links[key].data
           };
           this.props.ui.chartsInEditor.map(c => {
-            if (c == this.state.id) {
+            if (c === this.state.id) {
               this.sendSignalToChart(
                 "signal_highlight",
                 links[key].type,
@@ -58,8 +58,8 @@ class Chart extends Component {
     }
   }
   render() {
-    const Cspecs = JSON.parse(JSON.stringify(this.state.specs));
-    const Cdata = JSON.parse(JSON.stringify(this.state.specs.data));
+    const Cspecs = JSON.parse(JSON.stringify(this.props.specs));
+    const Cdata = JSON.parse(JSON.stringify(this.props.specs.data));
     return <Vega spec={Cspecs} data={Cdata} onNewView={this.handleView} />;
   }
 }
