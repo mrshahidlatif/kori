@@ -223,12 +223,17 @@ class MyEditor extends React.Component {
     const currentBlock = currentContent.getBlockForKey(blockKey);
     const caretOffset = currentSelection.getAnchorOffset();
     let blockTextBeforeCaret = currentBlock.getText().substr(0, caretOffset);
+
     let lastWord = blockTextBeforeCaret.split(" ").slice(-2)[0];
 
     //check if the word exists in list of suggestions
+    console.log("Last Typed Word for potential link:", blockTextBeforeCaret);
     console.log("Last Typed Word for potential link:", lastWord);
-
-    if (this.props.ui.suggestions.listOfSuggestions.length > 0) {
+    //Condition [blockTextBeforeCaret.split(" ").length > 1] waits for the space key to run the auto-link code!
+    if (
+      this.props.ui.suggestions.listOfSuggestions.length > 0 &&
+      blockTextBeforeCaret.split(" ").length > 1
+    ) {
       const suggestionList = this.props.ui.suggestions.listOfSuggestions;
       let fs = FuzzySet(suggestionList);
       let closestSuggestion =
@@ -355,7 +360,8 @@ class MyEditor extends React.Component {
     const blockKey = currentSelection.getAnchorKey();
     const currentBlock = currentContent.getBlockForKey(blockKey);
     const end = currentSelection.getAnchorOffset();
-    const start = end - text.length;
+    let start = end - text.length;
+    if (start < 0) start = 0;
     const entityKey = Entity.create("Auto-Link", "MUTABLE", "");
 
     const insertTextSelection = currentSelection.merge({
