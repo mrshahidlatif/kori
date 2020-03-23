@@ -235,6 +235,7 @@ class MyEditor extends React.Component {
       blockTextBeforeCaret.split(" ").length > 1
     ) {
       const suggestionList = this.props.ui.suggestions.listOfSuggestions;
+      console.log("suggestion list:", suggestionList);
       let fs = FuzzySet(suggestionList);
       let closestSuggestion =
         fs.get(lastWord, "", 0.7).length > 0
@@ -498,7 +499,7 @@ class MyEditor extends React.Component {
     //Adding a random chart on button click!
     //Needs to replace with drag and drop feature!
     // var chartId = Math.floor(Math.random() * (4 - 3 + 1) + 3);
-    let chartId = 1;
+    let chartId = 5;
     let chart = this.props.charts.byId[chartId];
     let chartFeatures = extractChartFeatures(chart);
     this.props.updateSuggestionList(chartFeatures);

@@ -149,26 +149,20 @@ const initialState = {
           {
             name: "table",
             values: [
-              { x: 0, y: 28, c: 0 },
-              { x: 0, y: 20, c: 1 },
-              { x: 1, y: 43, c: 0 },
-              { x: 1, y: 35, c: 1 },
-              { x: 2, y: 81, c: 0 },
-              { x: 2, y: 10, c: 1 },
-              { x: 3, y: 19, c: 0 },
-              { x: 3, y: 15, c: 1 },
-              { x: 4, y: 52, c: 0 },
-              { x: 4, y: 48, c: 1 },
-              { x: 5, y: 24, c: 0 },
-              { x: 5, y: 28, c: 1 },
-              { x: 6, y: 87, c: 0 },
-              { x: 6, y: 66, c: 1 },
-              { x: 7, y: 17, c: 0 },
-              { x: 7, y: 27, c: 1 },
-              { x: 8, y: 68, c: 0 },
-              { x: 8, y: 16, c: 1 },
-              { x: 9, y: 49, c: 0 },
-              { x: 9, y: 25, c: 1 }
+              { x: "Monday", y: 28, c: 0 },
+              { x: "Monday", y: 20, c: 1 },
+              { x: "Tuesday", y: 43, c: 0 },
+              { x: "Tuesday", y: 35, c: 1 },
+              { x: "Wednesday", y: 81, c: 0 },
+              { x: "Wednesday", y: 10, c: 1 },
+              { x: "Thursday", y: 19, c: 0 },
+              { x: "Thursday", y: 15, c: 1 },
+              { x: "Friday", y: 52, c: 0 },
+              { x: "Friday", y: 48, c: 1 },
+              { x: "Saturday", y: 24, c: 0 },
+              { x: "Saturday", y: 28, c: 1 },
+              { x: "Sunday", y: 87, c: 0 },
+              { x: "Sunday", y: 66, c: 1 }
             ]
           }
         ],
@@ -338,7 +332,7 @@ const initialState = {
         data: [
           {
             name: "source",
-            url: process.env.PUBLIC_URL + "/datasets/cars.json",
+            url: process.env.PUBLIC_URL + "datasets/cars.json",
             transform: [
               {
                 type: "filter",
@@ -644,26 +638,24 @@ const initialState = {
           {
             name: "table",
             values: [
-              { x: 0, y: 28, c: 0 },
-              { x: 0, y: 55, c: 1 },
-              { x: 1, y: 43, c: 0 },
-              { x: 1, y: 91, c: 1 },
-              { x: 2, y: 81, c: 0 },
-              { x: 2, y: 53, c: 1 },
-              { x: 3, y: 19, c: 0 },
-              { x: 3, y: 87, c: 1 },
-              { x: 4, y: 52, c: 0 },
-              { x: 4, y: 48, c: 1 },
-              { x: 5, y: 24, c: 0 },
-              { x: 5, y: 49, c: 1 },
-              { x: 6, y: 87, c: 0 },
-              { x: 6, y: 66, c: 1 },
-              { x: 7, y: 17, c: 0 },
-              { x: 7, y: 27, c: 1 },
-              { x: 8, y: 68, c: 0 },
-              { x: 8, y: 16, c: 1 },
-              { x: 9, y: 49, c: 0 },
-              { x: 9, y: 15, c: 1 }
+              { x: "Apple", y: 28, c: 0 },
+              { x: "Apple", y: 55, c: 1 },
+              { x: "Amazon", y: 43, c: 0 },
+              { x: "Amazon", y: 91, c: 1 },
+              { x: "Facebook", y: 81, c: 0 },
+              { x: "Facebook", y: 53, c: 1 },
+              { x: "Netflix", y: 19, c: 0 },
+              { x: "Netflix", y: 87, c: 1 },
+              { x: "Microsoft", y: 52, c: 0 },
+              { x: "Microsoft", y: 48, c: 1 },
+              { x: "Linkedin", y: 24, c: 0 },
+              { x: "Linkedin", y: 49, c: 1 },
+              { x: "Twitter", y: 87, c: 0 },
+              { x: "Twitter", y: 66, c: 1 },
+              { x: "Google", y: 17, c: 0 },
+              { x: "Google", y: 27, c: 1 },
+              { x: "Yahoo", y: 68, c: 0 },
+              { x: "Yahoo", y: 16, c: 1 }
             ],
             transform: [
               {
