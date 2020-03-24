@@ -136,11 +136,12 @@ const ChartBlock = ({
       {...elementProps}
       style={{ maxWidth: 500, backgroundColor: "none", ...style }}
     >
-      <Chart id={content.id} specs={content.chartData} shouldUpdate={true} />
+      <Chart id={content.id} specs={content.chartData} />
     </div>
   );
 };
 
+//Alignment controls for the charts in document
 const createChartBlockPlugin = (config = {}) => {
   const component = config.decorator
     ? config.decorator(ChartBlock)
@@ -211,9 +212,6 @@ class MyEditor extends React.Component {
     this.props.updateEditorState(rawContent);
 
     const blocks = rawContent.blocks;
-    // const allText = blocks
-    //   .map(block => (!block.text.trim() && "\n") || block.text)
-    //   .join("\n");
 
     //AUTOMATIC LINKING WHEN THE USER IS TYPING
     //Get the last word user typed before pressing the space
@@ -223,19 +221,15 @@ class MyEditor extends React.Component {
     const currentBlock = currentContent.getBlockForKey(blockKey);
     const caretOffset = currentSelection.getAnchorOffset();
     let blockTextBeforeCaret = currentBlock.getText().substr(0, caretOffset);
-
     let lastWord = blockTextBeforeCaret.split(" ").slice(-2)[0];
 
     //check if the word exists in list of suggestions
-    console.log("Last Typed Word for potential link:", blockTextBeforeCaret);
-    console.log("Last Typed Word for potential link:", lastWord);
     //Condition [blockTextBeforeCaret.split(" ").length > 1] waits for the space key to run the auto-link code!
     if (
       this.props.ui.suggestions.listOfSuggestions.length > 0 &&
       blockTextBeforeCaret.split(" ").length > 1
     ) {
       const suggestionList = this.props.ui.suggestions.listOfSuggestions;
-      console.log("suggestion list:", suggestionList);
       let fs = FuzzySet(suggestionList);
       let closestSuggestion =
         fs.get(lastWord, "", 0.7).length > 0
@@ -249,11 +243,7 @@ class MyEditor extends React.Component {
         this.setState({ lastTypedWord: lastWord });
       }
     }
-    //Updating chartsInEditor to store
-    //TODO: It calls addSelectedChart fucntion on each key process! It shouldn't happen!
-    //TODO: Explicity check if the entity contains a chart. now Links will also be entites!
-
-    //Do this only when Chart has been added or removed in the Editor
+    //Updating charts in store when a chart is added to or removed from document
     let updatedNumberOfCharts = Object.keys(rawContent.entityMap).length;
     if (updatedNumberOfCharts !== this.state.numberOfChartsInEditor) {
       var ids = [];
@@ -263,7 +253,6 @@ class MyEditor extends React.Component {
           ids.push(id);
         }
       }, this);
-      console.log("Chart added or deleted!!!");
       this.props.addSelectedChart(ids);
       this.setState({ numberOfChartsInEditor: updatedNumberOfCharts });
     }
@@ -498,7 +487,7 @@ class MyEditor extends React.Component {
     let content = editorState.getCurrentContent();
 
     //Adding a random chart on button click!
-    //Needs to replace with drag and drop feature!
+    //TODO: Needs to replace with drag and drop feature!
     // var chartId = Math.floor(Math.random() * (4 - 3 + 1) + 3);
     let chartId = 5;
     let chart = this.props.charts.byId[chartId];

@@ -12,16 +12,11 @@ class Chart extends Component {
 
   state = {
     id: this.props.id,
-    specs: this.props.specs,
-    shouldUpdate: this.props.shouldUpdate
+    specs: this.props.specs
   };
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state.shouldUpdate;
-  }
-  handleView(...args) {
-    let view = args[0];
-    let { links, chartsInEditor } = this.props;
+  componentWillReceiveProps(nextProps) {
+    //TODO: add a deactivating link mechanism! Look if this code belongs here in the react documentation
+    let { links, chartsInEditor } = nextProps;
     if (links !== undefined) {
       Object.keys(links).map(function(key) {
         if (links[key].active) {
@@ -34,14 +29,22 @@ class Chart extends Component {
                 "signal_highlight",
                 links[key].type,
                 d,
-                view
+                this.view
               );
             }
           });
         }
       }, this);
     }
-    return view;
+    //Defining signal for clearing the highlight
+    // this.view.signal("signal_highlight", []).run();
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    //Never update the chart once it's rendered
+    return false;
+  }
+  handleView(...args) {
+    this.view = args[0];
   }
   sendSignalToChart(signalName, signalType, signalData, view) {
     switch (signalType) {

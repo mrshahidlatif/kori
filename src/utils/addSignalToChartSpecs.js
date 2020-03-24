@@ -33,6 +33,7 @@ function updateChartSpecsWithSignals(oldChartSpecs, chartType) {
       fillOpacity: [
         {
           test:
+            "signal_highlight.data[0] !== 'CLEAR' && (" +
             "indexof(signal_highlight.data,datum." +
             x +
             ") != -1 || (datum." +
@@ -41,7 +42,7 @@ function updateChartSpecsWithSignals(oldChartSpecs, chartType) {
             y +
             " < signal_highlight.data[1]) || indexof(signal_highlight.data,datum." +
             color +
-            ") != -1",
+            ") != -1)",
           value: 1.0
         },
         { value: 0.6 }
@@ -58,13 +59,14 @@ function updateChartSpecsWithSignals(oldChartSpecs, chartType) {
       fillOpacity: [
         {
           test:
+            "signal_highlight.data[0] !== 'CLEAR' && (" +
             "indexof(signal_highlight.data,datum." +
             x +
             ") >= 0 || (datum." +
             y +
             " > signal_highlight.data[0] && datum." +
             y +
-            " < signal_highlight.data[1])",
+            " < signal_highlight.data[1]))",
           value: 1.0
         },
         { value: 0.6 }
