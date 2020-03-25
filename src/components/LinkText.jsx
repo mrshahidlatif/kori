@@ -16,6 +16,17 @@ class LinkText extends Component {
     super(props);
   }
   state = {};
+  componentWillReceiveProps(nextProps) {
+    if (this.props.children !== nextProps.children) {
+      let text = nextProps.children[0].props.text;
+      text = text.slice(1, text.length);
+      let filteredSuggestions = filterArray(
+        this.props.ui.suggestions.listOfSuggestions,
+        text
+      );
+      this.props.updateFilteredSuggestions(filteredSuggestions);
+    }
+  }
   componentDidMount() {
     let text = this.props.children[0].props.text;
     text = text.slice(1, text.length);
