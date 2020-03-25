@@ -31,25 +31,23 @@ class Suggestion extends Component {
   }
   render() {
     let cursor_position = this.props.caretPosition;
-    if (
-      this.props.ui.suggestions.isActive &&
-      this.props.ui.suggestions.listOfSuggestions != undefined
-    ) {
+    let { isActive, filteredSuggestions } = this.props;
+    if (isActive && filteredSuggestions.length > 0) {
       return (
         <div
           style={{
-            left: cursor_position.x - 10,
-            top: cursor_position.y + 15
+            left: cursor_position === undefined ? 0 : cursor_position.x - 10,
+            top: cursor_position === undefined ? 0 : cursor_position.y + 15
           }}
           className={css.suggestionPanel}
         >
           <ul className={"list-group"}>
-            {this.props.ui.suggestions.listOfSuggestions.map(s => (
+            {filteredSuggestions.map(s => (
               <button
                 onClick={this.handleClick}
                 type="button"
                 className={
-                  this.props.ui.suggestions.listOfSuggestions.indexOf(s) ==
+                  filteredSuggestions.indexOf(s) ===
                   this.props.focussedSuggestionIndex
                     ? "list-group-item list-group-item-action active"
                     : "list-group-item list-group-item-action"
@@ -68,7 +66,9 @@ class Suggestion extends Component {
 
 //Define the public proptypes of this componenet
 const mapStateToProps = (state, ownProps) => {
-  return state;
+  let filteredSuggestions = state.ui.suggestions.listOfFilteredSuggestions;
+  let isActive = state.ui.suggestions.isActive;
+  return { filteredSuggestions, isActive };
 };
 
 const mapDispatchToProps = dispatch => {

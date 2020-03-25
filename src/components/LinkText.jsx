@@ -6,11 +6,9 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import PropTypes from "prop-types";
 import {
-  addTextLink,
-  activateTextLink,
-  deactivateTextLink,
   activateSuggestions,
-  deactivateSuggestions
+  deactivateSuggestions,
+  updateFilteredSuggestions
 } from "../ducks/ui";
 
 class LinkText extends Component {
@@ -19,8 +17,20 @@ class LinkText extends Component {
   }
   state = {};
   componentDidMount() {
-    //activate the suggestion dropdown as soon as user presses '@'
+    let text = this.props.children[0].props.text;
+    text = text.slice(1, text.length);
+    let filteredSuggestions = filterArray(
+      this.props.ui.suggestions.listOfSuggestions,
+      text
+    );
+    this.props.updateFilteredSuggestions(filteredSuggestions);
+    //activate the suggestion dropdown as soon as user's text matches a suggestion after pressing @
     this.props.activateSuggestions();
+  }
+  componentWillUnmount() {
+    this.props.deactivateSuggestions();
+    //resetting the filtered suggestions for next time!
+    this.props.updateFilteredSuggestions([]);
   }
   render() {
     return (
@@ -36,6 +46,15 @@ class LinkText extends Component {
   }
 }
 
+const filterArray = (array, text) => {
+  var filteredArray = null;
+  filteredArray = array.filter(object => {
+    const query = text.toLowerCase();
+    return object.toLowerCase().startsWith(query);
+  });
+  return filteredArray;
+};
+
 //Define the public proptypes of this componenet
 const mapStateToProps = (state, ownProps) => {
   return state;
@@ -45,10 +64,8 @@ const mapDispatchToProps = dispatch => {
   return {
     ...bindActionCreators(
       {
-        addTextLink,
-        activateTextLink,
-        deactivateTextLink,
         activateSuggestions,
+        updateFilteredSuggestions,
         deactivateSuggestions
       },
       dispatch

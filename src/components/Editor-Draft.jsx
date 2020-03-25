@@ -174,7 +174,7 @@ class MyEditor extends React.Component {
     const compositeDecorator = new CompositeDecorator([
       {
         strategy: handleStrategy,
-        component: decorateComponentWithProps(LinkText, EditorState)
+        component: LinkText // decorateComponentWithProps(LinkText, EditorState)
       },
       {
         strategy: findLinkEntities,
@@ -290,13 +290,13 @@ class MyEditor extends React.Component {
     if (this.state.focussedSuggestionIndex - 1 < 0) {
       this.setState({
         focussedSuggestionIndex:
-          this.props.ui.suggestions.listOfSuggestions.length - 1
+          this.props.ui.suggestions.listOfFilteredSuggestions.length - 1
       });
     } else {
       this.setState({
         focussedSuggestionIndex:
           (this.state.focussedSuggestionIndex - 1) %
-          this.props.ui.suggestions.listOfSuggestions.length
+          this.props.ui.suggestions.listOfFilteredSuggestions.length
       });
     }
   }
@@ -306,7 +306,7 @@ class MyEditor extends React.Component {
     this.setState({
       focussedSuggestionIndex:
         (this.state.focussedSuggestionIndex + 1) %
-        this.props.ui.suggestions.listOfSuggestions.length
+        this.props.ui.suggestions.listOfFilteredSuggestions.length
     });
   }
   handleReturn() {
@@ -316,7 +316,7 @@ class MyEditor extends React.Component {
 
   onTab(keyboardEvent) {
     keyboardEvent.preventDefault();
-    const suggestionText = this.props.ui.suggestions.listOfSuggestions[
+    const suggestionText = this.props.ui.suggestions.listOfFilteredSuggestions[
       this.state.focussedSuggestionIndex
     ];
     const newEditorState = insertSuggestion(

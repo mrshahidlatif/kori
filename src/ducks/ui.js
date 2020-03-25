@@ -5,6 +5,7 @@ export const ACTIVATE_TEXT_LINK = "ACTIVATE_TEXT_LINK";
 export const DEACTIVATE_TEXT_LINK = "DEACTIVATE_TEXT_LINK";
 export const ACTIVATE_SUGGESTIONS = "ACTIVATE_SUGGESTIONS";
 export const DEACTIVATE_SUGGESTIONS = "DEACTIVATE_SUGGESTIONS";
+export const UPDATE_FILTERED_SUGGESTIONS = "UPDATE_FILTERED_SUGGESTIONS";
 
 export const addSelectedChart = chartId => {
   return { type: ADD_SELECTED_CHART, chartId };
@@ -28,6 +29,9 @@ export const activateSuggestions = () => {
 export const deactivateSuggestions = () => {
   return { type: DEACTIVATE_SUGGESTIONS };
 };
+export const updateFilteredSuggestions = filteredSuggestions => {
+  return { type: UPDATE_FILTERED_SUGGESTIONS, filteredSuggestions };
+};
 
 //reducers
 export default (state = initialUi, action) => {
@@ -43,6 +47,17 @@ export default (state = initialUi, action) => {
         suggestions: {
           ...state.suggestions,
           listOfSuggestions: action.suggestionList
+          // listOfSuggestions: state.suggestions.listOfSuggestions.concat(
+          //   action.suggestionList
+          //)
+        }
+      };
+    case UPDATE_FILTERED_SUGGESTIONS:
+      return {
+        ...state,
+        suggestions: {
+          ...state.suggestions,
+          listOfFilteredSuggestions: action.filteredSuggestions
           // listOfSuggestions: state.suggestions.listOfSuggestions.concat(
           //   action.suggestionList
           //)
@@ -112,6 +127,7 @@ const initialUi = {
       "OrangeLine",
       "Apple"
     ],
+    listOfFilteredSuggestions: [],
     isActive: false
   },
   links: {}
