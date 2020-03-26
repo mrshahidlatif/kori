@@ -12,6 +12,7 @@ code {
     monospace;
 }
 .editor_container {
+  position: relative;
   margin: 10px auto 0;
   padding: 15px;
 }

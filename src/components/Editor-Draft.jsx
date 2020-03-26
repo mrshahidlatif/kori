@@ -9,6 +9,7 @@ import FuzzySet from "fuzzyset.js";
 import { updateEditorState } from "../ducks/editor";
 import insertSuggestion from "./InsertSuggestion";
 import updateChartSpecsWithSignals from "../utils/addSignalToChartSpecs";
+import getCaretPosition from "../utils/getCaretPosition";
 import extractChartFeatures from "../utils/extractChartFeatures";
 import {
   addSelectedChart,
@@ -260,30 +261,11 @@ class MyEditor extends React.Component {
     //Computing the position of cursor relative to viewport for showing suggestions
     //https://github.com/facebook/draft-js/issues/45
     const selection = window.getSelection();
-    let caretPosition = this.getCaretPosition(selection);
+    let caretPosition = getCaretPosition(selection);
     if (caretPosition !== null) {
       this.setState({ caretPosition: caretPosition });
     }
   };
-  getCaretPosition(selection) {
-    if (selection.anchorNode === null) return;
-    let range = selection.getRangeAt(0);
-    let cursorPosition = range.getBoundingClientRect();
-    cursorPosition = JSON.parse(JSON.stringify(cursorPosition));
-    //https://github.com/facebook/draft-js/blob/master/src/component/selection/getVisibleSelectionRect.js
-    // When a re-render leads to a node being removed, the DOM selection will
-    // temporarily be placed on an ancestor node, which leads to an invalid
-    // bounding rect. Discard this state.
-    if (
-      cursorPosition.top === 0 &&
-      cursorPosition.right === 0 &&
-      cursorPosition.bottom === 0 &&
-      cursorPosition.left === 0
-    ) {
-      return null;
-    }
-    return cursorPosition;
-  }
   onUpArrow(keyboardEvent) {
     keyboardEvent.preventDefault();
 
@@ -348,6 +330,7 @@ class MyEditor extends React.Component {
     const { editorState } = this.state;
     const currentContent = editorState.getCurrentContent();
     const currentSelection = editorState.getSelection();
+    console.log("Current Selection", currentSelection);
     const blockKey = currentSelection.getAnchorKey();
     const currentBlock = currentContent.getBlockForKey(blockKey);
     const end = currentSelection.getAnchorOffset();
@@ -359,6 +342,7 @@ class MyEditor extends React.Component {
       anchorOffset: start,
       focusOffset: end
     });
+    console.log("Insert Selection:", insertTextSelection);
     let newContent = Modifier.replaceText(
       editorState.getCurrentContent(),
       insertTextSelection,
@@ -441,44 +425,46 @@ class MyEditor extends React.Component {
             Add VIS
           </button>
         </div>
-        <div className="col-9 editor" id="mainEditor">
-          <Editor
-            editorState={this.state.editorState}
-            placeholder="Start composing an interactive article!"
-            onChange={this.handleEditorChange}
-            stripPastedStyles={true}
-            blockRendererFn={this.blockRendererFn}
-            plugins={plugins}
-            {...additionalProps}
-            ref={element => {
-              this.editor = element;
-            }}
-          />
-          <Toolbar>
-            {// may be use React.Fragment instead of div to improve perfomance after React 16
-            externalProps => (
-              <div>
-                <BoldButton {...externalProps} />
-                <ItalicButton {...externalProps} />
-                <UnderlineButton {...externalProps} />
-                <CodeButton {...externalProps} />
-                <Separator {...externalProps} />
-                <HeadlinesButton {...externalProps} />
-                <UnorderedListButton {...externalProps} />
-                <OrderedListButton {...externalProps} />
-                <BlockquoteButton {...externalProps} />
-                <CodeBlockButton {...externalProps} />
-              </div>
-            )}
-          </Toolbar>
-          <AlignmentTool />
+        <div className="col-9" id="mainEditor">
+          <div className="editor editor_container">
+            <Editor
+              editorState={this.state.editorState}
+              placeholder="Start composing an interactive article!"
+              onChange={this.handleEditorChange}
+              stripPastedStyles={true}
+              blockRendererFn={this.blockRendererFn}
+              plugins={plugins}
+              {...additionalProps}
+              ref={element => {
+                this.editor = element;
+              }}
+            />
+            <Toolbar>
+              {// may be use React.Fragment instead of div to improve perfomance after React 16
+              externalProps => (
+                <div>
+                  <BoldButton {...externalProps} />
+                  <ItalicButton {...externalProps} />
+                  <UnderlineButton {...externalProps} />
+                  <CodeButton {...externalProps} />
+                  <Separator {...externalProps} />
+                  <HeadlinesButton {...externalProps} />
+                  <UnorderedListButton {...externalProps} />
+                  <OrderedListButton {...externalProps} />
+                  <BlockquoteButton {...externalProps} />
+                  <CodeBlockButton {...externalProps} />
+                </div>
+              )}
+            </Toolbar>
+            <AlignmentTool />
+            <Suggestion
+              suggestionCallback={this.callbackFunction}
+              suggestionState={this.state.editorState}
+              focussedSuggestionIndex={this.state.focussedSuggestionIndex}
+              caretPosition={this.state.caretPosition}
+            />
+          </div>
         </div>
-        <Suggestion
-          suggestionCallback={this.callbackFunction}
-          suggestionState={this.state.editorState}
-          focussedSuggestionIndex={this.state.focussedSuggestionIndex}
-          caretPosition={this.state.caretPosition}
-        />
       </div>
     );
   }
