@@ -1,5 +1,5 @@
 import React, { Fragment, Component } from "react";
-import "../css-draftjs/Draft.css";
+import "../css-draftjs/Draft.css"; //this should be imported from node modules
 import "../css-draftjs/static-toolbar-plugin.css";
 import "../css-draftjs/alignment-tool-plugin.css";
 import "../css-draftjs/focus-plugin.css";
@@ -55,7 +55,7 @@ import decorateComponentWithProps from "../utils/decorate_component_with_props";
 import createTextLink from "./CreateTextLink";
 import Link from "./ManualLink";
 import AutoLink from "./AutoLink";
-
+import throttle from 'utils/throttle';
 class HeadlinesPicker extends Component {
   componentDidMount() {
     setTimeout(() => {
@@ -81,7 +81,7 @@ class HeadlinesPicker extends Component {
           i // eslint-disable-next-line
         ) => (
           <Button key={i} {...this.props} />
-        ))}
+        ))}3
       </div>
     );
   }
@@ -200,6 +200,9 @@ class MyEditor extends React.Component {
     this.onEscape = this.onEscape.bind(this);
     this.onBlur = this.onBlur.bind(this);
     this.onFocus = this.onFocus.bind(this);
+    this.handleDragOver = this.handleDragOver.bind(this);
+    this.handleDragOverThrottled = throttle(this.handleDragOverThrottled.bind(this));//this.handleDragOver.bind(this);
+    this.handleDrop = this.handleDrop.bind(this);
   }
   callbackFunction = (newEditorState, newContent) => {
     this.setState({ editorState: newEditorState });
@@ -226,7 +229,7 @@ class MyEditor extends React.Component {
     //check if the word exists in list of suggestions
     //Condition [blockTextBeforeCaret.split(" ").length > 1] waits for the space key to run the auto-link code!
     if (
-      this.props.ui.suggestions.listOfSuggestions.length > 0 &&
+      this.props.ui.suggestions.listOfSuggestions && this.props.ui.suggestions.listOfSuggestions.length > 0 &&
       blockTextBeforeCaret.split(" ").length > 1
     ) {
       const suggestionList = this.props.ui.suggestions.listOfSuggestions;
@@ -406,6 +409,35 @@ class MyEditor extends React.Component {
     let editorPosition = editorNode.getBoundingClientRect();
     editorPosition = JSON.parse(JSON.stringify(editorPosition));
   }
+  handleDragOver(e){// may need to throttle for performance
+    e.preventDefault();
+    e.stopPropagation();
+    e.persist();//conflict with asynchronous setTimeout in throuttle:
+    //https://stackoverflow.com/questions/38142880/react-js-throttle-mousemove-event-keep-throwing-event-persist-error 
+    this.handleDragOverThrottled(e);
+  }
+  handleDragOverThrottled(e){
+    // e.dataTransfer.dropEffect = "copy";
+    // console.log('mouse', this.state.editorState.getSelection());
+    this.editor.focus();
+
+    // let editorState = EditorState.moveSelectionToEnd(this.state.editorState);//.getSelection();
+    // this.setState({
+    //   editorState
+    // });
+    
+    // console.log('dragging chart over', e, e.dataTransfer.getData('chartId'));
+  }
+  handleDrop(e){
+    e.preventDefault();
+    e.stopPropagation();
+    let chartId = e.dataTransfer.getData('chartId');
+    if (chartId){
+      console.log('handleDrop, chartId', chartId);
+      this.insertChart(chartId);
+      e.dataTransfer.clearData();
+    }
+  }
   render() {
     const additionalProps = (() => {
       if (this.props.ui.suggestions.isActive) {
@@ -432,17 +464,20 @@ class MyEditor extends React.Component {
     })();
     return (
       <div className="row">
-        <div className="col">
+        <div className="col-3">
           <VisPanel />
-          <button
+          {/* <button
             className={"btn btn-primary btn-lg"}
             onClick={this.insertChart}
           >
             Add VIS
-          </button>
+          </button> */}
         </div>
-        <div className="col-9 editor" id="mainEditor">
+        <div className="col-9 editor" id="mainEditor"
+            onDragOver = {this.handleDragOver}
+            onDrop={this.handleDrop}>
           <Editor
+
             editorState={this.state.editorState}
             placeholder="Start composing an interactive article!"
             onChange={this.handleEditorChange}
@@ -482,14 +517,14 @@ class MyEditor extends React.Component {
       </div>
     );
   }
-  insertChart = () => {
+  insertChart = (chartId) => {
     const { editorState } = this.state;
     let content = editorState.getCurrentContent();
 
     //Adding a random chart on button click!
     //TODO: Needs to replace with drag and drop feature!
     // var chartId = Math.floor(Math.random() * (4 - 3 + 1) + 3);
-    let chartId = 5;
+    // let chartId = 5;
     let chart = this.props.charts.byId[chartId];
     let chartFeatures = extractChartFeatures(chart);
     this.props.updateSuggestionList(chartFeatures);
