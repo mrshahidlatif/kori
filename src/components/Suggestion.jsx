@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import css from "./Suggestion.module.css";
 import { addTextLink, deactivateSuggestions } from "../ducks/ui";
-import { EditorState, Modifier } from "draft-js";
 import insertSuggestion from "./InsertSuggestion";
 import createTextLink from "./CreateTextLink";
 
@@ -17,16 +16,15 @@ class Suggestion extends Component {
     this.props.suggestionCallback(newEditorState, newContent);
   };
   handleClick(event) {
+    event.preventDefault();
     const text = event.target.textContent;
     const link = createTextLink(text);
     this.props.addTextLink(link);
-    // this.insertTextLinkToEditor(text);
     const updatedEditorState = insertSuggestion(
       text,
       this.props.suggestionState
     );
-    this.sendUpdatedEditorStateToEditor(updatedEditorState);
-    //deactivating the suggestions panels
+    this.sendUpdatedEditorStateToEditor(updatedEditorState, text);
     this.props.deactivateSuggestions();
   }
   render() {
@@ -36,15 +34,15 @@ class Suggestion extends Component {
       return (
         <div
           style={{
-            left: cursor_position === undefined ? 0 : cursor_position.x - 10,
-            top: cursor_position === undefined ? 0 : cursor_position.y + 15
+            left: cursor_position === undefined ? 0 : cursor_position.x,
+            top: cursor_position === undefined ? 0 : cursor_position.y
           }}
           className={css.suggestionPanel}
         >
           <ul className={"list-group"}>
             {filteredSuggestions.map(s => (
               <button
-                onClick={this.handleClick}
+                onMouseDown={this.handleClick}
                 type="button"
                 className={
                   filteredSuggestions.indexOf(s) ===

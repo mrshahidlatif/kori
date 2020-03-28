@@ -9,12 +9,16 @@ import FuzzySet from "fuzzyset.js";
 import { updateEditorState } from "../ducks/editor";
 import insertSuggestion from "./InsertSuggestion";
 import updateChartSpecsWithSignals from "../utils/addSignalToChartSpecs";
+import getCaretPosition from "../utils/getCaretPosition";
 import extractChartFeatures from "../utils/extractChartFeatures";
+import PotentialLinkControls from "./PotentialLinkControls";
 import {
   addSelectedChart,
   updateSuggestionList,
   deactivateSuggestions,
-  addTextLink
+  addTextLink,
+  deactivatePotentialLinkControls,
+  activatePotentialLinkControls
 } from "../ducks/ui";
 
 import { connect } from "react-redux";
@@ -190,7 +194,8 @@ class MyEditor extends React.Component {
       caretPosition: {},
       focussedSuggestionIndex: 0,
       lastTypedWord: "",
-      numberOfChartsInEditor: 0
+      numberOfChartsInEditor: 0,
+      potentialLinkControlsPosition: {}
     };
     this.handleEditorChange = this.handleEditorChange.bind(this);
     this.onDownArrow = this.onDownArrow.bind(this);
@@ -204,8 +209,8 @@ class MyEditor extends React.Component {
     this.handleDragOverThrottled = throttle(this.handleDragOverThrottled.bind(this));//this.handleDragOver.bind(this);
     this.handleDrop = this.handleDrop.bind(this);
   }
-  callbackFunction = (newEditorState, newContent) => {
-    this.setState({ editorState: newEditorState });
+  callbackSuggestionsFunction = (newEditorState, lastWord) => {
+    this.setState({ editorState: newEditorState, lastTypedWord: lastWord });
   };
   handleEditorChange = editorState => {
     this.setState({ editorState: editorState });
@@ -263,30 +268,20 @@ class MyEditor extends React.Component {
     //Computing the position of cursor relative to viewport for showing suggestions
     //https://github.com/facebook/draft-js/issues/45
     const selection = window.getSelection();
-    let caretPosition = this.getCaretPosition(selection);
+    let caretPosition = getCaretPosition(selection);
     if (caretPosition !== null) {
       this.setState({ caretPosition: caretPosition });
     }
-  };
-  getCaretPosition(selection) {
-    if (selection.anchorNode === null) return;
-    let range = selection.getRangeAt(0);
-    let cursorPosition = range.getBoundingClientRect();
-    cursorPosition = JSON.parse(JSON.stringify(cursorPosition));
-    //https://github.com/facebook/draft-js/blob/master/src/component/selection/getVisibleSelectionRect.js
-    // When a re-render leads to a node being removed, the DOM selection will
-    // temporarily be placed on an ancestor node, which leads to an invalid
-    // bounding rect. Discard this state.
     if (
-      cursorPosition.top === 0 &&
-      cursorPosition.right === 0 &&
-      cursorPosition.bottom === 0 &&
-      cursorPosition.left === 0
+      blockKey === this.props.ui.potentialLink.info.blockKey &&
+      caretOffset > this.props.ui.potentialLink.info.start &&
+      caretOffset <= this.props.ui.potentialLink.info.end
     ) {
-      return null;
+      this.props.activatePotentialLinkControls();
+    } else {
+      this.props.deactivatePotentialLinkControls();
     }
-    return cursorPosition;
-  }
+  };
   onUpArrow(keyboardEvent) {
     keyboardEvent.preventDefault();
 
@@ -312,8 +307,10 @@ class MyEditor extends React.Component {
         this.props.ui.suggestions.listOfFilteredSuggestions.length
     });
   }
-  handleReturn() {
+  handleReturn(keyboardEvent) {
     //TODO: Fix this! It is not working at the moment!
+    keyboardEvent.preventDefault();
+    // console.log("return pressed");
     return true;
   }
 
@@ -342,7 +339,8 @@ class MyEditor extends React.Component {
 
   onBlur() {
     //TODO: BUG The following logic doesn't work well with the click on suggestion item. Probably because that is implemented in a different Component
-    // this.props.deactivateSuggestions();
+    this.props.deactivateSuggestions();
+    this.props.deactivatePotentialLinkControls();
   }
 
   onFocus() {}
@@ -396,7 +394,6 @@ class MyEditor extends React.Component {
     );
     this.props.addTextLink(link);
   }
-
   componentDidMount() {
     const rawEditorData = this.props.editor;
     const contentState = convertFromRaw(rawEditorData);
@@ -473,47 +470,57 @@ class MyEditor extends React.Component {
             Add VIS
           </button> */}
         </div>
-        <div className="col-9 editor" id="mainEditor"
-            onDragOver = {this.handleDragOver}
-            onDrop={this.handleDrop}>
-          <Editor
-
-            editorState={this.state.editorState}
-            placeholder="Start composing an interactive article!"
-            onChange={this.handleEditorChange}
-            stripPastedStyles={true}
-            blockRendererFn={this.blockRendererFn}
-            plugins={plugins}
-            {...additionalProps}
-            ref={element => {
-              this.editor = element;
-            }}
-          />
-          <Toolbar>
-            {// may be use React.Fragment instead of div to improve perfomance after React 16
-            externalProps => (
-              <div>
-                <BoldButton {...externalProps} />
-                <ItalicButton {...externalProps} />
-                <UnderlineButton {...externalProps} />
-                <CodeButton {...externalProps} />
-                <Separator {...externalProps} />
-                <HeadlinesButton {...externalProps} />
-                <UnorderedListButton {...externalProps} />
-                <OrderedListButton {...externalProps} />
-                <BlockquoteButton {...externalProps} />
-                <CodeBlockButton {...externalProps} />
-              </div>
-            )}
-          </Toolbar>
-          <AlignmentTool />
+        <div className="col-9" id="mainEditor">
+          <div className="editor editor_container"
+              onDragOver = {this.handleDragOver}
+              onDrop={this.handleDrop}>>
+            <Editor
+              editorState={this.state.editorState}
+              placeholder="Start composing an interactive article!"
+              onChange={this.handleEditorChange}
+              stripPastedStyles={true}
+              blockRendererFn={this.blockRendererFn}
+              plugins={plugins}
+              {...additionalProps}
+              ref={element => {
+                this.editor = element;
+              }}
+            />
+            <Toolbar>
+              {// may be use React.Fragment instead of div to improve perfomance after React 16
+              externalProps => (
+                <div>
+                  <BoldButton {...externalProps} />
+                  <ItalicButton {...externalProps} />
+                  <UnderlineButton {...externalProps} />
+                  <CodeButton {...externalProps} />
+                  <Separator {...externalProps} />
+                  <HeadlinesButton {...externalProps} />
+                  <UnorderedListButton {...externalProps} />
+                  <OrderedListButton {...externalProps} />
+                  <BlockquoteButton {...externalProps} />
+                  <CodeBlockButton {...externalProps} />
+                </div>
+              )}
+            </Toolbar>
+            <AlignmentTool />
+            <Suggestion
+              suggestionCallback={this.callbackSuggestionsFunction}
+              suggestionState={this.state.editorState}
+              focussedSuggestionIndex={this.state.focussedSuggestionIndex}
+              caretPosition={this.state.caretPosition}
+            />
+            <PotentialLinkControls
+              position={this.state.caretPosition}
+              showControls={
+                this.props.ui.potentialLink.showPotentialLinkControls
+              }
+              PotentialLinkControlsCallback={
+                this.callbackPotentialLinkControlsFunction
+              }
+            />
+          </div>
         </div>
-        <Suggestion
-          suggestionCallback={this.callbackFunction}
-          suggestionState={this.state.editorState}
-          focussedSuggestionIndex={this.state.focussedSuggestionIndex}
-          caretPosition={this.state.caretPosition}
-        />
       </div>
     );
   }
@@ -632,7 +639,9 @@ const mapDispatchToProps = dispatch => {
         addSelectedChart,
         updateSuggestionList,
         deactivateSuggestions,
-        addTextLink
+        addTextLink,
+        deactivatePotentialLinkControls,
+        activatePotentialLinkControls
       },
       dispatch
     )

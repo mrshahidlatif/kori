@@ -8,7 +8,9 @@ import {
   activateTextLink,
   deactivateTextLink,
   activateSuggestions,
-  deactivateSuggestions
+  deactivateSuggestions,
+  activatePotentialLinkControls,
+  updateSelectedPotentialLinkInfo
 } from "../ducks/ui";
 
 class AutoLink extends Component {
@@ -16,6 +18,7 @@ class AutoLink extends Component {
     super(props);
     this.handleMouseOver = this.handleMouseOver.bind(this);
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
+    this.handleMouseDown = this.handleMouseDown.bind(this);
   }
   state = {};
   handleMouseOver() {
@@ -26,12 +29,20 @@ class AutoLink extends Component {
     let text = this.props.children[0].props.text;
     this.props.deactivateTextLink(text);
   }
+  handleMouseDown() {
+    this.props.updateSelectedPotentialLinkInfo({
+      blockKey: this.props.blockKey,
+      start: this.props.start,
+      end: this.props.end
+    });
+  }
   render() {
     return (
       <span
         className={css.link}
         onMouseOver={this.handleMouseOver}
         onMouseLeave={this.handleMouseLeave}
+        onMouseDown={this.handleMouseDown}
         data-offset-key={this.props.offsetKey}
       >
         {this.props.children}
@@ -53,7 +64,9 @@ const mapDispatchToProps = dispatch => {
         activateTextLink,
         deactivateTextLink,
         activateSuggestions,
-        deactivateSuggestions
+        deactivateSuggestions,
+        activatePotentialLinkControls,
+        updateSelectedPotentialLinkInfo
       },
       dispatch
     )

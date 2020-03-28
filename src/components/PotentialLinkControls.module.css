@@ -1,0 +1,6 @@
+.potentialLinkControls {
+  position: absolute;
+  opacity: 0.75;
+  cursor: pointer;
+  z-index: 10;
+}
