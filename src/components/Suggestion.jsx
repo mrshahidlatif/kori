@@ -16,16 +16,15 @@ class Suggestion extends Component {
     this.props.suggestionCallback(newEditorState, newContent);
   };
   handleClick(event) {
+    event.preventDefault();
     const text = event.target.textContent;
     const link = createTextLink(text);
     this.props.addTextLink(link);
-    // this.insertTextLinkToEditor(text);
     const updatedEditorState = insertSuggestion(
       text,
       this.props.suggestionState
     );
-    this.sendUpdatedEditorStateToEditor(updatedEditorState);
-    //deactivating the suggestions panels
+    this.sendUpdatedEditorStateToEditor(updatedEditorState, text);
     this.props.deactivateSuggestions();
   }
   render() {
@@ -43,7 +42,7 @@ class Suggestion extends Component {
           <ul className={"list-group"}>
             {filteredSuggestions.map(s => (
               <button
-                onClick={this.handleClick}
+                onMouseDown={this.handleClick}
                 type="button"
                 className={
                   filteredSuggestions.indexOf(s) ===

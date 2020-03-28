@@ -206,8 +206,8 @@ class MyEditor extends React.Component {
     this.onBlur = this.onBlur.bind(this);
     this.onFocus = this.onFocus.bind(this);
   }
-  callbackSuggestionsFunction = (newEditorState, newContent) => {
-    this.setState({ editorState: newEditorState });
+  callbackSuggestionsFunction = (newEditorState, lastWord) => {
+    this.setState({ editorState: newEditorState, lastTypedWord: lastWord });
   };
   handleEditorChange = editorState => {
     this.setState({ editorState: editorState });
@@ -271,7 +271,7 @@ class MyEditor extends React.Component {
     }
     if (
       blockKey === this.props.ui.potentialLink.info.blockKey &&
-      caretOffset >= this.props.ui.potentialLink.info.start &&
+      caretOffset > this.props.ui.potentialLink.info.start &&
       caretOffset <= this.props.ui.potentialLink.info.end
     ) {
       this.props.activatePotentialLinkControls();
@@ -304,8 +304,10 @@ class MyEditor extends React.Component {
         this.props.ui.suggestions.listOfFilteredSuggestions.length
     });
   }
-  handleReturn() {
+  handleReturn(keyboardEvent) {
     //TODO: Fix this! It is not working at the moment!
+    keyboardEvent.preventDefault();
+    // console.log("return pressed");
     return true;
   }
 
