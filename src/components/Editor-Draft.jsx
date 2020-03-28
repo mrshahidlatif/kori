@@ -11,11 +11,14 @@ import insertSuggestion from "./InsertSuggestion";
 import updateChartSpecsWithSignals from "../utils/addSignalToChartSpecs";
 import getCaretPosition from "../utils/getCaretPosition";
 import extractChartFeatures from "../utils/extractChartFeatures";
+import PotentialLinkControls from "./PotentialLinkControls";
 import {
   addSelectedChart,
   updateSuggestionList,
   deactivateSuggestions,
-  addTextLink
+  addTextLink,
+  deactivatePotentialLinkControls,
+  activatePotentialLinkControls
 } from "../ducks/ui";
 
 import { connect } from "react-redux";
@@ -191,7 +194,8 @@ class MyEditor extends React.Component {
       caretPosition: {},
       focussedSuggestionIndex: 0,
       lastTypedWord: "",
-      numberOfChartsInEditor: 0
+      numberOfChartsInEditor: 0,
+      potentialLinkControlsPosition: {}
     };
     this.handleEditorChange = this.handleEditorChange.bind(this);
     this.onDownArrow = this.onDownArrow.bind(this);
@@ -202,7 +206,7 @@ class MyEditor extends React.Component {
     this.onBlur = this.onBlur.bind(this);
     this.onFocus = this.onFocus.bind(this);
   }
-  callbackFunction = (newEditorState, newContent) => {
+  callbackSuggestionsFunction = (newEditorState, newContent) => {
     this.setState({ editorState: newEditorState });
   };
   handleEditorChange = editorState => {
@@ -265,6 +269,15 @@ class MyEditor extends React.Component {
     if (caretPosition !== null) {
       this.setState({ caretPosition: caretPosition });
     }
+    if (
+      blockKey === this.props.ui.potentialLink.info.blockKey &&
+      caretOffset >= this.props.ui.potentialLink.info.start &&
+      caretOffset <= this.props.ui.potentialLink.info.end
+    ) {
+      this.props.activatePotentialLinkControls();
+    } else {
+      this.props.deactivatePotentialLinkControls();
+    }
   };
   onUpArrow(keyboardEvent) {
     keyboardEvent.preventDefault();
@@ -321,7 +334,8 @@ class MyEditor extends React.Component {
 
   onBlur() {
     //TODO: BUG The following logic doesn't work well with the click on suggestion item. Probably because that is implemented in a different Component
-    // this.props.deactivateSuggestions();
+    this.props.deactivateSuggestions();
+    this.props.deactivatePotentialLinkControls();
   }
 
   onFocus() {}
@@ -330,7 +344,6 @@ class MyEditor extends React.Component {
     const { editorState } = this.state;
     const currentContent = editorState.getCurrentContent();
     const currentSelection = editorState.getSelection();
-    console.log("Current Selection", currentSelection);
     const blockKey = currentSelection.getAnchorKey();
     const currentBlock = currentContent.getBlockForKey(blockKey);
     const end = currentSelection.getAnchorOffset();
@@ -342,7 +355,6 @@ class MyEditor extends React.Component {
       anchorOffset: start,
       focusOffset: end
     });
-    console.log("Insert Selection:", insertTextSelection);
     let newContent = Modifier.replaceText(
       editorState.getCurrentContent(),
       insertTextSelection,
@@ -377,7 +389,6 @@ class MyEditor extends React.Component {
     );
     this.props.addTextLink(link);
   }
-
   componentDidMount() {
     const rawEditorData = this.props.editor;
     const contentState = convertFromRaw(rawEditorData);
@@ -458,10 +469,19 @@ class MyEditor extends React.Component {
             </Toolbar>
             <AlignmentTool />
             <Suggestion
-              suggestionCallback={this.callbackFunction}
+              suggestionCallback={this.callbackSuggestionsFunction}
               suggestionState={this.state.editorState}
               focussedSuggestionIndex={this.state.focussedSuggestionIndex}
               caretPosition={this.state.caretPosition}
+            />
+            <PotentialLinkControls
+              position={this.state.caretPosition}
+              showControls={
+                this.props.ui.potentialLink.showPotentialLinkControls
+              }
+              PotentialLinkControlsCallback={
+                this.callbackPotentialLinkControlsFunction
+              }
             />
           </div>
         </div>
@@ -583,7 +603,9 @@ const mapDispatchToProps = dispatch => {
         addSelectedChart,
         updateSuggestionList,
         deactivateSuggestions,
-        addTextLink
+        addTextLink,
+        deactivatePotentialLinkControls,
+        activatePotentialLinkControls
       },
       dispatch
     )

@@ -4,8 +4,14 @@ export const ADD_TEXT_LINK = "ADD_TEXT_LINK";
 export const ACTIVATE_TEXT_LINK = "ACTIVATE_TEXT_LINK";
 export const DEACTIVATE_TEXT_LINK = "DEACTIVATE_TEXT_LINK";
 export const ACTIVATE_SUGGESTIONS = "ACTIVATE_SUGGESTIONS";
+export const ACTIVATE_POTENTIAL_LINK_CONTROLS =
+  "ACTIVATE_POTENTIAL_LINK_CONTROLS";
+export const DEACTIVATE_POTENTIAL_LINK_CONTROLS =
+  "DEACTIVATE_POTENTIAL_LINK_CONTROLS";
 export const DEACTIVATE_SUGGESTIONS = "DEACTIVATE_SUGGESTIONS";
 export const UPDATE_FILTERED_SUGGESTIONS = "UPDATE_FILTERED_SUGGESTIONS";
+export const UPDATE_SELECTED_POTENTIAL_LINK_INFO =
+  "UPDATE_SELECTED_POTENTIAL_LINK_INFO";
 
 export const addSelectedChart = chartId => {
   return { type: ADD_SELECTED_CHART, chartId };
@@ -31,6 +37,15 @@ export const deactivateSuggestions = () => {
 };
 export const updateFilteredSuggestions = filteredSuggestions => {
   return { type: UPDATE_FILTERED_SUGGESTIONS, filteredSuggestions };
+};
+export const activatePotentialLinkControls = () => {
+  return { type: ACTIVATE_POTENTIAL_LINK_CONTROLS };
+};
+export const deactivatePotentialLinkControls = () => {
+  return { type: DEACTIVATE_POTENTIAL_LINK_CONTROLS };
+};
+export const updateSelectedPotentialLinkInfo = info => {
+  return { type: UPDATE_SELECTED_POTENTIAL_LINK_INFO, info };
 };
 
 //reducers
@@ -109,6 +124,30 @@ export default (state = initialUi, action) => {
           isActive: false
         }
       };
+    case ACTIVATE_POTENTIAL_LINK_CONTROLS:
+      return {
+        ...state,
+        potentialLink: {
+          ...state.potentialLink,
+          showPotentialLinkControls: true
+        }
+      };
+    case DEACTIVATE_POTENTIAL_LINK_CONTROLS:
+      return {
+        ...state,
+        potentialLink: {
+          ...state.potentialLink,
+          showPotentialLinkControls: false
+        }
+      };
+    case UPDATE_SELECTED_POTENTIAL_LINK_INFO:
+      return {
+        ...state,
+        potentialLink: {
+          ...state.potentialLink,
+          info: action.info
+        }
+      };
     default:
       return state;
   }
@@ -130,5 +169,6 @@ const initialUi = {
     listOfFilteredSuggestions: [],
     isActive: false
   },
-  links: {}
+  links: {},
+  potentialLink: { showPotentialLinkControls: false, info: {} }
 };

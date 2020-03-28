@@ -1,6 +1,7 @@
 function getCaretPosition(selection) {
   if (selection.anchorNode === null) return;
   let range = selection.getRangeAt(0).cloneRange();
+
   range.setStart(range.startContainer, range.start);
   let cursorPosition = range.getBoundingClientRect();
   cursorPosition = JSON.parse(JSON.stringify(cursorPosition));

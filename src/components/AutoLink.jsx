@@ -3,14 +3,14 @@ import css from "./AutoLink.module.css";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import PropTypes from "prop-types";
-import getCaretPosition from "../utils/getCaretPosition";
-import PotentialLinkControls from "./PotentialLinkControls";
 import {
   addTextLink,
   activateTextLink,
   deactivateTextLink,
   activateSuggestions,
-  deactivateSuggestions
+  deactivateSuggestions,
+  activatePotentialLinkControls,
+  updateSelectedPotentialLinkInfo
 } from "../ducks/ui";
 
 class AutoLink extends Component {
@@ -20,10 +20,7 @@ class AutoLink extends Component {
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
     this.handleMouseDown = this.handleMouseDown.bind(this);
   }
-  state = { showPotentialLinkControls: false, caretPosition: undefined };
-  callbackFunction = flag => {
-    this.setState({ showPotentialLinkControls: flag });
-  };
+  state = {};
   handleMouseOver() {
     let text = this.props.children[0].props.text;
     this.props.activateTextLink(text);
@@ -33,41 +30,23 @@ class AutoLink extends Component {
     this.props.deactivateTextLink(text);
   }
   handleMouseDown() {
-    const selection = window.getSelection();
-    //TODO: Fix the controls positions consistently across all links
-    //TODO: also highlight the selected link for which the controls are open!
-    this.caretPosition = getCaretPosition(selection);
-    this.setState({
-      showPotentialLinkControls: true,
-      caretPosition: this.caretPosition
+    this.props.updateSelectedPotentialLinkInfo({
+      blockKey: this.props.blockKey,
+      start: this.props.start,
+      end: this.props.end
     });
   }
   render() {
-    let { showPotentialLinkControls } = this.state;
-    const renderPotentialLinkControls = () => {
-      if (showPotentialLinkControls) {
-        return (
-          <PotentialLinkControls
-            position={this.state.caretPosition}
-            showControls={this.showControls}
-            PotentialLinkControlsCallback={this.callbackFunction}
-          />
-        );
-      }
-    };
     return (
-      <React.Fragment>
-        <span
-          className={css.link}
-          onMouseOver={this.handleMouseOver}
-          onMouseLeave={this.handleMouseLeave}
-          onMouseDown={this.handleMouseDown}
-          data-offset-key={this.props.offsetKey}
-        >
-          {this.props.children}
-        </span>
-        {renderPotentialLinkControls()}
-      </React.Fragment>
+      <span
+        className={css.link}
+        onMouseOver={this.handleMouseOver}
+        onMouseLeave={this.handleMouseLeave}
+        onMouseDown={this.handleMouseDown}
+        data-offset-key={this.props.offsetKey}
+      >
+        {this.props.children}
+      </span>
     );
   }
 }
@@ -85,7 +64,9 @@ const mapDispatchToProps = dispatch => {
         activateTextLink,
         deactivateTextLink,
         activateSuggestions,
-        deactivateSuggestions
+        deactivateSuggestions,
+        activatePotentialLinkControls,
+        updateSelectedPotentialLinkInfo
       },
       dispatch
     )
