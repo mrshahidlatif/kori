@@ -10,20 +10,14 @@ class MyNavbar extends Component {
       <Navbar bg="dark" variant="dark">
         <Navbar.Brand>Logo</Navbar.Brand>
         <Nav className="mr-auto">
-          <Nav.Link href="#editor">
-            <Link to="/" className="nav-link">
-              Editor
-            </Link>
+          <Nav.Link as={Link} to="/">
+            Editor
           </Nav.Link>
-          <Nav.Link href="#reader">
-            <Link to="/reader" className="nav-link">
-              Reader
-            </Link>
+          <Nav.Link as={Link} to="/reader">
+            Reader
           </Nav.Link>
-          <Nav.Link href="#viscreator">
-            <Link to="/viscreator" className="nav-link">
-              VisCreator
-            </Link>
+          <Nav.Link as={Link} to="/viscreator">
+            VisCreator
           </Nav.Link>
         </Nav>
       </Navbar>
