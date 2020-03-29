@@ -5,6 +5,7 @@ import css from "./Suggestion.module.css";
 import { addTextLink, deactivateSuggestions } from "../ducks/ui";
 import insertSuggestion from "./InsertSuggestion";
 import createTextLink from "./CreateTextLink";
+import { ListGroup } from "react-bootstrap";
 
 class Suggestion extends Component {
   constructor(props) {
@@ -39,25 +40,37 @@ class Suggestion extends Component {
           }}
           className={css.suggestionPanel}
         >
-          <ul className={"list-group"}>
+          <ListGroup>
             {filteredSuggestions.map(s => (
-              <button
+              <ListGroup.Item
+                action
+                variant="dark"
                 onMouseDown={this.handleClick}
-                type="button"
                 className={
                   filteredSuggestions.indexOf(s) ===
                   this.props.focussedSuggestionIndex
-                    ? "list-group-item list-group-item-action active"
-                    : "list-group-item list-group-item-action"
+                    ? "list-group-item-action active dark"
+                    : "list-group-item-action"
                 }
               >
                 {s}
-              </button>
+              </ListGroup.Item>
             ))}
-          </ul>
+          </ListGroup>
         </div>
       );
-    }
+    } else if (isActive && filteredSuggestions.length === 0)
+      return (
+        <ListGroup
+          className={css.suggestionPanel}
+          style={{
+            left: cursor_position === undefined ? 0 : cursor_position.x,
+            top: cursor_position === undefined ? 0 : cursor_position.y
+          }}
+        >
+          <ListGroup.Item variant="dark">No suggestion found!</ListGroup.Item>
+        </ListGroup>
+      );
     return null;
   }
 }

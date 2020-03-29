@@ -1,6 +1,5 @@
 .suggestionPanel {
   position: absolute;
-  background-color: yellowgreen;
   min-width: 150px;
   opacity: 0.75;
   z-index: 10;
