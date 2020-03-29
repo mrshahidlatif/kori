@@ -28,6 +28,7 @@ class VisPanel extends Component {
             id={id}
             specs={allCharts[id].specs}
             shouldUpdate={false}
+            draggable = {true}
           />
         ))}
       </div>
