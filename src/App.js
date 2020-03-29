@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "./components/Navbar";
+import MyNavbar from "./components/MyNavbar";
 import MyEditor from "./components/Editor-Draft";
 import VisCreator from "./components/VisCreator";
 import Reader from "./components/Reader";
@@ -12,7 +12,7 @@ function App() {
   return (
     <div>
       <Router>
-        <Navbar />
+        <MyNavbar />
         <main className="container-fluid">
           <Switch>
             <Route path="/viscreator">
