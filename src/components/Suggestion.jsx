@@ -6,6 +6,7 @@ import { addTextLink, deactivateSuggestions } from "../ducks/ui";
 import insertSuggestion from "./InsertSuggestion";
 import createTextLink from "./CreateTextLink";
 import { ListGroup } from "react-bootstrap";
+import uuid from "react-uuid";
 
 class Suggestion extends Component {
   constructor(props) {
@@ -43,6 +44,7 @@ class Suggestion extends Component {
           <ListGroup>
             {filteredSuggestions.map(s => (
               <ListGroup.Item
+                key={uuid()}
                 action
                 variant="dark"
                 onMouseDown={this.handleClick}
