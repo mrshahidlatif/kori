@@ -1,9 +1,0 @@
-.suggestionPanel {
-  position: absolute;
-  min-width: 150px;
-  opacity: 0.75;
-  z-index: 10;
-}
-.suggestionList {
-  list-style-type: none;
-}

@@ -1,33 +1,32 @@
-//Parsing ChartInEditor for extracting chart features from vegalite specs
-const extractChartFeatures = chart => {
-  let specs = chart.specs;
-  let data = chart.specs.data;
-  let features = [],
-    scaleNames = [],
-    varNames = [];
+//Parsing ChartInEditor for extracting chart features from vegalite spec
+export default function (chart){
+    let spec = chart.spec;
+    let data = chart.spec.data;
+    let features = [],
+        // scaleNames = [],
+        fields = [];
 
-  //extracting the name of all scales
-  console.log("Specs:", specs);
-  specs.scales.map(s => {
-    scaleNames.push(s["name"]);
-    varNames.push(s.domain.field);
-  });
-  if (specs.data[0].url !== undefined) {
-    const path = process.env.PUBLIC_URL + specs.data[0].url;
-    //TODO: Handle the case where data is read from the URL
-    return;
-  }
-
-  varNames.forEach(function(v) {
-    data[0].values.map(val => {
-      if (val[v] !== undefined) features.push(val[v].toString()); //FuzzySet expects a string value!
+    //extracting the name of all scales
+    // console.log("spec:", spec);
+    spec.scales.map(s => {
+        // scaleNames.push(s["name"]);
+        fields.push(s.domain.field);
     });
-  });
-  // Get Unique Elements in case of repetition
-  let uniqueFeatures = [...new Set(features)];
-  uniqueFeatures = uniqueFeatures.filter(f => {
-    return f !== undefined;
-  });
-  return uniqueFeatures;
+    // if (spec.data[0].url !== undefined) {
+    //   const path = process.env.PUBLIC_URL + spec.data[0].url;
+    //   //TODO: Handle the case where data is read from the URL
+    //   return;
+    // }
+
+    fields.forEach(function (field) {
+        data[0].values.map(val => {
+            if (val[field] !== undefined) features.push(val[field].toString()); //FuzzySet expects a string value!
+        });
+    });
+    // Get Unique Elements in case of repetition
+    features = [...new Set(features)];
+    features = features.filter(f => {
+        return f !== undefined;
+    });
+    return features;
 };
-export default extractChartFeatures;
