@@ -3,19 +3,38 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-import "bootstrap/dist/css/bootstrap.css";
-import "react-quill/dist/quill.snow.css";
-import "react-quill/dist/quill.bubble.css";
-import "semantic-ui-css/semantic.min.css";
-
-import logger from "redux-logger";
+import {createLogger} from "redux-logger";
 import reduxFreeze from "redux-freeze";
-
 import { Provider } from "react-redux";
 import { applyMiddleware, createStore } from "redux";
 import rootReducer from "./ducks";
 import localforage from "localforage";
 import throttle from "./utils/throttle";
+
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+const theme = createMuiTheme({ //https://material-ui.com/customization/palette/
+  palette: {
+    primary: {
+      main: '#2196f3'
+    },
+    secondary: {
+      main: '#e91e63'
+    },
+    info:{
+      main:"#1976d2"
+    },
+    error:{
+      main:"#f44336"
+    },
+    warning:{
+      main:"#ff9800"
+    },
+    success:{
+      main:"#4caf50"
+    }
+  }
+});
+// console.log(logger);
 
 let loadData = new Promise((resolve, reject) => {
   localforage
@@ -30,16 +49,21 @@ let loadData = new Promise((resolve, reject) => {
 
 loadData
   .then(data => {
-    let middleware = [reduxFreeze, logger];
+    let middleware = [reduxFreeze, createLogger()];
     let store = createStore(
       rootReducer,
-      data ? data : {},
+      {},
+      // data ? data : {},
       applyMiddleware(...middleware)
     );
+    // initialize if ne
+    if (!data){
 
+    }
     store.subscribe(
       throttle(() => {
         let state = { ...store.getState() };
+        delete state["ui"]; // don't persist ui sate
         localforage.setItem("state", state);
       }, 1000)
     );
@@ -49,7 +73,9 @@ loadData
     // });
     ReactDOM.render(
       <Provider store={store}>
-        <App />
+        <ThemeProvider theme={theme}>
+          <App />
+        </ThemeProvider>
       </Provider>,
       document.getElementById("root")
     );

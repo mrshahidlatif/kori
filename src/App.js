@@ -1,33 +1,34 @@
 import React from "react";
-import MyNavbar from "./components/MyNavbar";
-import MyEditor from "./components/Editor-Draft";
-import VisCreator from "./components/VisCreator";
-import Reader from "./components/Reader";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-
-import "./App.css";
+import Navbar from "components/Navbar";
+import Home from 'components/Home';
+import Docs from 'components/Docs';
+import View from 'components/View';
+import Edit from 'components/Edit';
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import Container from '@material-ui/core/Container';
 
 function App() {
   return (
-    <div>
-      <Router>
-        <MyNavbar />
-        <main className="container-fluid">
-          <Switch>
-            <Route path="/viscreator">
-              <VisCreator />
-            </Route>
-            <Route path="/reader">
-              <Reader />
-            </Route>
-            <Route path="/">
-              <MyEditor />
-            </Route>
-          </Switch>
-        </main>
-      </Router>
-    </div>
+    <Router>
+      <Navbar />
+      <Container maxWidth="lg" mt={2}>
+        <Switch>
+          <Route path="/docs/:docId/view">
+            <View />
+          </Route>
+          <Route path="/docs/:docId">
+            <Edit />
+          </Route>
+          <Route path="/docs">
+            <Docs />
+          </Route>
+          <Route path="/">
+            <Home />
+          </Route>
+          
+        </Switch>
+      </Container>
+    </Router>
   );
 }
 
