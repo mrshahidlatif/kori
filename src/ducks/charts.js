@@ -8,13 +8,14 @@ export const DELETE_CHART = 'DELETE_CHART';
 
 
 // actions
-export const createChart = (docId, attrs={}) => {
+export const createChart = (docId, spec, attrs={}) => {
 	let chartId = uniqueId('chart-');
 	attrs = {
-    docId,
+	docId,
+	spec,
     timestamp: Date.now(),
     ...attrs,
-		id:chartId
+	id:chartId
 	};
 	return {type: CREATE_CHART, chartId, attrs};
 };
