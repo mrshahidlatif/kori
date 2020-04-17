@@ -23,7 +23,8 @@ export default function () {
     features: [],
   };
 
-  //TODO: @Nam: Can you have a look at this CSV reading method!
+  //TODO: @Nam: Can you have a look at this CSV reading method! At present it expects 'file' as an import before
+  // parsing it. But for us 'file' will be dynamically loaded when adding a new chart to chart gallery
   // d3.csv(file).then(function (data) {
   //   console.log(data);
   // });
