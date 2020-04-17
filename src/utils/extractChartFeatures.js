@@ -1,32 +1,111 @@
 //Parsing ChartInEditor for extracting chart features from vegalite spec
-export default function (chart){
-    let spec = chart.spec;
-    let data = chart.spec.data;
-    let features = [],
-        // scaleNames = [],
-        fields = [];
 
-    //extracting the name of all scales
-    // console.log("spec:", spec);
-    spec.scales.map(s => {
-        // scaleNames.push(s["name"]);
-        fields.push(s.domain.field);
-    });
-    // if (spec.data[0].url !== undefined) {
-    //   const path = process.env.PUBLIC_URL + spec.data[0].url;
-    //   //TODO: Handle the case where data is read from the URL
-    //   return;
-    // }
+//These are just here for testing!
+import bar from "../ducks/specs/bar.vl.json";
+import stackbar from "../ducks/specs/stackbar.vl.json";
+import groupbar from "../ducks/specs/groupbar.vl.json";
+import scatterplot from "../ducks/specs/scatterplot.vl.json";
+import columnStackBar from "../ducks/specs/columnstackbar.vl.json";
+import line from "../ducks/specs/line.vl.json";
+import multiLine from "../ducks/specs/multiline.vl.json";
+import map from "../ducks/specs/map.vl.json";
+import * as d3 from "d3-fetch";
+import file from "../ducks/specs/weather.csv";
 
-    fields.forEach(function (field) {
-        data[0].values.map(val => {
-            if (val[field] !== undefined) features.push(val[field].toString()); //FuzzySet expects a string value!
-        });
+//TODO: Also handle cases where data is read from CSV file.
+//TODO: Also see if we can support Maps!
+export default function () {
+  //This function expects VegaLite specs as an argument
+  let spec = bar;
+  let chartFeatures = {
+    chartType: "",
+    encodings: {},
+    features: [],
+  };
+
+  //TODO: @Nam: Can you have a look at this CSV reading method!
+  // d3.csv(file).then(function (data) {
+  //   console.log(data);
+  // });
+
+  //Data is embedded inside the chart specs
+  if (spec.data.url === undefined) {
+    handleAllChartTypes(spec, spec.data.values, chartFeatures);
+    chartFeatures.features = stringifyFeatures(chartFeatures);
+    console.log("Chart Features:", chartFeatures);
+    return;
+  }
+  //Data is JSON file and read from URL
+  fetch(process.env.PUBLIC_URL + "/" + spec.data.url)
+    .then((response) => response.json())
+    .then(function (data) {
+      // console.log("Data", data);
+      handleAllChartTypes(spec, data, chartFeatures);
+      chartFeatures.features = stringifyFeatures(chartFeatures);
+      console.log("Chart Features:", chartFeatures);
+    })
+    .catch(function (error) {
+      console.log(error);
     });
-    // Get Unique Elements in case of repetition
-    features = [...new Set(features)];
-    features = features.filter(f => {
-        return f !== undefined;
-    });
-    return features;
-};
+}
+function handleAllChartTypes(spec, data, features) {
+  switch (spec.mark || spec.spec.mark) {
+    case "bar":
+      features.chartType = "bar";
+      extractEncodings(spec, data, features);
+      break;
+    case "geoshape":
+      break;
+    case "point":
+      features.chartType = "scatter";
+      extractEncodings(spec, data, features);
+      break;
+    case "circle":
+      break;
+    case "line":
+      features.chartType = "line";
+      if (spec.mark === undefined) spec = spec.spec;
+      extractEncodings(spec, data, features);
+      break;
+    case "text":
+      break;
+    default:
+      if (spec.mark.type === "line") {
+        features.chartType = "line";
+        if (spec.mark === undefined) spec = spec.spec;
+        extractEncodings(spec, data, features);
+      }
+      console.log("ChartTypeError: Chart type not supported!");
+      break;
+  }
+}
+function extractEncodings(spec, data, features) {
+  Object.entries(spec.encoding).forEach(([key, value]) => {
+    features.encodings[key] = value;
+    features.encodings[key]["labels"] = filterDataByField(data, value.field);
+  });
+}
+function filterDataByField(data, field) {
+  let filteredValues = [];
+  data.map(function (d) {
+    filteredValues.push(d[field]);
+  });
+  filteredValues = removeDuplicates(filteredValues);
+  return filteredValues;
+}
+function removeDuplicates(list) {
+  let cleanList = [...new Set(list)];
+  list = list.filter((f) => {
+    return f !== undefined && f !== null;
+  });
+  return cleanList;
+}
+function stringifyFeatures(features) {
+  let featureList = [];
+  Object.entries(features.encodings).forEach(([key, value]) => {
+    featureList.push(value.field);
+    featureList = featureList.concat(value.labels);
+  });
+  featureList = removeDuplicates(featureList);
+  return featureList;
+}

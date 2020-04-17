@@ -1,7 +1,7 @@
-import {getVariableNameFromScale} from "./VegaHelpers";
+import { getVariableNameFromScale } from "./VegaHelpers";
 function addSignalToChartSpec(spec, chartType) {
   // console.log("Old Chart Specs:", oldChartSpecs);
-
+  // return spec;
   //I think this is not the right way to work with data cloning in Reactjs!
   //soultion Source: https://stackoverflow.com/questions/55567386/react-cannot-add-property-x-object-is-not-extensible
   // let spec = JSON.parse(JSON.stringify(oldChartSpecs));
@@ -13,14 +13,14 @@ function addSignalToChartSpec(spec, chartType) {
   if (hasAlreadySignalsField) {
     spec.signals.push({
       name: "signal_highlight",
-      value: { data: [], start: 0, end: 100 }
+      value: { data: [], start: 0, end: 100 },
     });
   } else {
     spec.signals = [
       {
         name: "signal_highlight",
-        value: { data: [], start: 0, end: 100 }
-      }
+        value: { data: [], start: 0, end: 100 },
+      },
     ];
   }
   //Case Stack-Bar chart
@@ -43,10 +43,10 @@ function addSignalToChartSpec(spec, chartType) {
             " < signal_highlight.data[1]) || indexof(signal_highlight.data,datum." +
             color +
             ") != -1)",
-          value: 1.0
+          value: 1.0,
         },
-        { value: 0.6 }
-      ]
+        { value: 0.6 },
+      ],
     };
   }
   // Case Simple Bar chart
@@ -67,10 +67,10 @@ function addSignalToChartSpec(spec, chartType) {
             " > signal_highlight.data[0] && datum." +
             y +
             " < signal_highlight.data[1]))",
-          value: 1.0
+          value: 1.0,
         },
-        { value: 0.6 }
-      ]
+        { value: 0.6 },
+      ],
     };
   }
   // Case Multi-Line Chart
@@ -92,9 +92,9 @@ function addSignalToChartSpec(spec, chartType) {
             " < signal_highlight.data[1]) || indexof(signal_highlight.data,datum." +
             color +
             ") !== -1",
-          value: 1.0
+          value: 1.0,
         },
-        { value: 0.6 }
+        { value: 0.6 },
       ];
     } else {
       spec.marks[0].marks[0].encode.update = {
@@ -111,10 +111,10 @@ function addSignalToChartSpec(spec, chartType) {
               " < signal_highlight.data[1]) || indexof(signal_highlight.data,datum." +
               color +
               ") !== -1",
-            value: 1.0
+            value: 1.0,
           },
-          { value: 0.4 }
-        ]
+          { value: 0.4 },
+        ],
       };
     }
   }
