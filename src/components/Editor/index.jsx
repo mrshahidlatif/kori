@@ -36,8 +36,8 @@ export default function Editor(props) {
     const dispatch = useDispatch();
     let { docId } = useParams();
     const doc = useSelector(state=>state.docs[docId]);
-    const charts = useSelector(getCharts);
-    const chartsInEditor = useSelector(getChartsInEditor);
+    const charts = useSelector(state=>getCharts(state, docId));
+    const chartsInEditor = useSelector(state=>getChartsInEditor(state, docId));
     
     const editorEl = useRef(null); //https://reactjs.org/docs/hooks-reference.html#useref
   

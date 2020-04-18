@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux'
+import {
+  useParams
+} from "react-router-dom";
 import css from "./index.module.css";
 import Chart from "components/Chart";
 import { createChart, getCharts } from 'ducks/charts';
@@ -10,10 +13,11 @@ import extractChartFeatures from 'utils/extractChartFeatures';
 
 export default function ChartGallery(props) {
   const dispatch = useDispatch();
+  let { docId } = useParams();
   const [dragging, setDragging] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
-  const charts = useSelector(getCharts);
-  const currentDocId = useSelector(state=>state.ui.currentDocId);
+  const charts = useSelector(state=>getCharts(state, docId));
+  
 
   function handleDragEnter() {
     setDragging(true)
@@ -52,7 +56,7 @@ export default function ChartGallery(props) {
         })
         console.log('Converted Vega Spec', spec);
         const features = await extractChartFeatures(spec);
-        dispatch(createChart(currentDocId, spec, {features}))
+        dispatch(createChart(docId, spec, {features}))
       };
 
       reader.readAsText(file);
