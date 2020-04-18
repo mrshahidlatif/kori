@@ -1,5 +1,5 @@
-import shortid from 'shortid';
+import { customAlphabet } from 'nanoid'
+const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 10)
 export default (prefix) => { 
-	return (prefix ? prefix + shortid.generate() : shortid.generate());
-
+	return (prefix ? prefix + nanoid() : nanoid());
 };
