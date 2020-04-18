@@ -176,11 +176,12 @@ export default function Editor(props) {
         //TODO: there should be a single place generating a link (see find links)
         const action = createLink(doc.id, {
             text: suggestion.text,
+            feature: suggestion.feature,
             chartId: suggestion.chartId,
             active: false,
             type: "point"//TODO: range selection
         });// need ids
-        const newEditorState = insertLinks([action.attrs], editorState, "Auto");
+        const newEditorState = insertLinks([action.attrs], editorState, "Manual");
         dispatch(action);
 
         setSuggestions([]);

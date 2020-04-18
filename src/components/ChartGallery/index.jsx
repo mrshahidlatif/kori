@@ -4,8 +4,9 @@ import css from "./index.module.css";
 import Chart from "components/Chart";
 import { createChart, getCharts } from 'ducks/charts';
 import Snackbar from '@material-ui/core/Snackbar';
-import * as vegalite from 'vega-lite/build/vega-lite';
+import {compile} from 'vega-lite/build/vega-lite';
 
+import extractChartFeatures from 'utils/extractChartFeatures';
 
 export default function ChartGallery(props) {
   const dispatch = useDispatch();
@@ -35,21 +36,23 @@ export default function ChartGallery(props) {
       setErrorMsg("Size too big (>1MB)!");
       return;
     }
-    console.log('file.type', file.type);
     if (file.type.match('application/json')) {
       const reader = new FileReader();
 
       // Closure to capture the file information.
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const liteSpec = JSON.parse(e.target.result);
-        const spec = vegalite.compile(liteSpec).spec;
+        const spec = compile(liteSpec).spec; // vega spec
         // support vega-lite sample datasets
+ 
         spec.data.forEach(d=>{
           if (d.url && d.url.startsWith('data')){
             d.url = process.env.PUBLIC_URL +'/'+ d.url;
           }
         })
-        dispatch(createChart(currentDocId, spec))
+        console.log('Converted Vega Spec', spec);
+        const features = await extractChartFeatures(spec);
+        dispatch(createChart(currentDocId, spec, {features}))
       };
 
       reader.readAsText(file);
