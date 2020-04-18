@@ -1,7 +1,9 @@
 import React, { Fragment, useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from "prop-types";
-
+import {
+    useParams
+} from "react-router-dom";
 import {
     EditorState,
     AtomicBlockUtils,
@@ -32,7 +34,8 @@ import insertLinks from 'utils/insertLinks';
 
 export default function Editor(props) {
     const dispatch = useDispatch();
-    const doc = useSelector(state=>state.docs[state.ui.currentDocId]);
+    let { docId } = useParams();
+    const doc = useSelector(state=>state.docs[docId]);
     const charts = useSelector(getCharts);
     const chartsInEditor = useSelector(getChartsInEditor);
     

@@ -1,5 +1,6 @@
 import uniqueId from 'utils/uniqueId';
 import barChartSpec from './specs/barchart.json'
+import { createSelector } from 'reselect'
 
 // action types
 export const CREATE_CHART = 'CREATE_CHART';
@@ -31,25 +32,37 @@ export const deleteChart = (chartId) =>{
 	};
 };
 // selectors
-export const getCharts = (state)=>{ 
-	//TODO: memoization using reselect
-	return state.ui.currentDocId? state.docs[state.ui.currentDocId].charts.map(cid=>state.charts[cid]): [];
-}
+export const getCharts = createSelector(
+	state=>state.docs,
+	state=>state.charts,
+	(_, docId)=>docId,
+	(docs, charts, docId)=>docs[docId].charts.map(cid=>charts[cid])
+)
 
-export const getChartsInEditor = (state)=>{ 
-	//TODO: memoization using reselect
-	return state.ui.currentDocId? state.docs[state.ui.currentDocId].chartsInEditor.map(cid=>state.charts[cid]): [];
-}
+export const getChartsInEditor = createSelector(
+	state=>state.docs,
+	state=>state.charts,
+	(_, docId)=>docId,
+	(docs, charts, docId)=>docs[docId].chartsInEditor.map(cid=>charts[cid])
+)
 // reducers
 const initialState = {
 	'testchart':{
 		id:'testchart',
 		docId:"testdoc",
 		timestamp: Date.now(),
-		features:["Apple", "Amazon", "Facebook", "Netflix", "Microsoft", "Samsung", "Twitter", "Linkedin"],
+		features:[{value: "Apple", type: "string", field: "category", data: "data_0"},{value: "Amazon", type: "string", field: "category", data: "data_0"}
+		,{value: "Facebook", type: "string", field: "category", data: "data_0"}
+		,{value: "Netflix", type: "string", field: "category", data: "data_0"}
+		,{value: "Microsoft", type: "string", field: "category", data: "data_0"}
+		,{value: "Samsung", type: "string", field: "category", data: "data_0"}
+		,{value: "Twitter", type: "string", field: "category", data: "data_0"}
+		,{value: "Linkedin", type: "string", field: "category", data: "data_0"}],
 		spec:barChartSpec
 	}
 }
+
+
 export default  (state = initialState, action)=>{
 	switch (action.type) {
 
