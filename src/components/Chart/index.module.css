@@ -2,7 +2,8 @@
     box-sizing: border-box;
     padding: 10px;
     border:1px solid white;
-    border-radius: 3px;
+    border-radius: 4px;
+    transition: border .2s ease;
 }
 .container:hover{
     border:1px solid #BDBDBD;

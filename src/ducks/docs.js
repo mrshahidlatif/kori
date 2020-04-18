@@ -76,17 +76,17 @@ export default  (state = initialState, action)=>{
         case CREATE_CHART:
             return {
                 ...state,
-                [action.docId]:{
-                    ...state[action.docId],
-                    charts: state[action.docId].concat(action.chartId)
+                [action.attrs.docId]:{
+                    ...state[action.attrs.docId],
+                    charts: state[action.attrs.docId].charts.concat(action.chartId)
                 }
             }
         case DELETE_CHART:
             return {
                 ...state,
-                [action.docId]:{
-                    ...state[action.docId],
-                    charts: state[action.docId].filter(cid=>cid!==action.chartId)
+                [action.attrs.docId]:{
+                    ...state[action.attrs.docId],
+                    charts: state[action.attrs.docId].charts.filter(cid=>cid!==action.chartId)
                 }
             }
         

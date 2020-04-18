@@ -17,10 +17,16 @@ export const findLink = (chart, text)=>{
     // let word = fs.get(text, '', MIN_MATCH_THRESHOLD);
     // console.log(word);
     // word = word.length>0? word[0][1]: text;
-    const match = chart.features.find(feature=>feature===text);
+    const match = chart.features.find(d=>{
+        if (d.type==="string"){
+            return d.value===text
+        }
+        return false;
+    });
     
     return match? {
         text,
+        feature: match,//information about how the link was found
         chartId: chart.id,
         active: false,
         type: "point"//TODO: range selection

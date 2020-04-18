@@ -1,7 +1,9 @@
 import React, { Fragment, useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from "prop-types";
-
+import {
+    useParams
+} from "react-router-dom";
 import {
     EditorState,
     AtomicBlockUtils,
@@ -32,9 +34,10 @@ import insertLinks from 'utils/insertLinks';
 
 export default function Editor(props) {
     const dispatch = useDispatch();
-    const doc = useSelector(state=>state.docs[state.ui.currentDocId]);
-    const charts = useSelector(getCharts);
-    const chartsInEditor = useSelector(getChartsInEditor);
+    let { docId } = useParams();
+    const doc = useSelector(state=>state.docs[docId]);
+    const charts = useSelector(state=>getCharts(state, docId));
+    const chartsInEditor = useSelector(state=>getChartsInEditor(state, docId));
     
     const editorEl = useRef(null); //https://reactjs.org/docs/hooks-reference.html#useref
   
@@ -176,11 +179,12 @@ export default function Editor(props) {
         //TODO: there should be a single place generating a link (see find links)
         const action = createLink(doc.id, {
             text: suggestion.text,
+            feature: suggestion.feature,
             chartId: suggestion.chartId,
             active: false,
             type: "point"//TODO: range selection
         });// need ids
-        const newEditorState = insertLinks([action.attrs], editorState, "Auto");
+        const newEditorState = insertLinks([action.attrs], editorState, "Manual");
         dispatch(action);
 
         setSuggestions([]);
