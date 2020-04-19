@@ -1,17 +1,9 @@
 .container{
     box-sizing: border-box;
-    padding: 10px;
-    border:1px solid white;
-    border-radius: 4px;
-    transition: border .2s ease;
-}
-.container:hover{
-    border:1px solid #BDBDBD;
-}
-.draggable{
+    padding:5px;
+    width: 100%;
+    overflow: scroll;
     cursor: grab;
+    margin-bottom: 10px;
 }
-.draggable:active {
-    cursor: grabbing;
-    background-color: white;
-}
+
