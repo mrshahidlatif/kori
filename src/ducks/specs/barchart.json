@@ -1,81 +1,104 @@
 {
-    "$schema":"https://vega.github.io/schema/vega/v5.json",
-    "description":"A basic bar chart example, with value labels shown upon mouse hover.",
-    "width":200,
-    "height":100,
-    "padding":5,
-    "data":[
-      {
-        "name":"table",
-        "values":[
-          {"category":"Apple","amount":28},
-          {"category":"Amazon","amount":55},
-          {"category":"Facebook","amount":43},
-          {"category":"Netflix","amount":91},
-          {"category":"Microsoft","amount":81},
-          {"category":"Samsung","amount":53},
-          {"category":"Twitter","amount":19},
-          {"category":"Linkedin","amount":87}
-        ]
-      }
-    ],
-    "signals":[
-      {
-        "name":"tooltip",
-        "value":{},
-        "on":[
-          {"events":"rect:mouseover","update":"datum"},
-          {"events":"rect:mouseout","update":"{}"}
-        ]
-      }
-    ],
-    "scales":[
-      {
-        "name":"xscale",
-        "type":"band",
-        "domain":{"data":"table","field":"category"},
-        "range":"width",
-        "padding":0.05,
-        "round":true
-      },
-      {
-        "name":"yscale",
-        "domain":{"data":"table","field":"amount"},
-        "nice":true,
-        "range":"height"
-      }
-    ],
-    "axes":[{"orient":"bottom","scale":"xscale"},{"orient":"left","scale":"yscale"}],
-    "marks":[
-      {
-        "type":"rect",
-        "from":{"data":"table"},
-        "encode":{
-          "enter":{
-            "x":{"scale":"xscale","field":"category"},
-            "width":{"scale":"xscale","band":1},
-            "y":{"scale":"yscale","field":"amount"},
-            "y2":{"scale":"yscale","value":0}
-          },
-          "update":{"fill":{"value":"steelblue"}},
-          "hover":{"fill":{"value":"red"}}
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "A simple bar chart with embedded data.",
+  "background": "white",
+  "padding": 5,
+  "width": 300,
+  "height": 200,
+  "style": "cell",
+  "data": [
+    {
+      "name": "source_0",
+      "values": [
+        {"category": "Apple", "amount": 28},
+        {"category": "Amazon", "amount": 55},
+        {"category": "Facebook", "amount": 43},
+        {"category": "Netflix", "amount": 91},
+        {"category": "Microsoft", "amount": 81},
+        {"category": "Samsung", "amount": 53},
+        {"category": "Twitter", "amount": 19},
+        {"category": "Linkedin", "amount": 87}
+      ]
+    },
+    {
+      "name": "data_0",
+      "source": "source_0",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "isValid(datum[\"amount\"]) && isFinite(+datum[\"amount\"])"
         }
-      },
-      {
-        "type":"text",
-        "encode":{
-          "enter":{
-            "align":{"value":"center"},
-            "baseline":{"value":"bottom"},
-            "fill":{"value":"#333"}
-          },
-          "update":{
-            "x":{"scale":"xscale","signal":"tooltip.category","band":0.5},
-            "y":{"scale":"yscale","signal":"tooltip.amount","offset":-2},
-            "text":{"signal":"tooltip.amount"},
-            "fillOpacity":[{"test":"datum === tooltip","value":0},{"value":1}]
-          }
+      ]
+    }
+  ],
+  "marks": [
+    {
+      "name": "marks",
+      "type": "rect",
+      "style": ["bar"],
+      "from": {"data": "data_0"},
+      "encode": {
+        "update": {
+          "fill": {"value": "#4c78a8"},
+          "x": {"scale": "x", "field": "category"},
+          "width": {"scale": "x", "band": 1},
+          "y": {"scale": "y", "field": "amount"},
+          "y2": {"scale": "y", "value": 0}
         }
       }
-    ]
-  }
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "type": "band",
+      "domain": {"data": "data_0", "field": "category", "sort": true},
+      "range": [0, {"signal": "width"}],
+      "paddingInner": 0.1,
+      "paddingOuter": 0.05
+    },
+    {
+      "name": "y",
+      "type": "linear",
+      "domain": {"data": "data_0", "field": "amount"},
+      "range": [{"signal": "height"}, 0],
+      "nice": true,
+      "zero": true
+    }
+  ],
+  "axes": [
+    {
+      "scale": "y",
+      "orient": "left",
+      "gridScale": "x",
+      "grid": true,
+      "tickCount": {"signal": "ceil(height/40)"},
+      "domain": false,
+      "labels": false,
+      "maxExtent": 0,
+      "minExtent": 0,
+      "ticks": false,
+      "zindex": 0
+    },
+    {
+      "scale": "x",
+      "orient": "bottom",
+      "grid": false,
+      "title": "category",
+      "labelAngle": 90,
+      "labelAlign": "left",
+      "labelBaseline": "middle",
+      "labelOverlap": true,
+      "zindex": 0
+    },
+    {
+      "scale": "y",
+      "orient": "left",
+      "grid": false,
+      "title": "amount",
+      "labelOverlap": true,
+      "tickCount": {"signal": "ceil(height/40)"},
+      "zindex": 0
+    }
+  ]
+}
