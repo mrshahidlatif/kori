@@ -3,9 +3,14 @@ import React, { Fragment } from 'react';
 import createToolbarPlugin, { Separator } from "draft-js-static-toolbar-plugin";
 import createAlignmentPlugin from "draft-js-alignment-plugin";
 import createFocusPlugin from "draft-js-focus-plugin";
+import createResizeablePlugin from 'draft-js-resizeable-plugin';
+
 import "draft-js-static-toolbar-plugin/lib/plugin.css";
 import "draft-js-alignment-plugin/lib/plugin.css";
 import "draft-js-focus-plugin/lib/plugin.css";
+// import "draft-js-resizeable-plugin/lib/plugin.css";
+
+import createChartBlockPlugin from 'utils/createChartBlockPlugin';
 
 import {
   ItalicButton,
@@ -21,20 +26,23 @@ import {
   CodeBlockButton
 } from "draft-js-buttons";
 import { composeDecorators } from "draft-js-plugins-editor";
-import createChartBlockPlugin from 'utils/createChartBlockPlugin';
+
 
 const toolbarPlugin = createToolbarPlugin();
 const focusPlugin = createFocusPlugin();
 const alignmentPlugin = createAlignmentPlugin();
+const resizeablePlugin = createResizeablePlugin();
+
 const { AlignmentTool } = alignmentPlugin;
 const { Toolbar } = toolbarPlugin;
 const decorator = composeDecorators(
-  alignmentPlugin.decorator,
-  focusPlugin.decorator
+  focusPlugin.decorator,
+  resizeablePlugin.decorator,
+  alignmentPlugin.decorator
 );
 
 const chartBlockPlugin = createChartBlockPlugin({ decorator });
-export const EditorPlugins = [focusPlugin, alignmentPlugin, chartBlockPlugin, toolbarPlugin];
+export const EditorPlugins = [focusPlugin, resizeablePlugin, alignmentPlugin, toolbarPlugin, chartBlockPlugin];
 
 export default function EditorToolbar() {
   return (

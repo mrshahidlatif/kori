@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, } from "react";
 import { useSelector, useDispatch } from 'react-redux'
 import {
   useParams
@@ -7,15 +7,20 @@ import css from "./index.module.css";
 import Chart from "components/Chart";
 import { createChart, getCharts } from 'ducks/charts';
 import Snackbar from '@material-ui/core/Snackbar';
+
 import {compile} from 'vega-lite/build/vega-lite';
 
 import extractChartFeatures from 'utils/extractChartFeatures';
+
+
 
 export default function ChartGallery(props) {
   const dispatch = useDispatch();
   let { docId } = useParams();
   const [dragging, setDragging] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+  
+  
   const charts = useSelector(state=>getCharts(state, docId));
   
 
@@ -35,7 +40,9 @@ export default function ChartGallery(props) {
     e.stopPropagation();
     // console.log('VegaLite', VegaLite);
     let file = e.dataTransfer.files[0];
-    console.log(file);
+    if (!file){
+      return;
+    }
     if (file.size > 1000000) {// larger than 1 MB
       setErrorMsg("Size too big (>1MB)!");
       return;
@@ -85,7 +92,7 @@ export default function ChartGallery(props) {
         />
         
       <div className={css.draggingArea} style={{ opacity: dragging ? 0.5 : 0.0 }}>
-        Drop Vega-lite spec
+        Drop Vega-lite Spec
       </div>
       {charts.map(chart => <Chart
         key={chart.id}

@@ -1,44 +1,29 @@
 {
     "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
-    "data": {
-        "url": "data/seattle-weather.csv"
-    },
+    "data": {"url": "data/seattle-weather.csv"},
     "mark": "bar",
+    "width":200,
+    "height":100,
     "encoding": {
-        "x": {
-            "timeUnit": "month",
-            "field": "date",
-            "type": "ordinal",
-            "axis": {
-                "title": "Month of the year"
-            }
+      "x": {
+        "timeUnit": "month",
+        "field": "date",
+        "type": "ordinal",
+        "axis": {"title": "Month of the year"}
+      },
+      "y": {
+        "aggregate": "count",
+        "type": "quantitative"
+      },
+      "color": {
+        "field": "weather",
+        "type": "nominal",
+        "scale": {
+          "domain": ["sun", "fog", "drizzle", "rain", "snow"],
+          "range": ["#e7ba52", "#c7c7c7", "#aec7e8", "#1f77b4", "#9467bd"]
         },
-        "y": {
-            "aggregate": "count",
-            "type": "quantitative"
-        },
-        "color": {
-            "field": "weather",
-            "type": "nominal",
-            "scale": {
-                "domain": [
-                    "sun",
-                    "fog",
-                    "drizzle",
-                    "rain",
-                    "snow"
-                ],
-                "range": [
-                    "#e7ba52",
-                    "#c7c7c7",
-                    "#aec7e8",
-                    "#1f77b4",
-                    "#9467bd"
-                ]
-            },
-            "legend": {
-                "title": "Weather type"
-            }
-        }
+        "legend": {"title": "Weather type"}
+      }
     }
-}
+  }
+  

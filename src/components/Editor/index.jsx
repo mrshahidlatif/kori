@@ -16,7 +16,6 @@ import DraftEditor from "draft-js-plugins-editor";
 import css from './index.module.css';
 
 import EditorToolbar, { EditorPlugins } from 'components/EditorToolbar';
-import ChartBlock from 'components/ChartBlock';
 
 import SuggestionPanel from "components/SuggestionPanel";
 
@@ -138,22 +137,7 @@ export default function Editor(props) {
     }
 
     function blockRendererFn(block) {//TODO: is this necessary given the plugin is there
-        const content = editorState.getCurrentContent();
-
-        if (block.getType() === "atomic") {
-            const entity = content.getEntity(block.getEntityAt(0));
-            
-            if (entity.getType() === "CHART") {
-                const data = entity.getData();
-                return {
-                    component: ChartBlock,
-                    editable: false,
-                    props:{
-                        ...data
-                    }
-                };
-            }
-        }
+        // ChartBlock Removed
     };
     function insertChart(chart) {
         // console.log(chartId, charts[chart.id])

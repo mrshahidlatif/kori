@@ -1,23 +1,12 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
-  "data": {
-    "url": "data/barley.json"
-  },
+  "data": {"url": "data/barley.json"},
+  "width":200,
+  "height":150,
   "mark": "bar",
   "encoding": {
-    "x": {
-      "aggregate": "sum",
-      "field": "yield",
-      "type": "quantitative"
-    },
-    "y": {
-      "field": "variety",
-      "type": "nominal"
-    },
-    "color": {
-      "field": "site",
-      "type": "nominal"
-    }
-  },
-  "config": {}
+    "x": {"aggregate": "sum", "field": "yield", "type": "quantitative"},
+    "y": {"field": "variety", "type": "nominal"},
+    "color": {"field": "site", "type": "nominal"}
+  }
 }
