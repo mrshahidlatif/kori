@@ -2,7 +2,11 @@
 import nlp from "compromise";
 
 export default (charts, sentence) => {
-    return charts.map((chart) => findWordLink(chart, sentence)); //findWordLink(chart, sentence)).filter((link) => link !== null);
+    let links = [];
+    charts.forEach(function (chart) {
+        links = links.concat(findWordLink(chart, sentence).filter((link) => link !== null));
+    });
+    return links;
 };
 // const MIN_MATCH_THRESHOLD = 0.7;
 
@@ -39,8 +43,8 @@ export const findWordLink = (chart, sentence) => {
                 active: false,
                 type: "point", //TODO: range selection
                 data: [m.value],
-                startOffset: sentence.text.indexOf(m.value),
-                endOffset: sentence.text.indexOf(m.value) + m.value.length,
+                startOffset: sentence.startOffset + sentence.text.indexOf(m.value),
+                endOffset: sentence.startOffset + sentence.text.indexOf(m.value) + m.value.length,
                 fullText: sentence.text,
             };
             links.push(link);
