@@ -26,6 +26,7 @@
     "redux": "^4.0.5",
     "reselect": "^4.0.0",
     "vega": "^5.10.1",
+    "vega-embed": "^6.6.0",
     "vega-lite": "^4.10.1"
   },
   "scripts": {
