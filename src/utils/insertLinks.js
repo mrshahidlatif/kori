@@ -30,13 +30,13 @@ export const insertLink = (link, editorState, method = "Auto") => {
         [], //inline styling
         entityKey
     );
+    const caretNewIndex = end > blockEndIndex ? end : blockEndIndex;
     let newEditorState = EditorState.push(editorState, newContent, "apply-entity");
     let newSelection = newEditorState.getSelection().merge({
-        focusOffset: blockEndIndex,
-        anchorOffset: blockEndIndex,
+        focusOffset: caretNewIndex,
+        anchorOffset: caretNewIndex,
     });
     newEditorState = EditorState.moveSelectionToEnd(newEditorState);
     newEditorState = EditorState.forceSelection(newEditorState, newSelection);
-    console.log("LAST LINK INDEX", blockEndIndex);
     return newEditorState;
 };

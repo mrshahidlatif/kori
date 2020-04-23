@@ -18,7 +18,6 @@ export default (editorState, type) => {
                 startIndex: start,
                 endIndex: end,
             };
-            return null;
             break;
         case "SENTENCE":
             if (blockTextBeforeCaret.charAt(blockTextBeforeCaret.length - 1) === ".") {
