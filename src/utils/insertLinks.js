@@ -7,11 +7,11 @@ export default (links, editorState, method = "Auto") => {
 };
 export const insertLink = (link, editorState, method = "Auto") => {
     //TODO: remove duplicates
-    console.log("LINK INSERTLINK", link);
     const currentContent = editorState.getCurrentContent();
     const currentSelection = editorState.getSelection();
-    const start = link.startOffset;
-    const end = link.endOffset;
+    const blockEndIndex = currentSelection.getAnchorOffset();
+    const start = link.startIndex;
+    const end = link.endIndex;
     if (start < 0) start = 0;
     let newContent = currentContent.createEntity(`LINK`, "MUTABLE", {
         ...link,
@@ -32,10 +32,11 @@ export const insertLink = (link, editorState, method = "Auto") => {
     );
     let newEditorState = EditorState.push(editorState, newContent, "apply-entity");
     let newSelection = newEditorState.getSelection().merge({
-        focusOffset: start + link.fullText.length,
-        anchorOffset: start + link.fullText.length,
+        focusOffset: blockEndIndex,
+        anchorOffset: blockEndIndex,
     });
     newEditorState = EditorState.moveSelectionToEnd(newEditorState);
     newEditorState = EditorState.forceSelection(newEditorState, newSelection);
+    console.log("LAST LINK INDEX", blockEndIndex);
     return newEditorState;
 };

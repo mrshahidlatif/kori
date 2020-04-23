@@ -71,7 +71,7 @@ export default function Editor(props) {
             const suggestions = findSuggestions(
                 chartsInEditor,
                 lastTypedWord.text.slice(1),
-                lastTypedWord.startOffset
+                lastTypedWord.startIndex
             );
             console.log("suggestions", suggestions);
             setSuggestions(suggestions);
@@ -176,10 +176,10 @@ export default function Editor(props) {
             chartId: suggestion.chartId,
             active: false,
             type: "point", //TODO: range selection
-            fullText: suggestion.text,
+            sentence: suggestion.text,
             data: [suggestion.text],
-            startOffset: suggestion.startOffset,
-            endOffset: suggestion.startOffset + suggestion.text.length,
+            startIndex: suggestion.startIndex,
+            endIndex: suggestion.startIndex + suggestion.text.length,
         }); // need ids
         const newEditorState = insertLinks([action.attrs], editorState, "Manual");
         dispatch(action);

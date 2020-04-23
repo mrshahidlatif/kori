@@ -15,8 +15,8 @@ export default (editorState, type) => {
             const start = end - lastWord.length;
             return {
                 text: lastWord,
-                startOffset: start,
-                endOffset: end,
+                startIndex: start,
+                endIndex: end,
             };
             return null;
             break;
@@ -29,8 +29,8 @@ export default (editorState, type) => {
                 if (lastSentence.indexOf(".") > -1)
                     return {
                         text: lastSentence,
-                        startOffset: start,
-                        endOffset: end,
+                        startIndex: start,
+                        endIndex: end,
                     };
                 else return null;
             }
