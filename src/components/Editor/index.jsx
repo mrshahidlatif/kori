@@ -18,10 +18,11 @@ import { createLinks, createLink } from "ducks/links";
 import { getChartsInEditor, getCharts } from "ducks/charts";
 
 import editorDecorators from "utils/editorDecorators";
-import extractTextFromEditor from "utils/extractTextFromEditor";
 import findSuggestions from "utils/findSuggestions";
 import findLinks from "utils/findLinks";
 import insertLinks from "utils/insertLinks";
+import getLastTypedWord from "utils/getLastTypedWord";
+import getLastTypedSentence from "utils/getLastTypedSentence";
 
 export default function Editor(props) {
     const dispatch = useDispatch();
@@ -46,10 +47,8 @@ export default function Editor(props) {
     }, []);
 
     function handleEditorChange(editorState) {
-        //AUTOMATIC LINKING WHEN THE USER IS TYPING
-        //Get the last word user typed before pressing the space
-        const lastTypedWord = extractTextFromEditor(editorState, "WORD");
-        const lastSentence = extractTextFromEditor(editorState, "SENTENCE");
+        const lastTypedWord = getLastTypedWord(editorState);
+        const lastSentence = getLastTypedSentence(editorState);
         console.log("last typed word", lastTypedWord);
         console.log("last typed sentence", lastSentence);
 
