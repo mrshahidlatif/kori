@@ -13,9 +13,8 @@
     "draft-js-alignment-plugin": "^2.0.6",
     "draft-js-buttons": "^2.0.2",
     "draft-js-focus-plugin": "^3.0.1",
-    "draft-js-inline-toolbar-plugin": "^3.0.1",
     "draft-js-plugins-editor": "^3.0.0",
-    "draft-js-richbuttons-plugin": "^2.2.0",
+    "draft-js-resizeable-plugin": "^2.0.9",
     "draft-js-static-toolbar-plugin": "^3.0.1",
     "fuzzyset.js": "0.0.91",
     "localforage": "^1.7.3",
@@ -25,10 +24,10 @@
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.3.0",
-    "react-vega": "^7.3.0",
     "redux": "^4.0.5",
     "reselect": "^4.0.0",
     "vega": "^5.10.1",
+    "vega-embed": "^6.6.0",
     "vega-lite": "^4.10.1"
   },
   "scripts": {
