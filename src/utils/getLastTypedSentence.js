@@ -9,9 +9,7 @@ export default (editorState) => {
     const blockTextBeforeCaret = currentBlock.getText().substr(0, caretOffset);
     const end = currentSelection.getAnchorOffset();
     if (blockTextBeforeCaret.charAt(blockTextBeforeCaret.length - 1) === ".") {
-        const text = nlp(blockTextBeforeCaret);
-        let sentences = text.json().map((o) => o.text);
-        const lastSentence = sentences.slice(-1).pop();
+        const lastSentence = nlp(blockTextBeforeCaret).sentences().slice(-1).text();
         const start = end - lastSentence.length;
         if (lastSentence.indexOf(".") > -1)
             return {
