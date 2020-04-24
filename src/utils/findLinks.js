@@ -1,34 +1,36 @@
-
-
-// import FuzzySet from "fuzzyset.js";
-
-export default (charts, text)=>{
-    return charts.map(chart=>findLink(chart, text)).filter(link=>link!==null);
-}
+export default (charts, sentence) => {
+    let links = [];
+    charts.forEach(function (chart) {
+        links = links.concat(findWordLink(chart, sentence).filter((link) => link !== null));
+    });
+    return links;
+};
 // const MIN_MATCH_THRESHOLD = 0.7;
 
-
-export const findLink = (chart, text)=>{
-    // keyword matching
-    // Maybe I am wrong but this Fuzzyset thing really gets in the way
-    // TODO: Can we make it more implicit rather than autocorrect ?
-    // const fs = FuzzySet(chart.features); 
-    // console.log(chart.features, text,fs);
-    // let word = fs.get(text, '', MIN_MATCH_THRESHOLD);
-    // console.log(word);
-    // word = word.length>0? word[0][1]: text;
-    const match = chart.features.find(d=>{
-        if (d.type==="string"){
-            return d.value===text
+export const findWordLink = (chart, sentence) => {
+    let matches = [];
+    chart.features.forEach(function (f) {
+        if (f.type === "string" && sentence.text.includes(f.value)) {
+            matches.push(f);
         }
-        return false;
     });
-    
-    return match? {
-        text,
-        feature: match,//information about how the link was found
-        chartId: chart.id,
-        active: false,
-        type: "point"//TODO: range selection
-    }: null;
-}
+    let links = [];
+    if (matches.length > 0)
+        matches.forEach(function (m) {
+            const linkStartIndex = sentence.startIndex + sentence.text.indexOf(m.value);
+            const linkEndIndex = linkStartIndex + m.value.length;
+            const link = {
+                text: m.value,
+                feature: m, //information about how the link was found
+                chartId: chart.id,
+                active: false,
+                type: "point", //TODO: range selection
+                data: [m.value],
+                startIndex: linkStartIndex,
+                endIndex: linkEndIndex,
+                sentence: sentence.text,
+            };
+            links.push(link);
+        });
+    return links;
+};
