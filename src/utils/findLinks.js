@@ -1,5 +1,7 @@
 import FuzzySet from "fuzzyset.js";
-import nlp from "compromise";
+import splitTextIntoNWordsList from "./splitTextIntoNWordsList";
+
+const MIN_MATCH_THRESHOLD = 0.8;
 
 export default (charts, sentence) => {
     let links = [];
@@ -11,13 +13,11 @@ export default (charts, sentence) => {
 
 export const findWordLink = (chart, sentence) => {
     let matches = [];
-    const MIN_MATCH_THRESHOLD = 0.8;
     chart.features.forEach(function (f) {
-        const fs_res = fuzzyMatch(sentence.text, f.value);
-        console.log("FUZZY MATCH", fs_res[0]);
+        const fs_res = fuzzyMatch(sentence.text, f.value); //returns a [score, word] pair!
+        console.log("FUZZY MATCH", fs_res);
         // if (f.type === "string" && sentence.text.includes(f.value)) {
         if (f.type === "string" && fs_res[0] > MIN_MATCH_THRESHOLD) {
-            console.log("Feature", f.value);
             matches.push({ userTyped: fs_res[1], matchedFeature: f });
         }
     });
@@ -45,23 +45,7 @@ function fuzzyMatch(sentence, word) {
     let list =
         word.split(" ").length == 1
             ? sentence.split(" ")
-            : splitIntoNWordsList(sentence, word.split(" ").length);
+            : splitTextIntoNWordsList(sentence, word.split(" ").length);
     let fs = FuzzySet(list);
-    console.log("FUZZY LIST", list);
-    return fs.get(word) !== null ? fs.get(word)[0] : [0, ""];
-}
-function splitIntoNWordsList(sentence, n) {
-    let words = sentence.split(" ");
-    let blocks = [];
-    if (words.length > n) {
-        for (let i = n - 1; i < words.length; i++) {
-            let block = "";
-            for (let j = n - 1; j >= 0; j--) {
-                block += j === 0 ? words[i - j] : words[i - j] + " ";
-            }
-            blocks.push(block);
-        }
-    } else blocks = words;
-    console.log(blocks);
-    return blocks;
+    return fs.get(word) !== null ? fs.get(word).shift() : [0, ""];
 }
