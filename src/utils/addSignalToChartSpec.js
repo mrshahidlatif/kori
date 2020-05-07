@@ -24,18 +24,20 @@ export function addSignalToMark(mark){
     }
     return;
   }
+  const isMap = mark.type==='shape' && mark.style.includes("geoshape")
+  const predicate = 
+  ` highlight.enabled === false || 
+    indexof(highlight.data, ${isMap?'datum.properties':'datum'}[highlight.field])!=-1`;
+
   mark.encode.update = {
     ...mark.encode.update,
     opacity:[
       {
-        test:` 
-            highlight.enabled === false 
-            || indexof(highlight.data, datum[highlight.field])!=-1
-          `,
+        test: predicate,
         value: 1.0
       },
       {
-        value: 0.2
+        value: 0.05
       }
     ]
   }

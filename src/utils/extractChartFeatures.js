@@ -2,6 +2,7 @@
 
 import { parse } from 'vega-parser';
 import { View } from 'vega-view';
+import {truthy, falsy} from 'vega-util';
 import { toString, isDate, isString, isArray } from 'vega-util';
 
 // potential features?
@@ -17,12 +18,44 @@ export default async function (spec) {
     const featureMap = {};
     const runtime = parse(spec);
     const view = await new View(runtime).runAsync();
-    
+    const state = view.getState({
+        data: truthy,
+        signals: falsy,
+        recurse: true,
+      });
+
+    // sometimes, individual data points are not explicitely encoded using scales
+    for (const mark of spec.marks){ // mu
+        const data = state.data[mark.name].map(d=>d.datum);
+        
+        for (const datum of data){
+            const isMap = mark.type==='shape' && mark.style.includes("geoshape");
+            const entries = Object.entries(isMap?datum.properties:datum);
+            for (const [field, value] of entries){
+                if (!isString(value)){// only categorical data
+                    continue;
+                }
+                featureMap[value] = {
+                    value,
+                    type: 'string',
+                    field,
+                    data: datum.name
+                }; 
+            }
+        }
+    }
+    // Note: The following logic addressses two missing cases 
+    // 1. Nested marks
+    // 2. Categorical scale with numeric data domain
+    // TODO: Can we combine the two logics elegantly?
+    spec.data.forEach(datum => {// for each data table
+        const viewdata = view.data(datum.name);
+        console.log('viewdata', viewdata);
+    });
     spec.scales.filter(scale => ['ordinal', 'band', 'point'].includes(scale.type))
         .map(scale => {// each discrete scale
             spec.data.forEach(datum => {// for each data table
                 const viewdata = view.data(datum.name);
-                console.log('viewdata', viewdata);
                 viewdata.map(row => { // for each row in the table
                     // a single field
                     if (scale.domain.field) {
