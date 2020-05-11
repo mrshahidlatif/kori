@@ -3,7 +3,7 @@ export default (charts, partialText, startIndex) => {
         ? []
         : [].concat(
               ...charts.map((chart) =>
-                  chart.features
+                  chart.properties.features
                       .filter((d) => {
                           if (d.type === "string") {
                               return d.value.toLowerCase().startsWith(partialText.toLowerCase());

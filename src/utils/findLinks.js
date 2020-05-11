@@ -19,12 +19,12 @@ export default (charts, sentence) => {
 
 export const findWordLink = (chart, sentence) => {
     let matches = [];
-    chart.features.forEach(function (f) {
-        const fs_res = fuzzyMatch(sentence.text, f.value); //returns a [score, word] pair!
+    chart.properties.features.forEach(function (f) {
+        const fsResult = fuzzyMatch(sentence.text, f.value); //returns a [score, word] pair!
         // console.log("FUZZY MATCH", fs_res);
         // if (f.type === "string" && sentence.text.includes(f.value)) {
-        if (f.type === "string" && fs_res[0] > MIN_MATCH_THRESHOLD) {
-            matches.push({ userTyped: fs_res[1], matchedFeature: f });
+        if (f.type === "string" && fsResult[0] > MIN_MATCH_THRESHOLD) {
+            matches.push({ userTyped: fsResult[1], matchedFeature: f });
         }
     });
     let links = [];
@@ -58,12 +58,12 @@ function fuzzyMatch(sentence, word) {
 
 function findPhraseLink(chart, sentence) {
     let match = null;
-    chart.features.forEach(function (f) {
-        const fs_res = fuzzyMatch(sentence.text, f.field); //returns a [score, word] pair!
-        console.log("FUZZY MATCH", fs_res);
+    chart.properties.features.forEach(function (f) {
+        const fsResult = fuzzyMatch(sentence.text, f.field); //returns a [score, word] pair!
+        console.log("FUZZY MATCH", fsResult);
         // TODO: Later check only if the f.type is a number!
-        if (f.type === "string" && fs_res[0] > MIN_MATCH_THRESHOLD) {
-            match = { userTyped: fs_res[1], matchedFeature: f };
+        if (f.type === "string" && fsResult[0] > MIN_MATCH_THRESHOLD) {
+            match = { userTyped: fsResult[1], matchedFeature: f };
         }
     });
     //only send request to Wit.ai when we have a potential match!
