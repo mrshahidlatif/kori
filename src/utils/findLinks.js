@@ -48,12 +48,15 @@ export const findWordLink = (chart, sentence) => {
     return links;
 };
 function fuzzyMatch(sentence, word) {
-    let list =
-        word.split(" ").length == 1
-            ? sentence.split(" ")
-            : splitTextIntoNWordsList(sentence, word.split(" ").length);
-    let fs = FuzzySet(list);
-    return fs.get(word) !== null ? fs.get(word).shift() : [0, ""];
+    console.log("WORD TYPE OF", word, typeof word);
+    if (typeof word === "string") {
+        let list =
+            word.split(" ").length == 1
+                ? sentence.split(" ")
+                : splitTextIntoNWordsList(sentence, word.split(" ").length);
+        let fs = FuzzySet(list);
+        return fs.get(word) !== null ? fs.get(word).shift() : [0, ""];
+    } else return [0, ""];
 }
 
 function findPhraseLink(chart, sentence) {
