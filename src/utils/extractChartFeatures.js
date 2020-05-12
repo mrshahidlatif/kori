@@ -59,6 +59,7 @@ export default async function (spec) {
     spec.scales.map((scale) => {
         console.log("Scales in Chart:", scale);
         //TODO: handle cases where data is aggregated e.g., stack bar chart, stack area chart, pie chart,
+        //TODO: also store axes titles
         const name = scale.name;
         const field = scale.domain.field;
         const data = scale.domain.data;

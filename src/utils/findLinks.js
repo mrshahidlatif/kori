@@ -8,12 +8,14 @@ const client = new Wit({
     logger: new log.Logger(log.DEBUG), // optional
 });
 
-export default (charts, sentence) => {
+export default async (charts, sentence) => {
     let links = [];
-    charts.forEach(function (chart) {
+    //forEach loop doesn't work with async-await!
+    for (const chart of charts) {
         links = links.concat(findWordLink(chart, sentence).filter((link) => link !== null));
-        findPhraseLink(chart, sentence);
-    });
+        const link = await findPhraseLink(chart, sentence);
+        links.push(link);
+    }
     return links;
 };
 
@@ -59,47 +61,52 @@ function fuzzyMatch(sentence, word) {
     } else return [0, ""];
 }
 
-function findPhraseLink(chart, sentence) {
+export async function findPhraseLink(chart, sentence) {
     let match = null;
-    chart.properties.features.forEach(function (f) {
-        const fsResult = fuzzyMatch(sentence.text, f.field); //returns a [score, word] pair!
+    chart.properties.axes.forEach(function (a) {
+        const fsResult = fuzzyMatch(sentence.text, a.field); //returns a [score, word] pair!
         console.log("FUZZY MATCH", fsResult);
         // TODO: Later check only if the f.type is a number!
-        if (f.type === "string" && fsResult[0] > MIN_MATCH_THRESHOLD) {
-            match = { userTyped: fsResult[1], matchedFeature: f };
+        if (fsResult[0] > MIN_MATCH_THRESHOLD) {
+            match = { userTyped: fsResult[1], matchedFeature: a };
         }
     });
     //only send request to Wit.ai when we have a potential match!
     if (match !== null) {
-        client
-            .message(sentence.text, {})
-            .then((response) => {
-                console.log("RESPONSE", response);
-                const entities = parseResponse(response);
+        const witResponse = await client.message(sentence.text, {});
+        console.log("WIT Response", witResponse);
+        const entities = parseResponse(witResponse);
 
-                const link = {
-                    text: match.userTyped,
-                    feature: match.matchedFeature, //information about how the link was found
-                    chartId: chart.id,
-                    active: false,
-                    type: entities.intent,
-                    data: [match.matchedFeature.field],
-                    startIndex: sentence.startIndex,
-                    endIndex: sentence.endIndex,
-                    sentence: sentence.text,
-                };
-                console.log("Created LINK", link);
-            })
-            .catch(console.error);
+        const link = {
+            text: sentence.text, //match.userTyped,
+            feature: match.matchedFeature, //information about how the link was found
+            chartId: chart.id,
+            active: false,
+            type: entities.intent,
+            data: [match.matchedFeature.field],
+            startIndex: sentence.startIndex,
+            endIndex: sentence.endIndex,
+            sentence: sentence.text,
+            rangeMin: entities.min || 0,
+            rangeMax: entities.max || 0,
+        };
+        console.log("Phrase Link", link);
+        return link;
     }
 }
 function parseResponse(response) {
+    //TODO: This function will be modified depending on the training on Wit.ai service!
     let entities = null;
     if (response.entities.hasOwnProperty("range_selection")) {
-        if (response.entities.range_selection.shift().confidence > 0.5) {
+        if (response.entities.range_selection[0].confidence > 0.5) {
             const intent = "range_selection";
-            const min = response.entities.min_number.shift().value;
-            const max = response.entities.number.shift().value;
+            const min = response.entities.min_number[0].value || 0;
+            const max =
+                response.entities.number !== undefined
+                    ? response.entities.number[0].value
+                    : response.entities.max[0] !== undefined
+                    ? response.entities.max[0].value
+                    : 0;
             entities = { intent: intent, min: min, max: max };
         }
     }

@@ -88,6 +88,10 @@ export default memo(function ChartBlock({
                         data: link.data,
                         field: link.feature.field,
                         enabled: true,
+                        //Next 3 fields refer to range selection links
+                        rangeField: link.feature.field || "",
+                        rangeMin: link.rangeMin || 0,
+                        rangeMax: link.rangeMax || 0,
                     }).run();
                 });
         } else {

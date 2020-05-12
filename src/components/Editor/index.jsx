@@ -45,14 +45,14 @@ export default function Editor(props) {
         // editorPosition = JSON.parse(JSON.stringify(editorPosition));
     }, []);
 
-    function handleEditorChange(editorState) {
+    async function handleEditorChange(editorState) {
         const lastTypedWord = getLastTypedWord(editorState);
         const lastSentence = getLastTypedSentence(editorState);
         console.log("last typed word", lastTypedWord);
         console.log("last typed sentence", lastSentence);
 
         if (lastSentence) {
-            const links = findLinks(chartsInEditor, lastSentence);
+            const links = await findLinks(chartsInEditor, lastSentence);
 
             if (links.length > 0) {
                 console.log("Links before actions", links);
