@@ -16,7 +16,6 @@ export default async function (spec) {
         return [];
     }
     const featureMap = {};
-    const axesMap = {};
     const runtime = parse(spec);
     const view = await new View(runtime).runAsync();
     const state = view.getState({
@@ -56,17 +55,8 @@ export default async function (spec) {
         const viewdata = view.data(datum.name);
         console.log("viewdata", viewdata);
     });
-    spec.scales.map((scale) => {
-        console.log("Scales in Chart:", scale);
-        //TODO: handle cases where data is aggregated e.g., stack bar chart, stack area chart, pie chart,
-        //TODO: also store axes titles
-        const name = scale.name;
-        const field = scale.domain.field;
-        const data = scale.domain.data;
-        const type = scale.type;
-        const axis = { name: name, field: field, data: data, type: type };
-        axesMap[name] = axis;
-    });
+    //Extracting Axes of the charts
+    const axesMap = extractChartAxes(spec);
     spec.scales
         .filter((scale) => ["ordinal", "band", "point"].includes(scale.type))
         .map((scale) => {
@@ -143,4 +133,37 @@ export const searchFieldName = (spec, scaleName) => {
         }
     }
     return null;
+};
+
+export const extractChartAxes = (spec) => {
+    let axesMap = {};
+    spec.scales.map((scale) => {
+        console.log("Scales in Chart:", scale);
+        //TODO: handle cases where data is aggregated e.g., stack bar chart, stack area chart, pie chart,
+        const name = scale.name;
+        const field =
+            //field is array of objects
+            isArray(scale.domain.fields) && scale.domain.fields[0].hasOwnProperty("field")
+                ? scale.domain.fields[0].field
+                : //field is simple array
+                isArray(scale.domain.fields)
+                ? scale.domain.fields
+                : scale.domain.field;
+        const data = scale.domain.data;
+        const type = scale.type;
+
+        const relatedAxis = spec.axes
+            ? spec.axes.filter((axis) => {
+                  return (axis.scale === name && axis.title !== undefined) || null;
+              })
+            : undefined;
+        const title =
+            isArray(relatedAxis) && relatedAxis.length > 0 && relatedAxis[0].hasOwnProperty("title")
+                ? relatedAxis[0].title
+                : undefined;
+
+        const axis = { name: name, field: field, data: data, type: type, title: title };
+        axesMap[name] = axis;
+    });
+    return axesMap;
 };

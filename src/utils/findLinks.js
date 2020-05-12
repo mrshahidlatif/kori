@@ -50,7 +50,6 @@ export const findWordLink = (chart, sentence) => {
     return links;
 };
 function fuzzyMatch(sentence, word) {
-    console.log("WORD TYPE OF", word, typeof word);
     if (typeof word === "string") {
         let list =
             word.split(" ").length == 1
@@ -76,19 +75,20 @@ export async function findPhraseLink(chart, sentence) {
         const witResponse = await client.message(sentence.text, {});
         console.log("WIT Response", witResponse);
         const entities = parseResponse(witResponse);
+        const linkPhrase = sentence.text.substring(sentence.text.indexOf(match.userTyped));
 
         const link = {
-            text: sentence.text, //match.userTyped,
+            text: linkPhrase,
             feature: match.matchedFeature, //information about how the link was found
             chartId: chart.id,
             active: false,
             type: entities.intent,
             data: [match.matchedFeature.field],
-            startIndex: sentence.startIndex,
+            startIndex: sentence.startIndex + sentence.text.indexOf(match.userTyped),
             endIndex: sentence.endIndex,
             sentence: sentence.text,
-            rangeMin: entities.min || 0,
-            rangeMax: entities.max || 0,
+            rangeMin: entities.min,
+            rangeMax: entities.max,
         };
         console.log("Phrase Link", link);
         return link;
