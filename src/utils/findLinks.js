@@ -14,7 +14,7 @@ export default async (charts, sentence) => {
     for (const chart of charts) {
         links = links.concat(findWordLink(chart, sentence).filter((link) => link !== null));
         const link = await findPhraseLink(chart, sentence);
-        links.push(link);
+        if (link !== null) links.push(link);
     }
     return links;
 };
@@ -63,7 +63,7 @@ function fuzzyMatch(sentence, word) {
 export async function findPhraseLink(chart, sentence) {
     let match = null;
     chart.properties.axes.forEach(function (a) {
-        const fsResult = fuzzyMatch(sentence.text, a.field); //returns a [score, word] pair!
+        const fsResult = fuzzyMatch(sentence.text, a.title); //returns a [score, word] pair!
         console.log("FUZZY MATCH", fsResult);
         // TODO: Later check only if the f.type is a number!
         if (fsResult[0] > MIN_MATCH_THRESHOLD) {
@@ -75,23 +75,24 @@ export async function findPhraseLink(chart, sentence) {
         const witResponse = await client.message(sentence.text, {});
         console.log("WIT Response", witResponse);
         const entities = parseResponse(witResponse);
-        const linkPhrase = sentence.text.substring(sentence.text.indexOf(match.userTyped));
-
-        const link = {
-            text: linkPhrase,
-            feature: match.matchedFeature, //information about how the link was found
-            chartId: chart.id,
-            active: false,
-            type: entities.intent,
-            data: [match.matchedFeature.field],
-            startIndex: sentence.startIndex + sentence.text.indexOf(match.userTyped),
-            endIndex: sentence.endIndex,
-            sentence: sentence.text,
-            rangeMin: entities.min,
-            rangeMax: entities.max,
-        };
-        console.log("Phrase Link", link);
-        return link;
+        if (entities !== null) {
+            const linkPhrase = sentence.text.substring(sentence.text.indexOf(match.userTyped));
+            const link = {
+                text: linkPhrase,
+                feature: match.matchedFeature, //information about how the link was found
+                chartId: chart.id,
+                active: false,
+                type: entities.intent,
+                data: [match.matchedFeature.field],
+                startIndex: sentence.startIndex + sentence.text.indexOf(match.userTyped),
+                endIndex: sentence.endIndex,
+                sentence: sentence.text,
+                rangeMin: entities.min,
+                rangeMax: entities.max,
+            };
+            console.log("Phrase Link", link);
+            return link;
+        }
     }
 }
 function parseResponse(response) {
@@ -100,13 +101,19 @@ function parseResponse(response) {
     if (response.entities.hasOwnProperty("range_selection")) {
         if (response.entities.range_selection[0].confidence > 0.5) {
             const intent = "range_selection";
-            const min = response.entities.min_number[0].value || 0;
+            const min = response.entities.hasOwnProperty("min_number")
+                ? response.entities.min_number[0].value
+                : -Infinity;
             const max =
-                response.entities.number !== undefined
-                    ? response.entities.number[0].value
-                    : response.entities.max[0] !== undefined
-                    ? response.entities.max[0].value
-                    : 0;
+                //TODO: Use a consistent and ONLY ONE entity name for max value
+                response.entities.hasOwnProperty("number") ||
+                response.entities.hasOwnProperty("max")
+                    ? response.entities.number !== undefined
+                        ? response.entities.number[0].value
+                        : response.entities.max[0] !== undefined
+                        ? response.entities.max[0].value
+                        : 0
+                    : Infinity;
             entities = { intent: intent, min: min, max: max };
         }
     }

@@ -52,8 +52,14 @@ const initialState = {
         timestamp: Date.now(),
         properties: {
             axes: [
-                { name: "x", field: "category", data: "data_0", type: "ordinal" },
-                { name: "y", field: "amount", data: "data_0", type: "linear" },
+                {
+                    name: "x",
+                    field: "category",
+                    data: "data_0",
+                    type: "ordinal",
+                    title: "category",
+                },
+                { name: "y", field: "amount", data: "data_0", type: "linear", title: "amount" },
             ],
             features: [
                 { value: "Apple", type: "string", field: "category", data: "data_0" },

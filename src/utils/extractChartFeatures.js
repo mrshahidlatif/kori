@@ -160,6 +160,8 @@ export const extractChartAxes = (spec) => {
         const title =
             isArray(relatedAxis) && relatedAxis.length > 0 && relatedAxis[0].hasOwnProperty("title")
                 ? relatedAxis[0].title
+                : field //if title is not found, saving field as title (needed for maps!)
+                ? field
                 : undefined;
 
         const axis = { name: name, field: field, data: data, type: type, title: title };
