@@ -1,11 +1,12 @@
 import FuzzySet from "fuzzyset.js";
 import splitTextIntoNWordsList from "./splitTextIntoNWordsList";
 import { Wit, log } from "node-wit";
+import { isArray } from "vega";
 
 const MIN_MATCH_THRESHOLD = 0.8;
 const client = new Wit({
     accessToken: "FFJCMCE6JAQ3CT52WH5YBFED5TKENKTI",
-    logger: new log.Logger(log.DEBUG), // optional
+    // logger: new log.Logger(log.DEBUG), // optional
 });
 
 export default async (charts, sentence) => {
@@ -64,7 +65,6 @@ export async function findPhraseLink(chart, sentence) {
     let match = null;
     chart.properties.axes.forEach(function (a) {
         const fsResult = fuzzyMatch(sentence.text, a.title); //returns a [score, word] pair!
-        console.log("FUZZY MATCH", fsResult);
         // TODO: Later check only if the f.type is a number!
         if (fsResult[0] > MIN_MATCH_THRESHOLD) {
             match = { userTyped: fsResult[1], matchedFeature: a };
@@ -73,24 +73,41 @@ export async function findPhraseLink(chart, sentence) {
     //only send request to Wit.ai when we have a potential match!
     if (match !== null) {
         const witResponse = await client.message(sentence.text, {});
-        console.log("WIT Response", witResponse);
+        // console.log("WIT Response", witResponse);
+
         const entities = parseResponse(witResponse);
         if (entities !== null) {
-            const linkPhrase = sentence.text.substring(sentence.text.indexOf(match.userTyped));
+            //TODO: Also see if we can check if Wit.ai can also give us numbers described
+            // as words (e.g., fifty, thirty four, etc.)
+            const linkStartIndex = sentence.text.indexOf(match.userTyped);
+            const linkEndIndex =
+                entities.max !== Infinity
+                    ? sentence.text.indexOf(entities.max) !== -1
+                        ? sentence.text.indexOf(entities.max) + entities.max.toString().length
+                        : sentence.text.length - 1
+                    : entities.min !== -Infinity
+                    ? sentence.text.indexOf(entities.min) !== -1
+                        ? sentence.text.indexOf(entities.min) + entities.min.toString().length
+                        : sentence.text.length - 1
+                    : sentence.text.length - 1;
+            const linkPhrase = sentence.text.substring(linkStartIndex, linkEndIndex);
             const link = {
                 text: linkPhrase,
                 feature: match.matchedFeature, //information about how the link was found
                 chartId: chart.id,
                 active: false,
                 type: entities.intent,
-                data: [match.matchedFeature.field],
-                startIndex: sentence.startIndex + sentence.text.indexOf(match.userTyped),
-                endIndex: sentence.endIndex,
+                data: isArray(match.matchedFeature.field)
+                    ? match.matchedFeature.field
+                    : [match.matchedFeature.field],
+                startIndex: sentence.startIndex + linkStartIndex,
+                endIndex: sentence.startIndex + linkEndIndex,
+
                 sentence: sentence.text,
                 rangeMin: entities.min,
                 rangeMax: entities.max,
             };
-            console.log("Phrase Link", link);
+            // console.log("Phrase Link", link);
             return link;
         }
     }
@@ -105,7 +122,7 @@ function parseResponse(response) {
                 ? response.entities.min_number[0].value
                 : -Infinity;
             const max =
-                //TODO: Use a consistent and ONLY ONE entity name for max value
+                //TODO: Use a consistent and ONLY ONE entity name for max value in the Wit.ai Training!
                 response.entities.hasOwnProperty("number") ||
                 response.entities.hasOwnProperty("max")
                     ? response.entities.number !== undefined
@@ -117,6 +134,6 @@ function parseResponse(response) {
             entities = { intent: intent, min: min, max: max };
         }
     }
-    console.log("Parsed Response", entities);
+    // console.log("Parsed Response", entities);
     return entities;
 }

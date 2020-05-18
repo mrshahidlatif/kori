@@ -27,7 +27,7 @@ export function addSignalToMark(mark) {
     const isMap = mark.type === "shape" && mark.style.includes("geoshape");
     const predicate = ` highlight.enabled === false || 
     indexof(highlight.data, ${isMap ? "datum.properties" : "datum"}[highlight.field])!=-1 ||
-    datum[highlight.rangeField] > highlight.rangeMin && datum[highlight.rangeField]<highlight.rangeMax`;
+    datum[highlight.field] > highlight.rangeMin && datum[highlight.field]<highlight.rangeMax`;
 
     mark.encode.update = {
         ...mark.encode.update,
