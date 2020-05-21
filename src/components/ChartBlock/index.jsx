@@ -88,6 +88,9 @@ export default memo(function ChartBlock({
                         data: link.data,
                         field: link.feature.field,
                         enabled: true,
+                        //Next 2 fields refer to range selection links
+                        rangeMin: link.rangeMin || 0,
+                        rangeMax: link.rangeMax || 0,
                     }).run();
                 });
         } else {
@@ -97,8 +100,6 @@ export default memo(function ChartBlock({
 
     // const [resizing, setResizing] = useState(false);
     return (
-        //TODO: BUG: Text Wrap controls doesn't work as expected! perhaps the problem is with the css files and styles!
-        //TODO: Make the width of this div fit to the contents. At the moment it is hard-coded!
         <div
             ref={containerEl}
             {...elementProps}
