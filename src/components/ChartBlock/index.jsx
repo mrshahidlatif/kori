@@ -60,7 +60,7 @@ export default memo(function ChartBlock({
             setView(view);
         };
         asyncExec();
-    }, []); // will run only once
+    }, [spec]); // will run only once
 
     useEffect(
         throttle(async () => {
