@@ -17,6 +17,7 @@ export default (charts, partialText, startIndex) => {
                       })
                       .map((d) => ({
                           chartId: chart.id,
+                          thumbnail: chart.thumbnail,
                           feature: d,
                           text: d.value.toString(),
                           startIndex,
