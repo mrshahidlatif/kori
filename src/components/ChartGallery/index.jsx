@@ -9,6 +9,7 @@ import Snackbar from "@material-ui/core/Snackbar";
 import { compile } from "vega-lite/build/vega-lite";
 
 import extractChartFeatures from "utils/extractChartFeatures";
+import createThumbnail from 'utils/createThumbnail';
 
 export default function ChartGallery(props) {
     const dispatch = useDispatch();
@@ -56,9 +57,11 @@ export default function ChartGallery(props) {
                         d.url = process.env.PUBLIC_URL + "/" + d.url;
                     }
                 });
+                const thumbnail = await createThumbnail(spec);
+                
                 console.log("Converted Vega Spec", spec);
                 const properties = await extractChartFeatures(spec);
-                dispatch(createChart(docId, spec, { properties }));
+                dispatch(createChart(docId, spec, { properties, thumbnail }));
             };
 
             reader.readAsText(file);
