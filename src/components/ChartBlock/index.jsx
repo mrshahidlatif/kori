@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, memo, useState, useRef } from "react";
-// import { Vega } from "react-vega"; // having a problem with this, keep rerendering for no reason
 import { useSelector, shallowEqual } from "react-redux";
 import addSignalToChartSpec from "utils/addSignalToChartSpec";
 import vegaEmbed from "vega-embed";
 import throttle from "utils/throttle";
 import { parse } from "vega-parser";
 import { View } from "vega-view";
+import ChartConfigPanel from 'components/ChartConfigPanel';
 
 export default memo(function ChartBlock({
     block,
@@ -29,14 +29,15 @@ export default memo(function ChartBlock({
     const containerEl = useRef(null);
     const chartEl = useRef(null);
     const [ratio, setRatio] = useState(1);
-
+    const chart = useSelector(state=>state.charts[blockProps.id]);
     // TODO: use a memoized selector for performance
     const links = useSelector(
         (state) => Object.values(state.links).filter((link) => link.chartId === blockProps.id),
         shallowEqual
     );
-    const spec = useMemo(() => addSignalToChartSpec(JSON.parse(JSON.stringify(blockProps.spec))), [
-        blockProps.spec,
+    const spec = useMemo(() => addSignalToChartSpec(JSON.parse(JSON.stringify(chart.spec)), chart.highlight), [
+        chart.spec,
+        chart.highlight
     ]);
 
     useEffect(() => {
@@ -60,7 +61,7 @@ export default memo(function ChartBlock({
             setView(view);
         };
         asyncExec();
-    }, [spec]); // will run only once
+    }, [spec]); 
 
     useEffect(
         throttle(async () => {
@@ -98,17 +99,18 @@ export default memo(function ChartBlock({
         }
     }, [view, links]);
 
-    // const [resizing, setResizing] = useState(false);
+    const showConfig = selection.getAnchorKey() ===block.getKey(); // show only clicking this block
     return (
         <div
             ref={containerEl}
             {...elementProps}
-            style={{ ...style }}
+            style={{ ...style, position:'relative' }}// absolute positioning config panel
             // onMouseEnter={()=>setResizing(true)}
             // onMouseLeave={()=>setResizing(false)}
         >
             {/* <Vega spec={spec} onNewView={handleView} onParseError={handleError} /> */}
             <div ref={chartEl} />
+            {showConfig && <ChartConfigPanel chart={chart}/>}
             {/* {resizing && <AspectRatioIcon style={{color: grey[500], zIndex:2, marginLeft:"-30px"}}/>} */}
         </div>
     );

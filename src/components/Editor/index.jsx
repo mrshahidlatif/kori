@@ -140,8 +140,7 @@ export default function Editor(props) {
         let contentState = editorState.getCurrentContent();
 
         contentState = contentState.createEntity("CHART", "IMMUTABLE", {
-            id: chart.id,
-            spec: chart.spec,
+            id:chart.id // wil get chart info from store
         });
         const entityKey = contentState.getLastCreatedEntityKey();
         console.log("entityKey", entityKey);
