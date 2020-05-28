@@ -1,0 +1,25 @@
+.panel {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    cursor: default;
+    transform: translate(-50%,0);
+}
+
+.panel > div{
+    min-width: 200px;
+}
+
+.picker{
+    display: flex;
+    flex-wrap: wrap;
+    width: 250px;
+}
+.color{
+    box-sizing: border-box;
+    width:20px;
+    height:20px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    border-radius: 2px;;
+}

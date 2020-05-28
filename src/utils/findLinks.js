@@ -1,6 +1,6 @@
 import FuzzySet from "fuzzyset.js";
 import splitTextIntoNWordsList from "./splitTextIntoNWordsList";
-import { Wit, log } from "node-wit";
+import { Wit } from "node-wit";
 import { isArray } from "vega";
 import parseWitResponse from "./parseWitResponse";
 
@@ -54,7 +54,7 @@ export const findWordLink = (chart, sentence) => {
 function fuzzyMatch(sentence, word) {
     if (typeof word === "string") {
         let list =
-            word.split(" ").length == 1
+            word.split(" ").length === 1
                 ? sentence.split(" ")
                 : splitTextIntoNWordsList(sentence, word.split(" ").length);
         let fs = FuzzySet(list);

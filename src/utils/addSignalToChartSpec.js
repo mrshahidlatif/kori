@@ -1,6 +1,7 @@
 // TODO: support different encodings?
+import { isArray, isObject } from "vega-util";
 
-export default (spec) => {
+export default (spec, highlight) => {
     // highlight
     spec.signals = [
         ...(spec.signals || []),
@@ -11,12 +12,12 @@ export default (spec) => {
     ];
 
     spec.marks.forEach((mark) => {
-        addSignalToMark(mark);
+        addSignalToMark(mark, highlight);
     });
     return spec;
 };
 
-export function addSignalToMark(mark) {
+export function addSignalToMark(mark, highlight) {
     if (mark.type === "group") {
         // recursive
         if (mark.marks) {
@@ -25,20 +26,30 @@ export function addSignalToMark(mark) {
         return;
     }
     const isMap = mark.type === "shape" && mark.style.includes("geoshape");
-    const predicate = ` highlight.enabled === false || 
-    indexof(highlight.data, ${isMap ? "datum.properties" : "datum"}[highlight.field])!=-1 ||
-    datum[highlight.field] > highlight.rangeMin && datum[highlight.field]<highlight.rangeMax`;
-
+    const activePredicate = `highlight.enabled===true && (
+        (indexof(highlight.data, ${isMap ? "datum.properties" : "datum"}[highlight.field])!=-1) ||
+        (datum[highlight.field] > highlight.rangeMin && datum[highlight.field]<highlight.rangeMax)
+    )`;
+    //TODO: reduce redundant checking
+    const inactivePredicate = `highlight.enabled===true && !(
+        (indexof(highlight.data, ${isMap ? "datum.properties" : "datum"}[highlight.field])!=-1) ||
+        (datum[highlight.field] > highlight.rangeMin && datum[highlight.field]<highlight.rangeMax)
+    )`;
+    const oldProp  = mark.encode.update[highlight.channel];
     mark.encode.update = {
         ...mark.encode.update,
-        opacity: [
+        [highlight.channel]: [
             {
-                test: predicate,
-                value: 1.0,
+                test: activePredicate,
+                value: highlight.active,
             },
             {
-                value: 0.05,
+                test: inactivePredicate,
+                value: highlight.inactive,
             },
+            // put existing property if exists either in array or object form
+            ...(isObject(oldProp)? [oldProp]:(isArray(oldProp)?oldProp:[]))
+            
         ],
     };
 }

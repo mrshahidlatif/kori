@@ -1,4 +1,4 @@
-import { Modifier, EditorState, SelectionState } from "draft-js";
+import { Modifier, EditorState } from "draft-js";
 export default (links, editorState, method = "Auto") => {
     links.forEach((link) => {
         editorState = insertLink(link, editorState, method);
