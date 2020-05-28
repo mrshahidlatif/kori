@@ -59,12 +59,12 @@ export default async function (spec) {
     const axesMap = extractChartAxes(spec);
     spec.scales
         .filter((scale) => ["ordinal", "band", "point"].includes(scale.type))
-        .map((scale) => {
+        .forEach((scale) => {
             // each discrete scale
             spec.data.forEach((datum) => {
                 // for each data table
                 const viewdata = view.data(datum.name);
-                viewdata.map((row) => {
+                viewdata.forEach((row) => {
                     // for each row in the table
                     // a single field
                     if (scale.domain.field) {
@@ -79,7 +79,7 @@ export default async function (spec) {
                         };
                     } else if (scale.domain.fields) {
                         //multiple fields from the same data
-                        scale.domain.fields.map((d) => {
+                        scale.domain.fields.forEach((d) => {
                             const field = isString(d) ? d : d.field;
                             const value = isDate(row[field]) ? row[field] : toString(row[field]);
                             const type = isDate(value) ? "date" : "string";
@@ -137,7 +137,7 @@ export const searchFieldName = (spec, scaleName) => {
 
 export const extractChartAxes = (spec) => {
     let axesMap = {};
-    spec.scales.map((scale) => {
+    spec.scales.forEach((scale) => {
         console.log("Scales in Chart:", scale);
         //TODO: handle cases where data is aggregated e.g., stack bar chart, stack area chart, pie chart,
         const name = scale.name;

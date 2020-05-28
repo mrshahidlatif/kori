@@ -14,7 +14,7 @@ export function Chart(props) {
     vegaEmbed(chartEl.current, spec).then(result=>{
       // setView(result.view);
     });
-  },[]);// will run only once
+  },[spec]);// will run only once
 
 
   function handleDragStart(e) {

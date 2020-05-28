@@ -1,10 +1,11 @@
 .link {
-  color: #707070;
+  /* color: #707070; */
   cursor: pointer;
   /* font-weight: bold; */
-  background-color: #e8e8e8;
+  /* background-color: #e8e8e8; */
+  border-bottom: 2px solid #4FC3F7;
 }
 .link:hover {
-  color: black;
+  border-bottom: 4px solid #4FC3F7;
   /* font-weight: bold; */
 }

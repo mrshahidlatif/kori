@@ -14,6 +14,7 @@ export default (charts, partialText, startIndex) => {
                                   .toLowerCase()
                                   .includes(partialText.toLowerCase());
                           }
+                          return false;
                       })
                       .map((d) => ({
                           chartId: chart.id,
