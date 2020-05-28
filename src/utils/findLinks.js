@@ -7,7 +7,7 @@ import parseWitResponse from "./parseWitResponse";
 const MIN_MATCH_THRESHOLD = 0.8;
 const client = new Wit({
     accessToken: "FFJCMCE6JAQ3CT52WH5YBFED5TKENKTI",
-    logger: new log.Logger(log.DEBUG), // optional
+    // logger: new log.Logger(log.DEBUG), // optional
 });
 
 export default async (charts, sentence) => {
@@ -41,7 +41,7 @@ export const findWordLink = (chart, sentence) => {
                 feature: m.matchedFeature, //information about how the link was found
                 chartId: chart.id,
                 active: false,
-                type: "point", //TODO: range selection
+                type: "point",
                 data: [m.matchedFeature.value],
                 startIndex: linkStartIndex,
                 endIndex: linkEndIndex,
@@ -112,8 +112,12 @@ export async function findPhraseLink(chart, sentence) {
                         rangeMax: parsedResponse.max,
                     };
                     break;
+                case "comparison":
+                    break;
+                case "group_selection":
+                    break;
             }
-            console.log("Phrase Link out", link);
+            console.log("Phrase Link", link);
             return link;
         }
     }
