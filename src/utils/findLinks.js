@@ -76,6 +76,7 @@ export async function findPhraseLink(chart, sentence) {
     if (match !== null) {
         const response = await client.message(sentence.text, {});
         const parsedResponse = parseWitResponse(response);
+        console.log("Parsed Response", parsedResponse);
         if (parsedResponse !== null) {
             //TODO: Also see if we can check if Wit.ai can also give us numbers described
             // as words (e.g., fifty, thirty four, etc.)
@@ -113,12 +114,74 @@ export async function findPhraseLink(chart, sentence) {
                     };
                     break;
                 case "comparison":
+                    let group1Matches = [];
+                    let group2Matches = [];
+                    if (parsedResponse.group1 && parsedResponse.group2) {
+                        // only if group has more than 2 values otherwise it is point link
+                        group1Matches = findMatchesInChartFeatures(parsedResponse.group1, chart);
+                        group2Matches = findMatchesInChartFeatures(parsedResponse.group2, chart);
+                    }
+                    if (group1Matches && group2Matches) {
+                        let group1Data = group1Matches.map((m) => m.matchedFeature.value);
+                        let group2Data = group2Matches.map((m) => m.matchedFeature.value);
+                        const data = [...group1Data, ...group2Data];
+                        link = {
+                            text: sentence.text,
+                            feature: group1Matches[0].matchedFeature, //information about how the link was found
+                            chartId: chart.id,
+                            active: false,
+                            type: parsedResponse.intent,
+                            data: data,
+                            startIndex: sentence.startIndex,
+                            endIndex: sentence.endIndex,
+                            sentence: sentence.text,
+                        };
+                    }
                     break;
                 case "group_selection":
+                    let matches = [];
+                    if (parsedResponse.group.length > 1) {
+                        // only if group has more than 2 values otherwise it is point link
+                        matches = findMatchesInChartFeatures(parsedResponse.group, chart);
+                    }
+                    if (matches.length === parsedResponse.group.length) {
+                        const linkStartIndex = sentence.text.indexOf(matches[0].userTyped);
+                        const linkEndIndex =
+                            sentence.text.indexOf(matches[matches.length - 1].userTyped) +
+                            matches[matches.length - 1].userTyped.length;
+                        const linkPhrase = sentence.text.substring(
+                            linkStartIndex,
+                            linkEndIndex,
+                            matches[matches.length - 1].userTyped
+                        );
+                        link = {
+                            text: linkPhrase,
+                            feature: matches[0].matchedFeature, //information about how the link was found
+                            chartId: chart.id,
+                            active: false,
+                            type: parsedResponse.intent,
+                            data: matches.map((m) => m.matchedFeature.value),
+                            startIndex: sentence.startIndex + linkStartIndex,
+                            endIndex: sentence.startIndex + linkEndIndex,
+                            sentence: sentence.text,
+                        };
+                    }
                     break;
             }
             console.log("Phrase Link", link);
             return link;
         }
     }
+}
+function findMatchesInChartFeatures(terms, chart) {
+    let matches = [];
+    for (let i = 0; i < terms.length; i++) {
+        chart.properties.features.forEach(function (f) {
+            const fsResult = fuzzyMatch(terms[i], f.value); //returns a [score, word] pair!
+            if (f.type === "string" && fsResult[0] > MIN_MATCH_THRESHOLD) {
+                matches.push({ userTyped: fsResult[1], matchedFeature: f });
+            }
+        });
+    }
+    return matches;
 }
