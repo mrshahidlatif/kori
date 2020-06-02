@@ -21,7 +21,7 @@ export function addSignalToMark(mark, highlight) {
     if (mark.type === "group") {
         // recursive
         if (mark.marks) {
-            mark.marks.forEach((mark) => addSignalToMark(mark)); // will this generalize to all charts?
+            mark.marks.forEach((mark) => addSignalToMark(mark, highlight)); // will this generalize to all charts?
         }
         return;
     }
