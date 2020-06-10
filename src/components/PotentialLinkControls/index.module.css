@@ -1,0 +1,6 @@
+.potentialLinkControls {
+    position: fixed;
+    min-width: 150px;
+    /* opacity: 0.75; */
+    z-index: 10;
+}

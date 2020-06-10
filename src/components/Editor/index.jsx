@@ -2,7 +2,14 @@ import React, { Fragment, useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import { useParams } from "react-router-dom";
-import { EditorState, AtomicBlockUtils, RichUtils, convertToRaw } from "draft-js";
+import {
+    EditorState,
+    AtomicBlockUtils,
+    RichUtils,
+    convertToRaw,
+    Modifier,
+    ContentState,
+} from "draft-js";
 
 import DraftEditor from "draft-js-plugins-editor";
 
@@ -11,10 +18,12 @@ import css from "./index.module.css";
 import EditorToolbar, { EditorPlugins } from "components/EditorToolbar";
 
 import SuggestionPanel from "components/SuggestionPanel";
+import PotentialLinkControls from "components/PotentialLinkControls";
 
 import { updateDoc, updateChartsInEditor } from "ducks/docs";
-import { createLinks, createLink } from "ducks/links";
+import { createLinks, createLink, deleteLink } from "ducks/links";
 import { getChartsInEditor, getCharts } from "ducks/charts";
+import { setSelectedLink } from "ducks/ui";
 
 import editorDecorators from "utils/editorDecorators";
 import findSuggestions from "utils/findSuggestions";
@@ -29,6 +38,7 @@ export default function Editor(props) {
     const doc = useSelector((state) => state.docs[docId]);
     const charts = useSelector((state) => getCharts(state, docId));
     const chartsInEditor = useSelector((state) => getChartsInEditor(state, docId));
+    const selectedLink = useSelector((state) => state.ui.selectedLink);
 
     const editorEl = useRef(null); //https://reactjs.org/docs/hooks-reference.html#useref
 
@@ -96,6 +106,17 @@ export default function Editor(props) {
             }, []);
             dispatch(updateChartsInEditor(doc.id, ids));
         }
+
+        const currentSelection = editorState.getSelection();
+        const caretPos = currentSelection.getAnchorOffset();
+        console.log("CUrsor position", caretPos);
+        //TODO: also match if cursor & link are in the same block
+        if (selectedLink) {
+            if (caretPos < selectedLink.startIndex || caretPos > selectedLink.endIndex) {
+                dispatch(setSelectedLink(null));
+            }
+        }
+
         console.log("editorRawState", editorRawState);
     }
 
@@ -140,7 +161,7 @@ export default function Editor(props) {
         let contentState = editorState.getCurrentContent();
 
         contentState = contentState.createEntity("CHART", "IMMUTABLE", {
-            id:chart.id // wil get chart info from store
+            id: chart.id, // wil get chart info from store
         });
         const entityKey = contentState.getLastCreatedEntityKey();
         console.log("entityKey", entityKey);
@@ -162,12 +183,38 @@ export default function Editor(props) {
             data: [suggestion.text],
             startIndex: suggestion.startIndex,
             endIndex: suggestion.startIndex + suggestion.text.length,
+            isConfirmed: true,
         }); // need ids
         const newEditorState = insertLinks([action.attrs], editorState, "Manual");
         dispatch(action);
 
         setSuggestions([]);
         setEditorState(newEditorState);
+    }
+    function handleLinkDiscard(link) {
+        console.log("Handling Link Discard!!!", link);
+        const currentSelection = editorState.getSelection();
+        let newContent = ContentState.createFromText("");
+        const insertTextSelection = currentSelection.merge({
+            anchorOffset: link.startIndex,
+            focusOffset: link.endIndex,
+        });
+        newContent = Modifier.replaceText(
+            editorState.getCurrentContent(),
+            insertTextSelection,
+            link.text,
+            [] //inline styling
+        );
+        let newEditorState = EditorState.push(editorState, newContent, "apply-entity");
+        let newSelection = newEditorState.getSelection().merge({
+            focusOffset: link.endIndex,
+            anchorOffset: link.endIndex,
+        });
+        newEditorState = EditorState.moveSelectionToEnd(newEditorState);
+        newEditorState = EditorState.forceSelection(newEditorState, newSelection);
+        setEditorState(newEditorState);
+
+        dispatch(deleteLink(link.id));
     }
     return (
         <Fragment>
@@ -187,6 +234,7 @@ export default function Editor(props) {
             {suggestions.length > 0 && (
                 <SuggestionPanel suggestions={suggestions} onSelected={handleSuggestionSelected} />
             )}
+            <PotentialLinkControls selectedLink={selectedLink} onDiscard={handleLinkDiscard} />
         </Fragment>
     );
 }
