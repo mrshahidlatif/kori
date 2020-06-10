@@ -108,11 +108,14 @@ export default function Editor(props) {
         }
 
         const currentSelection = editorState.getSelection();
-        const caretPos = currentSelection.getAnchorOffset();
-        console.log("CUrsor position", caretPos);
-        //TODO: also match if cursor & link are in the same block
-        if (selectedLink) {
-            if (caretPos < selectedLink.startIndex || caretPos > selectedLink.endIndex) {
+        const caretPosition = currentSelection.getAnchorOffset();
+        const activeBlockKey = currentSelection.getAnchorKey();
+        if (selectedLink && activeBlockKey) {
+            if (
+                activeBlockKey !== selectedLink.blockKey ||
+                caretPosition < selectedLink.startIndex ||
+                caretPosition > selectedLink.endIndex
+            ) {
                 dispatch(setSelectedLink(null));
             }
         }
@@ -192,7 +195,7 @@ export default function Editor(props) {
         setEditorState(newEditorState);
     }
     function handleLinkDiscard(link) {
-        console.log("Handling Link Discard!!!", link);
+        //TODO: Some code is similar to insertLinks.js. Consider refactoring!
         const currentSelection = editorState.getSelection();
         let newContent = ContentState.createFromText("");
         const insertTextSelection = currentSelection.merge({

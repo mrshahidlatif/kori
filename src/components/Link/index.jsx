@@ -15,17 +15,13 @@ export default function Link(props) {
     }
 
     function handleMouseOver() {
-        const link = props.contentState.getEntity(props.entityKey).getData();
         if (links[link.id].isConfirmed) dispatch(activateLink(link.id));
     }
     function handleMouseLeave() {
-        // let text = props.children[0].props.text;
-        const link = props.contentState.getEntity(props.entityKey).getData();
         deactivateLink(link.id);
         dispatch(deactivateLink(link.id));
     }
     function handleClick() {
-        const link = props.contentState.getEntity(props.entityKey).getData();
         dispatch(setSelectedLink(link));
     }
 

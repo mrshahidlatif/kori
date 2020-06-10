@@ -17,7 +17,6 @@ export default function PotentialLinkControls(props) {
     const padding = 10;
 
     function handleDiscardClick(event) {
-        console.log("handleClick", "DISCARD");
         event.preventDefault();
         event.stopPropagation();
         props.onDiscard(props.selectedLink);
@@ -25,7 +24,6 @@ export default function PotentialLinkControls(props) {
         dispatch(setSelectedLink(null));
     }
     function handleAcceptClick(event) {
-        console.log("handleClick", "ACCEPT");
         event.preventDefault();
         event.stopPropagation();
 
@@ -34,12 +32,12 @@ export default function PotentialLinkControls(props) {
     }
     return pos && props.selectedLink ? (
         <Box
-            zIndex="modal"
+            // zIndex="modal"
             left={pos.x + padding}
             top={pos.y + padding}
             className={css.potentialLinkControls}
         >
-            <ButtonGroup size="small" aria-label="small outlined button group">
+            <ButtonGroup size="small" variant="contained" aria-label="small button group">
                 <Button onMouseDown={handleAcceptClick}>Accept</Button>
                 <Button onMouseDown={handleDiscardClick}>Discard</Button>
             </ButtonGroup>
