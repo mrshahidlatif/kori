@@ -14,6 +14,7 @@ export default (spec, highlight) => {
     spec.marks.forEach((mark) => {
         addSignalToMark(mark, highlight);
     });
+    console.log("Updated Specs", spec);
     return spec;
 };
 
@@ -35,7 +36,7 @@ export function addSignalToMark(mark, highlight) {
         (indexof(highlight.data, ${isMap ? "datum.properties" : "datum"}[highlight.field])!=-1) ||
         (datum[highlight.field] > highlight.rangeMin && datum[highlight.field]<highlight.rangeMax)
     )`;
-    const oldProp  = mark.encode.update[highlight.channel];
+    const oldProp = mark.encode.update[highlight.channel];
     mark.encode.update = {
         ...mark.encode.update,
         [highlight.channel]: [
@@ -48,8 +49,7 @@ export function addSignalToMark(mark, highlight) {
                 value: highlight.inactive,
             },
             // put existing property if exists either in array or object form
-            ...(isObject(oldProp)? [oldProp]:(isArray(oldProp)?oldProp:[]))
-            
+            ...(isObject(oldProp) ? [oldProp] : isArray(oldProp) ? oldProp : []),
         ],
     };
 }

@@ -1,11 +1,17 @@
 import React, { useEffect, useMemo, memo, useState, useRef } from "react";
-import { useSelector, shallowEqual } from "react-redux";
+import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import addSignalToChartSpec from "utils/addSignalToChartSpec";
 import vegaEmbed from "vega-embed";
 import throttle from "utils/throttle";
 import { parse } from "vega-parser";
 import { View } from "vega-view";
-import ChartConfigPanel from 'components/ChartConfigPanel';
+import ChartConfigPanel from "components/ChartConfigPanel";
+import { useParams } from "react-router-dom";
+
+import { createLinks } from "ducks/links";
+import { setSelectedLink, setManualLinkId } from "ducks/ui";
+import ManualLinkControls from "components/ManualLinkControls";
+import { SelectionState } from "draft-js";
 
 export default memo(function ChartBlock({
     block,
@@ -25,20 +31,26 @@ export default memo(function ChartBlock({
 }) {
     // const data = props.contentState.getEntity(props.block.getEntityAt(0)).getData();
     // let view = null;
+    const dispatch = useDispatch();
     const [view, setView] = useState(null);
     const containerEl = useRef(null);
     const chartEl = useRef(null);
     const [ratio, setRatio] = useState(1);
-    const chart = useSelector(state=>state.charts[blockProps.id]);
+    const chart = useSelector((state) => state.charts[blockProps.id]);
+    const textSelection = useSelector((state) => state.ui.textSelection);
+    let { docId } = useParams();
+    const doc = useSelector((state) => state.docs[docId]);
+    const [selectedMarks, setSelectedMarks] = useState([]);
+
     // TODO: use a memoized selector for performance
     const links = useSelector(
         (state) => Object.values(state.links).filter((link) => link.chartId === blockProps.id),
         shallowEqual
     );
-    const spec = useMemo(() => addSignalToChartSpec(JSON.parse(JSON.stringify(chart.spec)), chart.highlight), [
-        chart.spec,
-        chart.highlight
-    ]);
+    const spec = useMemo(
+        () => addSignalToChartSpec(JSON.parse(JSON.stringify(chart.spec)), chart.highlight),
+        [chart.spec, chart.highlight]
+    );
 
     useEffect(() => {
         const asyncExec = async () => {
@@ -61,14 +73,42 @@ export default memo(function ChartBlock({
             setView(view);
         };
         asyncExec();
-    }, [spec]); 
+    }, [spec]);
 
     useEffect(
         throttle(async () => {
             resize(view, ratio);
         }, 500)
     );
-
+    useEffect(() => {
+        if (view && textSelection) {
+            view.addEventListener("click", function (event, item) {
+                // console.log("CLICK", event, item.datum);
+                setSelectedMarks(selectedMarks.concat(item.datum));
+                // console.log("SELECTED MARKS", selectedMarks);
+            });
+        }
+    });
+    function makeManualLink(textSelection, data) {
+        if (textSelection && data) {
+            const link = {
+                text: textSelection.text,
+                feature: { field: "category" },
+                chartId: chart.id,
+                active: false,
+                type: "point",
+                data: data.map((d) => d.category),
+                startIndex: textSelection.startIndex,
+                endIndex: textSelection.endIndex,
+                sentence: "",
+                isConfirmed: true,
+            };
+            const action = createLinks(doc.id, [link]);
+            dispatch(action);
+            console.log("Manual LInk ID", action.links);
+            dispatch(setManualLinkId(action.links[0].id));
+        }
+    }
     function resize(view, ratio) {
         if (view) {
             const { width } = containerEl.current.getBoundingClientRect();
@@ -99,19 +139,34 @@ export default memo(function ChartBlock({
         }
     }, [view, links]);
 
-    const showConfig = selection.getAnchorKey() ===block.getKey(); // show only clicking this block
+    function handleManualLinkAccept() {
+        makeManualLink(textSelection, selectedMarks);
+    }
+    function handleManualLinkReset() {
+        setSelectedMarks([]);
+    }
+
+    const showConfig = selection.getAnchorKey() === block.getKey(); // show only clicking this block
+
     return (
         <div
             ref={containerEl}
             {...elementProps}
-            style={{ ...style, position:'relative' }}// absolute positioning config panel
+            style={{ ...style, position: "relative" }} // absolute positioning config panel
             // onMouseEnter={()=>setResizing(true)}
             // onMouseLeave={()=>setResizing(false)}
         >
             {/* <Vega spec={spec} onNewView={handleView} onParseError={handleError} /> */}
             <div ref={chartEl} />
-            {showConfig && <ChartConfigPanel chart={chart}/>}
+            {/* {showConfig && <ChartConfigPanel chart={chart} />} */}
             {/* {resizing && <AspectRatioIcon style={{color: grey[500], zIndex:2, marginLeft:"-30px"}}/>} */}
+            {showConfig && textSelection && (
+                <ManualLinkControls
+                    textSelection={textSelection}
+                    onAccept={handleManualLinkAccept}
+                    onReset={handleManualLinkReset}
+                />
+            )}
         </div>
     );
 });

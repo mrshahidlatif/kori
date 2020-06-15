@@ -23,7 +23,7 @@ import PotentialLinkControls from "components/PotentialLinkControls";
 import { updateDoc, updateChartsInEditor } from "ducks/docs";
 import { createLinks, createLink, deleteLink } from "ducks/links";
 import { getChartsInEditor, getCharts } from "ducks/charts";
-import { setSelectedLink } from "ducks/ui";
+import { setSelectedLink, setTextSelection, setManualLinkId } from "ducks/ui";
 
 import editorDecorators from "utils/editorDecorators";
 import findSuggestions from "utils/findSuggestions";
@@ -31,6 +31,8 @@ import findLinks from "utils/findLinks";
 import insertLinks from "utils/insertLinks";
 import getLastTypedWord from "utils/getLastTypedWord";
 import getLastTypedSentence from "utils/getLastTypedSentence";
+import getTextSelection from "utils/getTextSelection";
+import highlightTextSelection from "utils/highlightTextSelection";
 
 export default function Editor(props) {
     const dispatch = useDispatch();
@@ -39,6 +41,9 @@ export default function Editor(props) {
     const charts = useSelector((state) => getCharts(state, docId));
     const chartsInEditor = useSelector((state) => getChartsInEditor(state, docId));
     const selectedLink = useSelector((state) => state.ui.selectedLink);
+    const allLinks = useSelector((state) => state.links);
+    const manualLinkId = useSelector((state) => state.ui.manualLinkId);
+    const selectedTextForManualLink = useSelector((state) => state.ui.textSelection);
 
     const editorEl = useRef(null); //https://reactjs.org/docs/hooks-reference.html#useref
 
@@ -121,6 +126,21 @@ export default function Editor(props) {
         }
 
         console.log("editorRawState", editorRawState);
+
+        let textSelection = getTextSelection(
+            editorState.getCurrentContent(),
+            currentSelection,
+            " "
+        );
+
+        if (textSelection) {
+            dispatch(setTextSelection(textSelection));
+            // setEditorState(highlightTextSelection(textSelection, editorState));
+        }
+        if (allLinks[manualLinkId]) {
+            setEditorState(insertLinks([allLinks[manualLinkId]], editorState, "Manual"));
+            dispatch(setManualLinkId(null));
+        }
     }
 
     function handleKeyCommand(command) {

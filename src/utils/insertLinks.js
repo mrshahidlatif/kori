@@ -1,5 +1,6 @@
 import { Modifier, EditorState } from "draft-js";
 export default (links, editorState, method = "Auto") => {
+    console.log("Manual Link in INSERTLINS ", links);
     links.forEach((link) => {
         editorState = insertLink(link, editorState, method);
     });
@@ -14,7 +15,11 @@ export const insertLink = (link, editorState, method = "Auto") => {
     let start = link.startIndex;
     let end = link.endIndex;
     if (start < 0) start = 0;
+
+    //TODO: properly fix this object not extensible problem!
+    link = JSON.parse(JSON.stringify(link));
     link["blockKey"] = blockKey;
+
     let newContent = currentContent.createEntity(`LINK`, "MUTABLE", {
         ...link,
         method, // do we need to know this?
