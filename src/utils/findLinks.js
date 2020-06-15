@@ -46,6 +46,7 @@ export const findWordLink = (chart, sentence) => {
                 startIndex: linkStartIndex,
                 endIndex: linkEndIndex,
                 sentence: sentence.text,
+                isConfirmed: false,
             };
             links.push(link);
         });
@@ -111,6 +112,7 @@ export async function findPhraseLink(chart, sentence) {
                         sentence: sentence.text,
                         rangeMin: parsedResponse.min,
                         rangeMax: parsedResponse.max,
+                        isConfirmed: false,
                     };
                     break;
                 case "comparison":
@@ -135,6 +137,7 @@ export async function findPhraseLink(chart, sentence) {
                             startIndex: sentence.startIndex,
                             endIndex: sentence.endIndex,
                             sentence: sentence.text,
+                            isConfirmed: false,
                         };
                     }
                     break;
@@ -164,6 +167,7 @@ export async function findPhraseLink(chart, sentence) {
                             startIndex: sentence.startIndex + linkStartIndex,
                             endIndex: sentence.startIndex + linkEndIndex,
                             sentence: sentence.text,
+                            isConfirmed: false,
                         };
                     }
                     break;

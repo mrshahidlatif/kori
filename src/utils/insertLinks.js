@@ -10,9 +10,11 @@ export const insertLink = (link, editorState, method = "Auto") => {
     const currentContent = editorState.getCurrentContent();
     const currentSelection = editorState.getSelection();
     const blockEndIndex = currentSelection.getAnchorOffset();
+    const blockKey = currentSelection.getAnchorKey();
     let start = link.startIndex;
     let end = link.endIndex;
     if (start < 0) start = 0;
+    link["blockKey"] = blockKey;
     let newContent = currentContent.createEntity(`LINK`, "MUTABLE", {
         ...link,
         method, // do we need to know this?
