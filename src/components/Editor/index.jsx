@@ -33,6 +33,7 @@ import getLastTypedWord from "utils/getLastTypedWord";
 import getLastTypedSentence from "utils/getLastTypedSentence";
 import getTextSelection from "utils/getTextSelection";
 import highlightTextSelection from "utils/highlightTextSelection";
+import FloatingToolbar from "components/FloatingToolbar";
 
 export default function Editor(props) {
     const dispatch = useDispatch();
@@ -43,7 +44,8 @@ export default function Editor(props) {
     const selectedLink = useSelector((state) => state.ui.selectedLink);
     const allLinks = useSelector((state) => state.links);
     const manualLinkId = useSelector((state) => state.ui.manualLinkId);
-    const selectedTextForManualLink = useSelector((state) => state.ui.textSelection);
+    const textSelection = useSelector((state) => state.ui.textSelection);
+    const [tempTextSelection, setTempTextSelection] = useState(textSelection);
 
     const editorEl = useRef(null); //https://reactjs.org/docs/hooks-reference.html#useref
 
@@ -63,16 +65,16 @@ export default function Editor(props) {
     async function handleEditorChange(editorState) {
         const lastTypedWord = getLastTypedWord(editorState);
         const lastSentence = getLastTypedSentence(editorState);
-        console.log("last typed word", lastTypedWord);
-        console.log("last typed sentence", lastSentence);
+        // console.log("last typed word", lastTypedWord);
+        // console.log("last typed sentence", lastSentence);
 
         if (lastSentence) {
             const links = await findLinks(chartsInEditor, lastSentence);
 
             if (links.length > 0) {
-                console.log("Links before actions", links);
+                // console.log("Links before actions", links);
                 const action = createLinks(doc.id, links); // need ids
-                console.log("action.links", action.links);
+                // console.log("action.links", action.links);
                 editorState = insertLinks(action.links, editorState, "Auto");
 
                 dispatch(action);
@@ -132,6 +134,8 @@ export default function Editor(props) {
             currentSelection,
             " "
         );
+        //Hide the floating controls when no text is selected
+        setTempTextSelection(textSelection);
 
         if (textSelection) {
             dispatch(setTextSelection(textSelection));
@@ -258,6 +262,7 @@ export default function Editor(props) {
                 <SuggestionPanel suggestions={suggestions} onSelected={handleSuggestionSelected} />
             )}
             <PotentialLinkControls selectedLink={selectedLink} onDiscard={handleLinkDiscard} />
+            <FloatingToolbar textSelection={tempTextSelection} />
         </Fragment>
     );
 }
