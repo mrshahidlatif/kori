@@ -1,4 +1,3 @@
-
 /**
  * Super simple decorators for handles and hashtags, for demonstration
  * purposes only. Don't reuse these regexes.
@@ -6,7 +5,8 @@
 //TODO: REGEX needs to be improved and crafted to our use case!
 // import LinkText from 'components/LinkText';
 // import AutoLink from 'components/AutoLink';
-import Link from 'components/Link';
+import Link from "components/Link";
+import HighlightTextSelection from "components/HighlightTextSelection";
 // const HANDLE_REGEX = /\@[\w]+/g;
 
 // export function handleStrategy(contentBlock, callback, contentState) {
@@ -23,35 +23,31 @@ import Link from 'components/Link';
 // }
 
 export function findLinkEntities(contentBlock, callback, contentState) {
-  contentBlock.findEntityRanges(character => {
-    const entityKey = character.getEntity();
-    return (
-      entityKey !== null &&
-      contentState.getEntity(entityKey).getType() === "LINK"
-    );
-  }, callback);
+    contentBlock.findEntityRanges((character) => {
+        const entityKey = character.getEntity();
+        return entityKey !== null && contentState.getEntity(entityKey).getType() === "LINK";
+    }, callback);
 }
-// export function findAutoLinkEntities(contentBlock, callback, contentState) {
-//   contentBlock.findEntityRanges(character => {
-//     const entityKey = character.getEntity();
-//     return (
-//       entityKey !== null &&
-//       contentState.getEntity(entityKey).getType() === "Auto-Link"
-//     );
-//   }, callback);
-// }
+export function findTextSelectionEntity(contentBlock, callback, contentState) {
+    contentBlock.findEntityRanges((character) => {
+        const entityKey = character.getEntity();
+        return (
+            entityKey !== null && contentState.getEntity(entityKey).getType() === "TEXT_SELECTION"
+        );
+    }, callback);
+}
 
 export default [
-  // {
-  //     strategy: handleStrategy,
-  //     component: LinkText // decorateComponentWithProps(LinkText, EditorState)
-  // },
-  {
-      strategy: findLinkEntities,
-      component: Link
-  }
-  // {
-  //     strategy: findAutoLinkEntities,
-  //     component: AutoLink
-  // }
+    {
+        strategy: findTextSelectionEntity,
+        component: HighlightTextSelection, // decorateComponentWithProps(LinkText, EditorState)
+    },
+    {
+        strategy: findLinkEntities,
+        component: Link,
+    },
+    // {
+    //     strategy: findAutoLinkEntities,
+    //     component: AutoLink
+    // }
 ];

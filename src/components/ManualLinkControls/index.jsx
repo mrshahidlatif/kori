@@ -2,19 +2,31 @@ import React from "react";
 import css from "./index.module.css";
 
 import { useDispatch, useSelector } from "react-redux";
+
 import Box from "@material-ui/core/Box";
+import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
-import PropTypes from "prop-types";
-import { setSelectedLink, setTextSelection } from "ducks/ui";
-import { confirmLink, deleteLink } from "ducks/links";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import Grow from "@material-ui/core/Grow";
+import Paper from "@material-ui/core/Paper";
+import Popper from "@material-ui/core/Popper";
+import MenuItem from "@material-ui/core/MenuItem";
+import MenuList from "@material-ui/core/MenuList";
 
-export default function PotentialLinkControls(props) {
+import { setTextSelection } from "ducks/ui";
+import { createLinks } from "ducks/links";
+import { setManualLinkId } from "ducks/ui";
+
+export default function ManualLinkControls(props) {
     const dispatch = useDispatch();
     const selection = window.getSelection();
     const pos = selection.rangeCount > 0 ? selection.getRangeAt(0).getBoundingClientRect() : null;
-
+    const textSelection = useSelector((state) => state.ui.textSelection);
     const padding = 10;
+    const chartProperties = props.selectedChart.properties;
+    let options = chartProperties.axes.map((cp) => cp.field);
 
     function handleResetClick(event) {
         event.preventDefault();
@@ -24,10 +36,59 @@ export default function PotentialLinkControls(props) {
     function handleAcceptClick(event) {
         event.preventDefault();
         event.stopPropagation();
-
+        makeManualLink(props.textSelection, props.selectedMarks);
         props.onAccept();
         dispatch(setTextSelection(null));
     }
+
+    const [open, setOpen] = React.useState(false);
+    const anchorRef = React.useRef(null);
+    const [selectedIndex, setSelectedIndex] = React.useState(1);
+
+    const handleClick = () => {
+        console.info(`You clicked ${options[selectedIndex]}`);
+    };
+
+    const handleMenuItemClick = (event, index) => {
+        props.onAxisUpdate(options[index]);
+        setSelectedIndex(index);
+        setOpen(false);
+    };
+
+    const handleToggle = () => {
+        setOpen((prevOpen) => !prevOpen);
+    };
+
+    const handleClose = (event) => {
+        if (anchorRef.current && anchorRef.current.contains(event.target)) {
+            return;
+        }
+
+        setOpen(false);
+    };
+
+    function makeManualLink(textSelection, data) {
+        console.log("AXIS SELECT", options[selectedIndex]);
+        if (textSelection && data) {
+            const link = {
+                text: textSelection.text,
+                feature: { field: options[selectedIndex] },
+                chartId: props.selectedChart.id,
+                active: false,
+                type: "point",
+                data: data.map((d) => d[options[selectedIndex]]),
+                startIndex: props.textSelection.startIndex,
+                endIndex: props.textSelection.endIndex,
+                sentence: "",
+                isConfirmed: true,
+            };
+            const action = createLinks(props.currentDoc.id, [link]);
+            dispatch(action);
+            console.log("Manual LInk ID", action.links);
+            dispatch(setManualLinkId(action.links[0].id));
+        }
+    }
+
     return pos && props.textSelection ? (
         <Box
             // zIndex="modal"
@@ -41,13 +102,67 @@ export default function PotentialLinkControls(props) {
                 <Button onMouseDown={handleAcceptClick}>Accept</Button>
                 <Button onMouseDown={handleResetClick}>Reset</Button>
             </ButtonGroup>
+            <Grid container direction="column" alignItems="center">
+                <Grid item xs={12}>
+                    <ButtonGroup
+                        variant="contained"
+                        // color="primary"
+                        ref={anchorRef}
+                        aria-label="split button"
+                    >
+                        <Button
+                            onClick={handleClick} // color="primary"
+                            size="small"
+                            aria-controls={open ? "split-button-menu" : undefined}
+                            aria-expanded={open ? "true" : undefined}
+                            aria-label="Select an axis"
+                            aria-haspopup="menu"
+                            onClick={handleToggle}
+                        >
+                            {options[selectedIndex]}
+                            <ArrowDropDownIcon />
+                        </Button>
+                    </ButtonGroup>
+                    <Popper
+                        open={open}
+                        anchorEl={anchorRef.current}
+                        role={undefined}
+                        transition
+                        disablePortal
+                    >
+                        {({ TransitionProps, placement }) => (
+                            <Grow
+                                {...TransitionProps}
+                                style={{
+                                    transformOrigin:
+                                        placement === "bottom" ? "center top" : "center bottom",
+                                }}
+                            >
+                                <Paper>
+                                    <ClickAwayListener onClickAway={handleClose}>
+                                        <MenuList id="split-button-menu">
+                                            {options.map((option, index) => (
+                                                <MenuItem
+                                                    key={option}
+                                                    // disabled={index === 2}
+                                                    selected={index === selectedIndex}
+                                                    onClick={(event) =>
+                                                        handleMenuItemClick(event, index)
+                                                    }
+                                                >
+                                                    {option}
+                                                </MenuItem>
+                                            ))}
+                                        </MenuList>
+                                    </ClickAwayListener>
+                                </Paper>
+                            </Grow>
+                        )}
+                    </Popper>
+                </Grid>
+            </Grid>
         </Box>
     ) : (
         ""
     );
 }
-
-PotentialLinkControls.propTypes = {
-    suggestions: PropTypes.array,
-    onSelected: PropTypes.func,
-};

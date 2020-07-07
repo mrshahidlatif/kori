@@ -1,4 +1,5 @@
 //https://github.com/facebook/draft-js/issues/442#issuecomment-223816158
+//TODO: Maybe follow the next comment (on the above) and use getContentStateFragment function!
 
 export default (contentState, selection, blockDelimiter) => {
     let start = 0;

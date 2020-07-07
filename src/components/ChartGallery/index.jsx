@@ -5,11 +5,9 @@ import css from "./index.module.css";
 import Chart from "components/Chart";
 import { createChart, getCharts } from "ducks/charts";
 import Snackbar from "@material-ui/core/Snackbar";
-
 import { compile } from "vega-lite/build/vega-lite";
-
 import extractChartFeatures from "utils/extractChartFeatures";
-import createThumbnail from 'utils/createThumbnail';
+import createThumbnail from "utils/createThumbnail";
 
 export default function ChartGallery(props) {
     const dispatch = useDispatch();
@@ -49,6 +47,7 @@ export default function ChartGallery(props) {
             // Closure to capture the file information.
             reader.onload = async (e) => {
                 const liteSpec = JSON.parse(e.target.result);
+                console.log("Vega-Lite Specs", liteSpec);
                 const spec = compile(liteSpec).spec; // vega spec
                 // support vega-lite sample datasets
 
@@ -58,10 +57,11 @@ export default function ChartGallery(props) {
                     }
                 });
                 const thumbnail = await createThumbnail(spec);
-                
+
+                // addBrushToChartSpec(spec);
                 console.log("Converted Vega Spec", spec);
                 const properties = await extractChartFeatures(spec);
-                dispatch(createChart(docId, spec, { properties, thumbnail }));
+                dispatch(createChart(docId, spec, liteSpec, { properties, thumbnail }));
             };
 
             reader.readAsText(file);

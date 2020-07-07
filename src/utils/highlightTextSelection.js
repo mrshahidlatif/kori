@@ -18,7 +18,7 @@ export default (textSelection, editorState, method = "Auto") => {
         editorState.getCurrentContent(),
         insertTextSelection,
         textSelection.text,
-        ["BOLD"], //inline styling
+        [], //inline styling
         entityKey
     );
     let newEditorState = EditorState.push(editorState, newContent, "apply-entity");

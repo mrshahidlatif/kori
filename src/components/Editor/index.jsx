@@ -138,8 +138,17 @@ export default function Editor(props) {
         setTempTextSelection(textSelection);
 
         if (textSelection) {
-            dispatch(setTextSelection(textSelection));
+            // dispatch(setTextSelection(textSelection));
             // setEditorState(highlightTextSelection(textSelection, editorState));
+            const suggestions = findSuggestions(
+                chartsInEditor,
+                textSelection.text,
+                textSelection.startIndex
+            );
+            console.log("suggestions", suggestions);
+            suggestions.length !== 0
+                ? setSuggestions(suggestions)
+                : setSuggestions([{ text: "No link found!" }]);
         }
         if (allLinks[manualLinkId]) {
             setEditorState(insertLinks([allLinks[manualLinkId]], editorState, "Manual"));
@@ -218,6 +227,10 @@ export default function Editor(props) {
         setSuggestions([]);
         setEditorState(newEditorState);
     }
+    function handleCreateLinkSelect() {
+        setEditorState(highlightTextSelection(tempTextSelection, editorState));
+    }
+
     function handleLinkDiscard(link) {
         //TODO: Some code is similar to insertLinks.js. Consider refactoring!
         const currentSelection = editorState.getSelection();
@@ -258,11 +271,16 @@ export default function Editor(props) {
                     ref={editorEl}
                 />
             </div>
-            {suggestions.length > 0 && (
-                <SuggestionPanel suggestions={suggestions} onSelected={handleSuggestionSelected} />
+            {suggestions.length > 0 && chartsInEditor.length > 0 && (
+                <SuggestionPanel
+                    suggestions={suggestions}
+                    textSelection={tempTextSelection}
+                    onSelected={handleSuggestionSelected}
+                    onCreateLinkSelect={handleCreateLinkSelect}
+                />
             )}
             <PotentialLinkControls selectedLink={selectedLink} onDiscard={handleLinkDiscard} />
-            <FloatingToolbar textSelection={tempTextSelection} />
+            {/* <FloatingToolbar textSelection={tempTextSelection} /> */}
         </Fragment>
     );
 }

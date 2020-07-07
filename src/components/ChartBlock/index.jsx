@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, memo, useState, useRef } from "react";
-import { useDispatch, useSelector, shallowEqual } from "react-redux";
+import { useDispatch, useSelector, shallowEqual, connect } from "react-redux";
 import addSignalToChartSpec from "utils/addSignalToChartSpec";
 import vegaEmbed from "vega-embed";
 import throttle from "utils/throttle";
@@ -8,10 +8,7 @@ import { View } from "vega-view";
 import ChartConfigPanel from "components/ChartConfigPanel";
 import { useParams } from "react-router-dom";
 
-import { createLinks } from "ducks/links";
-import { setSelectedLink, setManualLinkId } from "ducks/ui";
 import ManualLinkControls from "components/ManualLinkControls";
-import { SelectionState } from "draft-js";
 
 export default memo(function ChartBlock({
     block,
@@ -40,7 +37,9 @@ export default memo(function ChartBlock({
     const textSelection = useSelector((state) => state.ui.textSelection);
     let { docId } = useParams();
     const doc = useSelector((state) => state.docs[docId]);
+    const chartsInEditor = useSelector((state) => state.docs[docId].chartsInEditor);
     const [selectedMarks, setSelectedMarks] = useState([]);
+    const [axis, setAxis] = useState(null);
 
     // TODO: use a memoized selector for performance
     const links = useSelector(
@@ -48,13 +47,19 @@ export default memo(function ChartBlock({
         shallowEqual
     );
     const spec = useMemo(
-        () => addSignalToChartSpec(JSON.parse(JSON.stringify(chart.spec)), chart.highlight),
+        () =>
+            addSignalToChartSpec(
+                // JSON.parse(JSON.stringify(chart.spec)),
+                chart.highlight,
+                JSON.parse(JSON.stringify(chart.liteSpec))
+            ),
         [chart.spec, chart.highlight]
     );
 
     useEffect(() => {
         const asyncExec = async () => {
             // compute canvas aspect ratio to maintain it while resizing
+            console.log("Specs Final in Chart Block", spec);
             const runtime = parse(spec);
             const tempView = await new View(runtime).runAsync();
 
@@ -62,14 +67,30 @@ export default memo(function ChartBlock({
             const ratio = canvas.height / canvas.width;
             setRatio(ratio);
             // add autosize: has limitations: https://vega.github.io/vega-lite/docs/size.html#limitations
-            spec.autosize = {
-                type: "fit",
-                contains: "padding",
-            };
+            // spec.autosize = {
+            //     type: "fit",
+            //     contains: "padding",
+            // };
 
             const result = await vegaEmbed(chartEl.current, spec, { actions: false });
             const view = result.view;
 
+            view.addDataListener("brush_store", function (name, value) {
+                console.log(name, value);
+            });
+
+            view.addDataListener("paintbrush_store", function (name, value) {
+                console.log(name, value);
+            });
+
+            // console.log("Brush Data", view.data("source_0"));
+
+            view.addEventListener("click", function (event, item) {
+                console.log("CLICK", item.datum);
+                setSelectedMarks(selectedMarks.push(item.datum));
+                // console.log("SELECTED MARKS", selectedMarks);
+                // highlightMarks(view);
+            });
             setView(view);
         };
         asyncExec();
@@ -80,35 +101,22 @@ export default memo(function ChartBlock({
             resize(view, ratio);
         }, 500)
     );
-    useEffect(() => {
-        if (view && textSelection) {
-            view.addEventListener("click", function (event, item) {
-                // console.log("CLICK", event, item.datum);
-                setSelectedMarks(selectedMarks.concat(item.datum));
-                // console.log("SELECTED MARKS", selectedMarks);
-            });
-        }
-    });
-    function makeManualLink(textSelection, data) {
-        if (textSelection && data) {
-            const link = {
-                text: textSelection.text,
-                feature: { field: "category" },
-                chartId: chart.id,
-                active: false,
-                type: "point",
-                data: data.map((d) => d.category),
-                startIndex: textSelection.startIndex,
-                endIndex: textSelection.endIndex,
-                sentence: "",
-                isConfirmed: true,
-            };
-            const action = createLinks(doc.id, [link]);
-            dispatch(action);
-            console.log("Manual LInk ID", action.links);
-            dispatch(setManualLinkId(action.links[0].id));
-        }
+
+    function hanldeAxisUpdate(axis) {
+        console.log("Axis is updated...!!!!", axis);
+        setAxis(axis);
     }
+
+    function highlightMarks(view) {
+        setSelectedMarks(selectedMarks);
+        console.log("Axis in HIGHLIGHT", selectedMarks);
+        view.signal("highlight", {
+            data: selectedMarks.map((sm) => sm["category"]),
+            field: "category",
+            enabled: true,
+        }).run();
+    }
+
     function resize(view, ratio) {
         if (view) {
             const { width } = containerEl.current.getBoundingClientRect();
@@ -140,31 +148,41 @@ export default memo(function ChartBlock({
     }, [view, links]);
 
     function handleManualLinkAccept() {
-        makeManualLink(textSelection, selectedMarks);
+        // makeManualLink(textSelection, selectedMarks);
+        setSelectedMarks([]);
     }
     function handleManualLinkReset() {
         setSelectedMarks([]);
     }
 
     const showConfig = selection.getAnchorKey() === block.getKey(); // show only clicking this block
+    const newStyle =
+        chartsInEditor.indexOf(chart.id) > -1 && !showConfig && textSelection
+            ? { ...style, position: "relative", borderStyle: "solid" }
+            : { ...style, position: "relative" };
 
     return (
         <div
             ref={containerEl}
             {...elementProps}
-            style={{ ...style, position: "relative" }} // absolute positioning config panel
+            // style={{ ...style, position: "relative", borderStyle: "solid" }} // absolute positioning config panel
+            style={newStyle}
             // onMouseEnter={()=>setResizing(true)}
             // onMouseLeave={()=>setResizing(false)}
         >
             {/* <Vega spec={spec} onNewView={handleView} onParseError={handleError} /> */}
             <div ref={chartEl} />
-            {/* {showConfig && <ChartConfigPanel chart={chart} />} */}
+            {/* {showConfig && !textSelection && <ChartConfigPanel chart={chart} />} */}
             {/* {resizing && <AspectRatioIcon style={{color: grey[500], zIndex:2, marginLeft:"-30px"}}/>} */}
             {showConfig && textSelection && (
                 <ManualLinkControls
+                    currentDoc={doc}
+                    selectedChart={chart}
                     textSelection={textSelection}
+                    selectedMarks={selectedMarks}
                     onAccept={handleManualLinkAccept}
                     onReset={handleManualLinkReset}
+                    onAxisUpdate={hanldeAxisUpdate}
                 />
             )}
         </div>

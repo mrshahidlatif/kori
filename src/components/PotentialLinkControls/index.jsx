@@ -46,8 +46,3 @@ export default function PotentialLinkControls(props) {
         ""
     );
 }
-
-PotentialLinkControls.propTypes = {
-    suggestions: PropTypes.array,
-    onSelected: PropTypes.func,
-};

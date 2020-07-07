@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import css from "./index.module.css";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
-import PropTypes from "prop-types";
-import { setSelectedLink } from "ducks/ui";
-import { confirmLink, deleteLink } from "ducks/links";
 
 export default function FloatingToolbar(props) {
     const dispatch = useDispatch();
@@ -15,8 +12,13 @@ export default function FloatingToolbar(props) {
     const pos = selection.rangeCount > 0 ? selection.getRangeAt(0).getBoundingClientRect() : null;
 
     const padding = 10;
+    const offSet = {
+        //TODO: compute offsets so that tooltip is always above and at center of selection!
+        x: props.textSelection ? props.textSelection.endIndex - props.textSelection.startIndex : 0,
+        y: -35,
+    };
 
-    function handleAcceptClick(event) {
+    function handleLinkClick(event) {
         event.preventDefault();
         event.stopPropagation();
     }
@@ -24,12 +26,12 @@ export default function FloatingToolbar(props) {
     return pos && props.textSelection ? (
         <Box
             zIndex="modal"
-            left={pos.x + padding}
-            top={pos.y + padding}
+            left={pos.x + offSet.x}
+            top={pos.y + padding + offSet.y}
             className={css.floatingToolbar}
         >
             <ButtonGroup size="small" variant="contained" aria-label="small button group">
-                <Button onMouseDown={handleAcceptClick}>Link</Button>
+                <Button onMouseDown={handleLinkClick}>Vis Link</Button>
                 {/* <Button onMouseDown={handleDiscardClick}>Discard</Button> */}
             </ButtonGroup>
         </Box>
@@ -37,8 +39,3 @@ export default function FloatingToolbar(props) {
         ""
     );
 }
-
-FloatingToolbar.propTypes = {
-    suggestions: PropTypes.array,
-    onSelected: PropTypes.func,
-};

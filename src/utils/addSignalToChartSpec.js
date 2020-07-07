@@ -1,7 +1,21 @@
 // TODO: support different encodings?
 import { isArray, isObject } from "vega-util";
+import addBrushToVegaLiteSpec from "utils/addBrushToVegaLiteSpec";
+import { compile } from "vega-lite/build/vega-lite";
 
-export default (spec, highlight) => {
+export default (highlight, liteSpec) => {
+    addBrushToVegaLiteSpec(liteSpec);
+    console.log("VegaLite Spec After adding brush", liteSpec);
+
+    const spec = compile(liteSpec).spec; // vega spec
+    // support vega-lite sample datasets
+
+    spec.data.forEach((d) => {
+        if (d.url && d.url.startsWith("data")) {
+            d.url = process.env.PUBLIC_URL + "/" + d.url;
+        }
+    });
+
     // highlight
     spec.signals = [
         ...(spec.signals || []),
@@ -14,7 +28,6 @@ export default (spec, highlight) => {
     spec.marks.forEach((mark) => {
         addSignalToMark(mark, highlight);
     });
-    console.log("Updated Specs", spec);
     return spec;
 };
 
