@@ -27,6 +27,11 @@ export default function ManualLinkControls(props) {
     const padding = 10;
     const chartProperties = props.selectedChart.properties;
     let options = chartProperties.axes.map((cp) => cp.field);
+    let featureFields = chartProperties.features.map((f) => f.field);
+
+    options = options.concat(featureFields);
+    options = [...new Set(options)];
+    console.log("Options", options);
 
     function handleResetClick(event) {
         event.preventDefault();
@@ -36,7 +41,7 @@ export default function ManualLinkControls(props) {
     function handleAcceptClick(event) {
         event.preventDefault();
         event.stopPropagation();
-        makeManualLink(props.textSelection, props.selectedMarks, props.viewData);
+        makeManualLink(props.textSelection, props.selectedMarks, props.brush, props.viewData);
         props.onAccept();
         dispatch(setTextSelection(null));
     }
@@ -67,38 +72,101 @@ export default function ManualLinkControls(props) {
         setOpen(false);
     };
 
-    function makeManualLink(textSelection, data, viewData) {
+    function makeManualLink(textSelection, data, brush, viewData) {
         // console.log("AXIS SELECT", options[selectedIndex]);
-        console.log("Selected Chart", props.selectedChart.spec.data[0].values);
+        // console.log("Selected Chart", props.selectedChart.spec.data[0].values);
         console.log("Selected Marks", data);
+        console.log("Selected Brush", brush);
         console.log("View Data", viewData);
-        console.log("Elements", viewData[0]._vgsid_, data[0].values[0]);
-
-        var points = [];
-        for (let i = 0; i < data.length; i++) {
-            for (let j = 0; j < viewData.length; j++) {
-                if (data[i].values[0] === viewData[j]._vgsid_) points.push(viewData[j]);
+        // console.log("Elements", viewData[0]._vgsid_, data[0].values[0]);
+        let link = null;
+        let linkData = null;
+        if (data.length > 0) {
+            console.log("Handle MultiPoint Selection");
+            var points = [];
+            for (let i = 0; i < data.length; i++) {
+                for (let j = 0; j < viewData.length; j++) {
+                    if (data[i].values[0] === viewData[j]._vgsid_) points.push(viewData[j]);
+                }
+            }
+            console.log("Points", points);
+            if (textSelection && data) {
+                link = {
+                    text: textSelection.text,
+                    feature: { field: options[selectedIndex] },
+                    chartId: props.selectedChart.id,
+                    active: false,
+                    type: "multipoint",
+                    data: points.map((d) => d[options[selectedIndex]]),
+                    startIndex: props.textSelection.startIndex,
+                    endIndex: props.textSelection.endIndex,
+                    sentence: "",
+                    isConfirmed: true,
+                };
             }
         }
-        console.log("Points", points);
-        if (textSelection && data) {
-            const link = {
+        if (brush.length > 0) {
+            console.log("Handle Brush Selection");
+            let points;
+            let fieldX;
+            let fieldY;
+            let rangeX;
+            let rangeY;
+            //Single Axis Brush
+            // let brushFiled;
+            // let brushValues;
+            // for (let i = 0; i < brush[0].fields.length; i++) {
+            //     if (brush[0].fields[i].type === "E") {
+            //         brushFiled = brush[0].fields[i].field;
+            //         brushValues = brush[0].values[i];
+            //     }
+            // }
+            const brushFieldIndex = brush[0].fields.findIndex(
+                (f) => f.field === options[selectedIndex]
+            );
+
+            //Rectangular Brush
+            if (
+                brush[0].fields.length === 2 &&
+                brush[0].fields[0].type === "R" &&
+                brush[0].fields[1].type === "R"
+            ) {
+                fieldX = brush[0].fields[0].field;
+                fieldY = brush[0].fields[1].field;
+                rangeX = brush[0].values[0];
+                rangeY = brush[0].values[1];
+                points = viewData.filter(
+                    (vd) =>
+                        vd[fieldX] >= rangeX[0] &&
+                        vd[fieldX] <= rangeX[1] &&
+                        vd[fieldY] <= rangeY[0] &&
+                        vd[fieldY] >= rangeY[1]
+                );
+                console.log("Filtered Points ", points, chartProperties);
+            }
+            linkData = points.map((p) => p[options[selectedIndex]]);
+
+            link = {
                 text: textSelection.text,
                 feature: { field: options[selectedIndex] },
                 chartId: props.selectedChart.id,
                 active: false,
-                type: "point",
-                data: points.map((d) => d[options[selectedIndex]]),
+                type: "brush",
+                data: [],
                 startIndex: props.textSelection.startIndex,
                 endIndex: props.textSelection.endIndex,
                 sentence: "",
                 isConfirmed: true,
+                fieldX: fieldX,
+                rangeX: rangeX,
+                fieldY: fieldY,
+                rangeY: rangeY,
             };
-            const action = createLinks(props.currentDoc.id, [link]);
-            dispatch(action);
-            // console.log("Manual LInk ID", action.links);
-            dispatch(setManualLinkId(action.links[0].id));
         }
+        const action = createLinks(props.currentDoc.id, [link]);
+        dispatch(action);
+        // console.log("Manual LInk ID", action.links);
+        dispatch(setManualLinkId(action.links[0].id));
     }
 
     return pos && props.textSelection ? (

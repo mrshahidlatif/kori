@@ -40,6 +40,7 @@ export default memo(function ChartBlock({
     const chartsInEditor = useSelector((state) => state.docs[docId].chartsInEditor);
     const [selectedMarks, setSelectedMarks] = useState([]);
     const [viewData, setViewData] = useState([]);
+    const [brush, setBrush] = useState([]);
 
     const [axis, setAxis] = useState(null);
     let xxx = [];
@@ -87,9 +88,10 @@ export default memo(function ChartBlock({
             });
             console.log("Selected Marks", selectedMarks);
 
-            // view.addDataListener("brush_store", function (name, value) {
-            //     console.log(name, value);
-            // });
+            view.addDataListener("brush_store", function (name, value) {
+                console.log(name, value);
+                setBrush(brush.concat(value));
+            });
 
             // view.addEventListener("click", function (event, item) {
             //     // console.log("CLICK", item.datum);
@@ -137,12 +139,18 @@ export default memo(function ChartBlock({
                 .filter((link) => link.active)
                 .forEach((link) => {
                     view.signal("highlight", {
+                        type: link.type,
                         data: link.data,
                         field: link.feature.field,
                         enabled: true,
                         //Next 2 fields refer to range selection links
                         rangeMin: link.rangeMin || 0,
                         rangeMax: link.rangeMax || 0,
+                        //Rectangular Brushes
+                        fieldX: link.fieldX || "",
+                        fieldY: link.fieldY || "",
+                        rangeX: link.rangeX || [0, 0],
+                        rangeY: link.rangeY || [0, 0],
                     }).run();
                 });
         } else {
@@ -151,6 +159,7 @@ export default memo(function ChartBlock({
     }, [view, links]);
 
     function handleManualLinkAccept() {
+        console.log("Selected BRUSH", brush);
         setSelectedMarks([]);
     }
     function handleManualLinkReset() {
@@ -182,6 +191,7 @@ export default memo(function ChartBlock({
                     selectedChart={chart}
                     textSelection={textSelection}
                     selectedMarks={selectedMarks}
+                    brush={brush}
                     viewData={viewData}
                     onAccept={handleManualLinkAccept}
                     onReset={handleManualLinkReset}
