@@ -36,7 +36,7 @@ export default function ManualLinkControls(props) {
     function handleAcceptClick(event) {
         event.preventDefault();
         event.stopPropagation();
-        makeManualLink(props.textSelection, props.selectedMarks);
+        makeManualLink(props.textSelection, props.selectedMarks, props.viewData);
         props.onAccept();
         dispatch(setTextSelection(null));
     }
@@ -67,8 +67,20 @@ export default function ManualLinkControls(props) {
         setOpen(false);
     };
 
-    function makeManualLink(textSelection, data) {
-        console.log("AXIS SELECT", options[selectedIndex]);
+    function makeManualLink(textSelection, data, viewData) {
+        // console.log("AXIS SELECT", options[selectedIndex]);
+        console.log("Selected Chart", props.selectedChart.spec.data[0].values);
+        console.log("Selected Marks", data);
+        console.log("View Data", viewData);
+        console.log("Elements", viewData[0]._vgsid_, data[0].values[0]);
+
+        var points = [];
+        for (let i = 0; i < data.length; i++) {
+            for (let j = 0; j < viewData.length; j++) {
+                if (data[i].values[0] === viewData[j]._vgsid_) points.push(viewData[j]);
+            }
+        }
+        console.log("Points", points);
         if (textSelection && data) {
             const link = {
                 text: textSelection.text,
@@ -76,7 +88,7 @@ export default function ManualLinkControls(props) {
                 chartId: props.selectedChart.id,
                 active: false,
                 type: "point",
-                data: data.map((d) => d[options[selectedIndex]]),
+                data: points.map((d) => d[options[selectedIndex]]),
                 startIndex: props.textSelection.startIndex,
                 endIndex: props.textSelection.endIndex,
                 sentence: "",
@@ -84,7 +96,7 @@ export default function ManualLinkControls(props) {
             };
             const action = createLinks(props.currentDoc.id, [link]);
             dispatch(action);
-            console.log("Manual LInk ID", action.links);
+            // console.log("Manual LInk ID", action.links);
             dispatch(setManualLinkId(action.links[0].id));
         }
     }

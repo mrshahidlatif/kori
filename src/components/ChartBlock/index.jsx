@@ -39,8 +39,10 @@ export default memo(function ChartBlock({
     const doc = useSelector((state) => state.docs[docId]);
     const chartsInEditor = useSelector((state) => state.docs[docId].chartsInEditor);
     const [selectedMarks, setSelectedMarks] = useState([]);
-    const [axis, setAxis] = useState(null);
+    const [viewData, setViewData] = useState([]);
 
+    const [axis, setAxis] = useState(null);
+    let xxx = [];
     // TODO: use a memoized selector for performance
     const links = useSelector(
         (state) => Object.values(state.links).filter((link) => link.chartId === blockProps.id),
@@ -59,7 +61,7 @@ export default memo(function ChartBlock({
     useEffect(() => {
         const asyncExec = async () => {
             // compute canvas aspect ratio to maintain it while resizing
-            console.log("Specs Final in Chart Block", spec);
+
             const runtime = parse(spec);
             const tempView = await new View(runtime).runAsync();
 
@@ -75,22 +77,26 @@ export default memo(function ChartBlock({
             const result = await vegaEmbed(chartEl.current, spec, { actions: false });
             const view = result.view;
 
-            view.addDataListener("brush_store", function (name, value) {
-                console.log(name, value);
-            });
+            const viewData = view.data("source_0");
+            setViewData(viewData);
+            // console.log("VIEW DATA", viewData);
 
             view.addDataListener("paintbrush_store", function (name, value) {
                 console.log(name, value);
+                setSelectedMarks(selectedMarks.concat(value));
             });
+            console.log("Selected Marks", selectedMarks);
 
-            // console.log("Brush Data", view.data("source_0"));
+            // view.addDataListener("brush_store", function (name, value) {
+            //     console.log(name, value);
+            // });
 
-            view.addEventListener("click", function (event, item) {
-                console.log("CLICK", item.datum);
-                setSelectedMarks(selectedMarks.push(item.datum));
-                // console.log("SELECTED MARKS", selectedMarks);
-                // highlightMarks(view);
-            });
+            // view.addEventListener("click", function (event, item) {
+            //     // console.log("CLICK", item.datum);
+            //     setSelectedMarks(selectedMarks.push(item.datum));
+            //     // console.log("SELECTED MARKS", selectedMarks);
+            //     // highlightMarks(view);
+            // });
             setView(view);
         };
         asyncExec();
@@ -102,19 +108,15 @@ export default memo(function ChartBlock({
         }, 500)
     );
 
+    useEffect(() => {
+        if (!view) {
+            return;
+        }
+    });
+
     function hanldeAxisUpdate(axis) {
         console.log("Axis is updated...!!!!", axis);
         setAxis(axis);
-    }
-
-    function highlightMarks(view) {
-        setSelectedMarks(selectedMarks);
-        console.log("Axis in HIGHLIGHT", selectedMarks);
-        view.signal("highlight", {
-            data: selectedMarks.map((sm) => sm["category"]),
-            field: "category",
-            enabled: true,
-        }).run();
     }
 
     function resize(view, ratio) {
@@ -124,6 +126,7 @@ export default memo(function ChartBlock({
             view.resize().height(height).width(width).run();
         }
     }
+
     useEffect(() => {
         if (!view) {
             return;
@@ -148,7 +151,6 @@ export default memo(function ChartBlock({
     }, [view, links]);
 
     function handleManualLinkAccept() {
-        // makeManualLink(textSelection, selectedMarks);
         setSelectedMarks([]);
     }
     function handleManualLinkReset() {
@@ -180,6 +182,7 @@ export default memo(function ChartBlock({
                     selectedChart={chart}
                     textSelection={textSelection}
                     selectedMarks={selectedMarks}
+                    viewData={viewData}
                     onAccept={handleManualLinkAccept}
                     onReset={handleManualLinkReset}
                     onAxisUpdate={hanldeAxisUpdate}
