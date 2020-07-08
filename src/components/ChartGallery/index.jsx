@@ -47,7 +47,6 @@ export default function ChartGallery(props) {
             // Closure to capture the file information.
             reader.onload = async (e) => {
                 const liteSpec = JSON.parse(e.target.result);
-                console.log("Vega-Lite Specs", liteSpec);
                 const spec = compile(liteSpec).spec; // vega spec
                 // support vega-lite sample datasets
 
@@ -58,8 +57,6 @@ export default function ChartGallery(props) {
                 });
                 const thumbnail = await createThumbnail(spec);
 
-                // addBrushToChartSpec(spec);
-                console.log("Converted Vega Spec", spec);
                 const properties = await extractChartFeatures(spec);
                 dispatch(createChart(docId, spec, liteSpec, { properties, thumbnail }));
             };

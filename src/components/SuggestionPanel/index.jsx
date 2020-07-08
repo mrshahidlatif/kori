@@ -44,7 +44,7 @@ export default function SuggestionPanel(props) {
             <Paper>
                 <ListItem key={"visLink"} button dense onMouseDown={handleCreateLink}>
                     <ListItemAvatar>
-                        <Avatar alt="chart" />
+                        <Avatar alt="chart" src={process.env.PUBLIC_URL + "/" + "linkIcon.png"} />
                     </ListItemAvatar>
                     Create a link
                 </ListItem>

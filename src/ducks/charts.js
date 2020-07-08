@@ -1,5 +1,6 @@
 import uniqueId from "utils/uniqueId";
 import barChartSpec from "./specs/barchart.json";
+import barChartLiteSpec from "./specs/barChartLite.json";
 import { createSelector } from "reselect";
 
 // action types
@@ -78,6 +79,7 @@ const initialState = {
             ],
         },
         spec: barChartSpec,
+        liteSpec: barChartLiteSpec,
     },
 };
 

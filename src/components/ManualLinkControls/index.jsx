@@ -72,38 +72,35 @@ export default function ManualLinkControls(props) {
         setOpen(false);
     };
 
-    function makeManualLink(textSelection, data, brush, viewData) {
-        // console.log("AXIS SELECT", options[selectedIndex]);
-        // console.log("Selected Chart", props.selectedChart.spec.data[0].values);
-        console.log("Selected Marks", data);
+    function makeManualLink(textSelection, multiPoint, brush, viewData) {
+        console.log("Selected Points", multiPoint);
         console.log("Selected Brush", brush);
         console.log("View Data", viewData);
-        // console.log("Elements", viewData[0]._vgsid_, data[0].values[0]);
+
         let link = null;
-        let linkData = null;
-        if (data.length > 0) {
+        if (multiPoint.length > 0) {
+            //TODO: _vegasid_ doesn't exist for charts that have builtin data (e.g., canada.json) Strange!
+            //TODO: handle multi selection on maps; data is inside viewData.properties: We don't have an example for it.
             console.log("Handle MultiPoint Selection");
             var points = [];
-            for (let i = 0; i < data.length; i++) {
+            for (let i = 0; i < multiPoint.length; i++) {
                 for (let j = 0; j < viewData.length; j++) {
-                    if (data[i].values[0] === viewData[j]._vgsid_) points.push(viewData[j]);
+                    if (multiPoint[i].values[0] === viewData[j]._vgsid_) points.push(viewData[j]);
                 }
             }
             console.log("Points", points);
-            if (textSelection && data) {
-                link = {
-                    text: textSelection.text,
-                    feature: { field: options[selectedIndex] },
-                    chartId: props.selectedChart.id,
-                    active: false,
-                    type: "multipoint",
-                    data: points.map((d) => d[options[selectedIndex]]),
-                    startIndex: props.textSelection.startIndex,
-                    endIndex: props.textSelection.endIndex,
-                    sentence: "",
-                    isConfirmed: true,
-                };
-            }
+            link = {
+                text: textSelection.text,
+                feature: { field: options[selectedIndex] },
+                chartId: props.selectedChart.id,
+                active: false,
+                type: "multipoint",
+                data: points.map((d) => d[options[selectedIndex]]),
+                startIndex: props.textSelection.startIndex,
+                endIndex: props.textSelection.endIndex,
+                sentence: "",
+                isConfirmed: true,
+            };
         }
         if (brush.length > 0) {
             console.log("Handle Brush Selection");
@@ -112,18 +109,6 @@ export default function ManualLinkControls(props) {
             let fieldY;
             let rangeX;
             let rangeY;
-            //Single Axis Brush
-            // let brushFiled;
-            // let brushValues;
-            // for (let i = 0; i < brush[0].fields.length; i++) {
-            //     if (brush[0].fields[i].type === "E") {
-            //         brushFiled = brush[0].fields[i].field;
-            //         brushValues = brush[0].values[i];
-            //     }
-            // }
-            const brushFieldIndex = brush[0].fields.findIndex(
-                (f) => f.field === options[selectedIndex]
-            );
 
             //Rectangular Brush
             if (
@@ -135,16 +120,17 @@ export default function ManualLinkControls(props) {
                 fieldY = brush[0].fields[1].field;
                 rangeX = brush[0].values[0];
                 rangeY = brush[0].values[1];
-                points = viewData.filter(
-                    (vd) =>
-                        vd[fieldX] >= rangeX[0] &&
-                        vd[fieldX] <= rangeX[1] &&
-                        vd[fieldY] <= rangeY[0] &&
-                        vd[fieldY] >= rangeY[1]
+                points = [];
+            } else {
+                //Single Axis Brush
+                const brushFieldIndex = brush[0].fields.findIndex(
+                    (f) => f.field === options[selectedIndex] && f.type === "E"
                 );
-                console.log("Filtered Points ", points, chartProperties);
+
+                if (brushFieldIndex > -1) {
+                    points = brush[0].values[brushFieldIndex];
+                }
             }
-            linkData = points.map((p) => p[options[selectedIndex]]);
 
             link = {
                 text: textSelection.text,
@@ -152,7 +138,7 @@ export default function ManualLinkControls(props) {
                 chartId: props.selectedChart.id,
                 active: false,
                 type: "brush",
-                data: [],
+                data: points,
                 startIndex: props.textSelection.startIndex,
                 endIndex: props.textSelection.endIndex,
                 sentence: "",
@@ -165,7 +151,6 @@ export default function ManualLinkControls(props) {
         }
         const action = createLinks(props.currentDoc.id, [link]);
         dispatch(action);
-        // console.log("Manual LInk ID", action.links);
         dispatch(setManualLinkId(action.links[0].id));
     }
 

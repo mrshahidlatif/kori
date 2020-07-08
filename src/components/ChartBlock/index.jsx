@@ -70,6 +70,7 @@ export default memo(function ChartBlock({
             const ratio = canvas.height / canvas.width;
             setRatio(ratio);
             // add autosize: has limitations: https://vega.github.io/vega-lite/docs/size.html#limitations
+            //TODO: brushes interfere with autosize
             // spec.autosize = {
             //     type: "fit",
             //     contains: "padding",
@@ -80,18 +81,19 @@ export default memo(function ChartBlock({
 
             const viewData = view.data("source_0");
             setViewData(viewData);
-            // console.log("VIEW DATA", viewData);
 
             view.addDataListener("paintbrush_store", function (name, value) {
                 console.log(name, value);
                 setSelectedMarks(selectedMarks.concat(value));
             });
-            console.log("Selected Marks", selectedMarks);
-
-            view.addDataListener("brush_store", function (name, value) {
-                console.log(name, value);
-                setBrush(brush.concat(value));
-            });
+            try {
+                view.addDataListener("brush_store", function (name, value) {
+                    console.log(name, value);
+                    setBrush(brush.concat(value));
+                });
+            } catch (error) {
+                //No brush_store if no brush added
+            }
 
             // view.addEventListener("click", function (event, item) {
             //     // console.log("CLICK", item.datum);
@@ -109,12 +111,6 @@ export default memo(function ChartBlock({
             resize(view, ratio);
         }, 500)
     );
-
-    useEffect(() => {
-        if (!view) {
-            return;
-        }
-    });
 
     function hanldeAxisUpdate(axis) {
         console.log("Axis is updated...!!!!", axis);
@@ -159,7 +155,6 @@ export default memo(function ChartBlock({
     }, [view, links]);
 
     function handleManualLinkAccept() {
-        console.log("Selected BRUSH", brush);
         setSelectedMarks([]);
     }
     function handleManualLinkReset() {
