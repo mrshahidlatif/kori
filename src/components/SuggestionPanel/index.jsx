@@ -50,7 +50,8 @@ export default function SuggestionPanel(props) {
                 </ListItem>
                 <List>
                     {
-                        // should we rank suggestions?
+                        // should we rank suggestions
+
                         props.suggestions.slice(0, SUGGESTION_LIMIT).map((suggestion, i) => (
                             <ListItem
                                 key={i}

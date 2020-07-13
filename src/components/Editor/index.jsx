@@ -148,7 +148,7 @@ export default function Editor(props) {
             console.log("suggestions", suggestions);
             suggestions.length !== 0
                 ? setSuggestions(suggestions)
-                : setSuggestions([{ text: "No link found!" }]);
+                : setSuggestions([{ text: "NoLinkFound!" }]);
         }
         if (allLinks[manualLinkId]) {
             setEditorState(insertLinks([allLinks[manualLinkId]], editorState, "Manual"));
@@ -271,9 +271,9 @@ export default function Editor(props) {
                     ref={editorEl}
                 />
             </div>
-            {suggestions.length > 0 && chartsInEditor.length > 0 && (
+            {suggestions.length >= 1 && chartsInEditor.length > 0 && (
                 <SuggestionPanel
-                    suggestions={suggestions}
+                    suggestions={suggestions.filter((s) => s.text !== "NoLinkFound!")}
                     textSelection={tempTextSelection}
                     onSelected={handleSuggestionSelected}
                     onCreateLinkSelect={handleCreateLinkSelect}

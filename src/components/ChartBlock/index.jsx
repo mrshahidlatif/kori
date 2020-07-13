@@ -178,6 +178,7 @@ export default memo(function ChartBlock({
         >
             {/* <Vega spec={spec} onNewView={handleView} onParseError={handleError} /> */}
             <div ref={chartEl} />
+            {/* TODO: Commented our for now as it interferes with manual creation of links! */}
             {/* {showConfig && !textSelection && <ChartConfigPanel chart={chart} />} */}
             {/* {resizing && <AspectRatioIcon style={{color: grey[500], zIndex:2, marginLeft:"-30px"}}/>} */}
             {showConfig && textSelection && (
