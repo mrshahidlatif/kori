@@ -9,6 +9,7 @@ import ChartConfigPanel from "components/ChartConfigPanel";
 import { useParams } from "react-router-dom";
 
 import ManualLinkControls from "components/ManualLinkControls";
+import { setTextSelection } from "ducks/ui";
 
 export default memo(function ChartBlock({
     block,
@@ -112,11 +113,6 @@ export default memo(function ChartBlock({
         }, 500)
     );
 
-    function hanldeAxisUpdate(axis) {
-        console.log("Axis is updated...!!!!", axis);
-        setAxis(axis);
-    }
-
     function resize(view, ratio) {
         if (view) {
             const { width } = containerEl.current.getBoundingClientRect();
@@ -154,15 +150,8 @@ export default memo(function ChartBlock({
         }
     }, [view, links]);
 
-    function handleManualLinkAccept() {
-        setSelectedMarks([]);
-    }
-    function handleManualLinkReset() {
-        setSelectedMarks([]);
-    }
-
     const showConfig = selection.getAnchorKey() === block.getKey(); // show only clicking this block
-    const newStyle =
+    const highlightStyle =
         chartsInEditor.indexOf(chart.id) > -1 && !showConfig && textSelection
             ? { ...style, position: "relative", borderStyle: "solid" }
             : { ...style, position: "relative" };
@@ -172,7 +161,7 @@ export default memo(function ChartBlock({
             ref={containerEl}
             {...elementProps}
             // style={{ ...style, position: "relative", borderStyle: "solid" }} // absolute positioning config panel
-            style={newStyle}
+            style={highlightStyle}
             // onMouseEnter={()=>setResizing(true)}
             // onMouseLeave={()=>setResizing(false)}
         >
@@ -189,9 +178,6 @@ export default memo(function ChartBlock({
                     selectedMarks={selectedMarks}
                     brush={brush}
                     viewData={viewData}
-                    onAccept={handleManualLinkAccept}
-                    onReset={handleManualLinkReset}
-                    onAxisUpdate={hanldeAxisUpdate}
                 />
             )}
         </div>

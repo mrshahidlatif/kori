@@ -1,6 +1,7 @@
 export const SET_SELECTED_LINK = "SET_SELECTED_LINK";
 export const SET_TEXT_SELECTION = "SET_TEXT_SELECTION";
 export const SET_MANUAL_LINK_ID = "SET_MANUAL_LINK_ID";
+export const EXIT_MANUAL_LINK_MODE = "EXIT_MANUAL_LINK_MODE";
 
 export const setSelectedLink = (link) => {
     return { type: SET_SELECTED_LINK, link };
@@ -10,6 +11,9 @@ export const setTextSelection = (textSelection) => {
 };
 export const setManualLinkId = (linkId) => {
     return { type: SET_MANUAL_LINK_ID, linkId };
+};
+export const exitManualLinkMode = (exit) => {
+    return { type: EXIT_MANUAL_LINK_MODE, exit };
 };
 //reducers
 const initialState = {};
@@ -30,6 +34,11 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 manualLinkId: action.linkId,
+            };
+        case EXIT_MANUAL_LINK_MODE:
+            return {
+                ...state,
+                exitManualLink: action.exit,
             };
         default:
             return state;

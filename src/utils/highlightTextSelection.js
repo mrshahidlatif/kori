@@ -1,13 +1,15 @@
 import { Modifier, EditorState } from "draft-js";
 
-export default (textSelection, editorState, method = "Auto") => {
+export default (textSelection, editorState, deSelect) => {
+    //deSelect = true removes the highlighting
     const currentContent = editorState.getCurrentContent();
     const currentSelection = editorState.getSelection();
 
     let newContent = currentContent.createEntity(`TEXT_SELECTION`, "MUTABLE", {
         ...textSelection,
-        method, // do we need to know this?
     });
+
+    if (deSelect) newContent = currentContent.createEntity();
     const entityKey = newContent.getLastCreatedEntityKey();
 
     const insertTextSelection = currentSelection.merge({

@@ -23,7 +23,7 @@ import PotentialLinkControls from "components/PotentialLinkControls";
 import { updateDoc, updateChartsInEditor } from "ducks/docs";
 import { createLinks, createLink, deleteLink } from "ducks/links";
 import { getChartsInEditor, getCharts } from "ducks/charts";
-import { setSelectedLink, setTextSelection, setManualLinkId } from "ducks/ui";
+import { setSelectedLink, setManualLinkId, exitManualLinkMode, setTextSelection } from "ducks/ui";
 
 import editorDecorators from "utils/editorDecorators";
 import findSuggestions from "utils/findSuggestions";
@@ -33,7 +33,6 @@ import getLastTypedWord from "utils/getLastTypedWord";
 import getLastTypedSentence from "utils/getLastTypedSentence";
 import getTextSelection from "utils/getTextSelection";
 import highlightTextSelection from "utils/highlightTextSelection";
-import FloatingToolbar from "components/FloatingToolbar";
 
 export default function Editor(props) {
     const dispatch = useDispatch();
@@ -43,9 +42,10 @@ export default function Editor(props) {
     const chartsInEditor = useSelector((state) => getChartsInEditor(state, docId));
     const selectedLink = useSelector((state) => state.ui.selectedLink);
     const allLinks = useSelector((state) => state.links);
+    const exitManualLink = useSelector((state) => state.ui.exitManualLink);
     const manualLinkId = useSelector((state) => state.ui.manualLinkId);
-    const textSelection = useSelector((state) => state.ui.textSelection);
-    const [tempTextSelection, setTempTextSelection] = useState(textSelection);
+    const textSelectionInStore = useSelector((state) => state.ui.textSelection);
+    const [tempTextSelection, setTempTextSelection] = useState(textSelectionInStore);
 
     const editorEl = useRef(null); //https://reactjs.org/docs/hooks-reference.html#useref
 
@@ -117,6 +117,8 @@ export default function Editor(props) {
         const currentSelection = editorState.getSelection();
         const caretPosition = currentSelection.getAnchorOffset();
         const activeBlockKey = currentSelection.getAnchorKey();
+        //Hide the link accept/delete button when cursor not in link range
+        //TODO: what if selection spans more than one block?
         if (selectedLink && activeBlockKey) {
             if (
                 activeBlockKey !== selectedLink.blockKey ||
@@ -138,18 +140,23 @@ export default function Editor(props) {
         setTempTextSelection(textSelection);
 
         if (textSelection) {
-            // dispatch(setTextSelection(textSelection));
-            // setEditorState(highlightTextSelection(textSelection, editorState));
             const suggestions = findSuggestions(
                 chartsInEditor,
                 textSelection.text,
                 textSelection.startIndex
             );
-            console.log("suggestions", suggestions);
             suggestions.length !== 0
                 ? setSuggestions(suggestions)
                 : setSuggestions([{ text: "NoLinkFound!" }]);
         }
+
+        if (exitManualLink && textSelectionInStore) {
+            dispatch(setTextSelection(null));
+            dispatch(exitManualLinkMode(false));
+            setEditorState(highlightTextSelection(textSelectionInStore, editorState, true));
+            //TODO: problem managing control back to editor!
+        }
+
         if (allLinks[manualLinkId]) {
             setEditorState(insertLinks([allLinks[manualLinkId]], editorState, "Manual"));
             dispatch(setManualLinkId(null));

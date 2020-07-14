@@ -17,13 +17,12 @@ import MenuList from "@material-ui/core/MenuList";
 
 import { setTextSelection } from "ducks/ui";
 import { createLinks } from "ducks/links";
-import { setManualLinkId } from "ducks/ui";
+import { setManualLinkId, exitManualLinkMode } from "ducks/ui";
 
 export default function ManualLinkControls(props) {
     const dispatch = useDispatch();
     const selection = window.getSelection();
     const pos = selection.rangeCount > 0 ? selection.getRangeAt(0).getBoundingClientRect() : null;
-    const textSelection = useSelector((state) => state.ui.textSelection);
     const padding = 10;
     const chartProperties = props.selectedChart.properties;
     let options = chartProperties.axes.map((cp) => cp.field);
@@ -36,13 +35,13 @@ export default function ManualLinkControls(props) {
     function handleResetClick(event) {
         event.preventDefault();
         event.stopPropagation();
-        props.onReset();
+        dispatch(exitManualLinkMode(true));
     }
     function handleAcceptClick(event) {
         event.preventDefault();
         event.stopPropagation();
         makeManualLink(props.textSelection, props.selectedMarks, props.brush, props.viewData);
-        props.onAccept();
+
         dispatch(setTextSelection(null));
     }
 
@@ -55,7 +54,6 @@ export default function ManualLinkControls(props) {
     };
 
     const handleMenuItemClick = (event, index) => {
-        props.onAxisUpdate(options[index]);
         setSelectedIndex(index);
         setOpen(false);
     };
@@ -88,7 +86,7 @@ export default function ManualLinkControls(props) {
                     if (multiPoint[i].values[0] === viewData[j]._vgsid_) points.push(viewData[j]);
                 }
             }
-            console.log("Points", points);
+
             link = {
                 text: textSelection.text,
                 feature: { field: options[selectedIndex] },
@@ -165,7 +163,7 @@ export default function ManualLinkControls(props) {
         >
             <ButtonGroup size="small" variant="contained" aria-label="small button group">
                 <Button onMouseDown={handleAcceptClick}>Accept</Button>
-                <Button onMouseDown={handleResetClick}>Reset</Button>
+                <Button onMouseDown={handleResetClick}>Cancel</Button>
             </ButtonGroup>
             <Grid container direction="column" alignItems="center">
                 <Grid item xs={12}>
