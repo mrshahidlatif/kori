@@ -19,6 +19,10 @@ export default (liteSpec) => {
                 selection: "brush",
                 value: 1,
             },
+            condition: {
+                selection: "paintbrush",
+                value: 1,
+            },
             value: 0.3,
         };
     return liteSpec;
