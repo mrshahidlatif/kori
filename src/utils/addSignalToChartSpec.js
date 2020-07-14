@@ -52,19 +52,21 @@ export function addSignalToMark(mark, highlight) {
         (datum[highlight.field] > highlight.rangeMin && datum[highlight.field]<highlight.rangeMax)
     )`;
     const oldProp = mark.encode.update[highlight.channel];
+    const highlightProp = [
+        {
+            test: activePredicate,
+            value: highlight.active,
+        },
+        {
+            test: inactivePredicate,
+            value: highlight.inactive,
+        },
+        // put existing property if exists either in array or object form
+        //TODO: see if we need the Object Check?
+        // ...(isObject(oldProp) ? [oldProp] : isArray(oldProp) ? oldProp : []),
+    ];
     mark.encode.update = {
         ...mark.encode.update,
-        [highlight.channel]: [
-            {
-                test: activePredicate,
-                value: highlight.active,
-            },
-            {
-                test: inactivePredicate,
-                value: highlight.inactive,
-            },
-            // put existing property if exists either in array or object form
-            ...(isObject(oldProp) ? [oldProp] : isArray(oldProp) ? oldProp : []),
-        ],
+        [highlight.channel]: highlightProp.concat(isArray(oldProp) ? oldProp : []),
     };
 }

@@ -13,5 +13,13 @@ export default (liteSpec) => {
           };
 
     liteSpec["selection"] = selections;
+    if (!isMap)
+        liteSpec.encoding["opacity"] = {
+            condition: {
+                selection: "brush",
+                value: 1,
+            },
+            value: 0.3,
+        };
     return liteSpec;
 };

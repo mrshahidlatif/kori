@@ -76,7 +76,7 @@ export default memo(function ChartBlock({
             //     type: "fit",
             //     contains: "padding",
             // };
-
+            console.log("Vega Specs", spec);
             const result = await vegaEmbed(chartEl.current, spec, { actions: false });
             const view = result.view;
 
