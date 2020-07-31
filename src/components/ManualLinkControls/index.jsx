@@ -77,7 +77,7 @@ export default function ManualLinkControls(props) {
 
         let link = null;
         if (multiPoint.length > 0) {
-            //TODO: _vegasid_ doesn't exist for charts that have builtin data (e.g., canada.json) Strange!
+            //TODO: _vegasid_ doesn't exist for charts that have built-in data (e.g., canada.json) Strange!
             //TODO: handle multi selection on maps; data is inside viewData.properties: We don't have an example for it.
             console.log("Handle MultiPoint Selection");
             var points = [];
@@ -124,6 +124,7 @@ export default function ManualLinkControls(props) {
                 const brushFieldIndex = brush[0].fields.findIndex(
                     (f) => f.field === options[selectedIndex] && f.type === "E"
                 );
+                //TODO: handle single axis brush of type "R" too
 
                 if (brushFieldIndex > -1) {
                     points = brush[0].values[brushFieldIndex];

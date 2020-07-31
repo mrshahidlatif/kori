@@ -235,7 +235,7 @@ export default function Editor(props) {
         setEditorState(newEditorState);
     }
     function handleCreateLinkSelect() {
-        setEditorState(highlightTextSelection(tempTextSelection, editorState));
+        setEditorState(highlightTextSelection(tempTextSelection, editorState, false));
     }
 
     function handleLinkDiscard(link) {

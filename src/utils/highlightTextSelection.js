@@ -2,6 +2,7 @@ import { Modifier, EditorState } from "draft-js";
 
 export default (textSelection, editorState, deSelect) => {
     //deSelect = true removes the highlighting
+    console.log("Text Selection", textSelection);
     const currentContent = editorState.getCurrentContent();
     const currentSelection = editorState.getSelection();
 

@@ -11,17 +11,17 @@ export default (liteSpec) => {
     const isMap = liteSpec.mark === "geoshape" || liteSpec.mark.type === "arc";
     const selections = isMap
         ? {
-              paintbrush: { type: "multi", toggle: true, clear: selectionClearCondition },
+              paintbrush: { type: "multi", toggle: true },
           }
         : {
               brush: {
                   type: "interval",
-                  clear: selectionClearCondition,
+                  //   clear: selectionClearCondition,
               },
               paintbrush: {
                   type: "multi",
                   toggle: true,
-                  clear: selectionClearCondition,
+                  //   clear: selectionClearCondition,
               },
           };
 
@@ -31,11 +31,11 @@ export default (liteSpec) => {
         liteSpec.encoding["opacity"] = {
             condition: [
                 // {
-                //     selection: "paintbrush",
+                //     selection: "brush",
                 //     value: 1,
                 // },
                 {
-                    selection: "brush",
+                    selection: "paintbrush",
                     value: 1,
                 },
             ],
