@@ -43,8 +43,6 @@ export default memo(function ChartBlock({
     const [viewData, setViewData] = useState([]);
     const [brush, setBrush] = useState([]);
 
-    const [axis, setAxis] = useState(null);
-    let xxx = [];
     // TODO: use a memoized selector for performance
     const links = useSelector(
         (state) => Object.values(state.links).filter((link) => link.chartId === blockProps.id),
@@ -117,7 +115,7 @@ export default memo(function ChartBlock({
         if (view) {
             const { width } = containerEl.current.getBoundingClientRect();
             const height = ratio * width;
-            view.resize().height(height).width(width).run();
+            // view.resize().height(height).width(width).run();
         }
     }
 
