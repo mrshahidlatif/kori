@@ -142,7 +142,7 @@ export default function Editor(props) {
         if (textSelection) {
             const suggestions = findSuggestions(
                 chartsInEditor,
-                textSelection.text,
+                textSelection.text.trim(),
                 textSelection.startIndex
             );
             suggestions.length !== 0

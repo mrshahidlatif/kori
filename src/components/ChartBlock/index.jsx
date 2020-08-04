@@ -166,7 +166,6 @@ export default memo(function ChartBlock({
             {...elementProps}
             // style={{ ...style, position: "relative", borderStyle: "solid" }} // absolute positioning config panel
             style={highlightStyle}
-            display={"flex"}
             // onMouseEnter={()=>setResizing(true)}
             // onMouseLeave={()=>setResizing(false)}
         >
@@ -179,6 +178,7 @@ export default memo(function ChartBlock({
                     <SettingsIcon />
                 </IconButton>
             )}
+
             {/* <Vega spec={spec} onNewView={handleView} onParseError={handleError} /> */}
             <div ref={chartEl} />
             {/* {showConfig && !textSelection && <ChartConfigPanel chart={chart} />} */}
