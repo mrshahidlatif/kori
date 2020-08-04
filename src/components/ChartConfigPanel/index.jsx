@@ -70,83 +70,87 @@ export default function ChartConfigPanel(props) {
         dispatch(updateChart(props.chart.id, { highlight: { ...highlight, inactive: newValue } }));
     }
     return (
-        <Box
-            zIndex="modal"
-            className={css.panel}
-            top={50}
-            left={"50%"}
-            onMouseDown={(e) => e.stopPropagation()}
-        >
-            <Box component={Paper} p={2}>
-                <Grid container direction="column" spacing={2}>
-                    <Grid item>
-                        <Typography gutterBottom>Highlight Option</Typography>
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="caption">Channel</Typography>
-                        <Box>
-                            <Select value={highlight.channel} onChange={handleChannelChange}>
-                                {Object.keys(channelOptions).map((option) => (
-                                    <MenuItem key={option} value={option}>
-                                        {option}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </Box>
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="caption">Active</Typography>
-                        {highlight.channel === "opacity" ? (
-                            <Slider
-                                value={active}
-                                aria-labelledby="discrete-slider"
-                                valueLabelDisplay="auto"
-                                min={0.0}
-                                max={1.0}
-                                step={0.05}
-                                onChange={handleActiveChange}
-                                onChangeCommitted={handleActiveChangeCommitted}
-                            />
-                        ) : (
-                            <Box className={css.picker}>
-                                {colors.map((color) => (
-                                    <Box
-                                        className={css.color}
-                                        bgcolor={color}
-                                        border={color === active ? 1 : 0}
-                                        onMouseUp={(e) => handleActiveChangeCommitted(e, color)}
-                                    />
-                                ))}
+        <div>
+            <Box
+                zIndex="modal"
+                className={css.panel}
+                top={40}
+                left={"45%"}
+                onMouseDown={(e) => e.stopPropagation()}
+            >
+                <Box component={Paper} p={2}>
+                    <Grid container direction="column" spacing={2}>
+                        <Grid item>
+                            <Typography gutterBottom>Highlight Option</Typography>
+                        </Grid>
+                        <Grid item>
+                            <Typography variant="caption">Channel</Typography>
+                            <Box>
+                                <Select value={highlight.channel} onChange={handleChannelChange}>
+                                    {Object.keys(channelOptions).map((option) => (
+                                        <MenuItem key={option} value={option}>
+                                            {option}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
                             </Box>
-                        )}
-                        <Typography variant="caption">Inactive</Typography>
-                        {highlight.channel === "opacity" ? (
-                            <Slider
-                                value={inactive}
-                                aria-labelledby="discrete-slider"
-                                valueLabelDisplay="auto"
-                                min={0.0}
-                                max={1.0}
-                                step={0.05}
-                                onChange={handleInactiveChange}
-                                onChangeCommitted={handleInactiveChangeCommitted}
-                            />
-                        ) : (
-                            <Box className={css.picker}>
-                                {colors.map((color) => (
-                                    <Box
-                                        className={css.color}
-                                        bgcolor={color}
-                                        border={color === inactive ? 1 : 0}
-                                        onMouseUp={(e) => handleInactiveChangeCommitted(e, color)}
-                                    />
-                                ))}
-                            </Box>
-                        )}
+                        </Grid>
+                        <Grid item>
+                            <Typography variant="caption">Active</Typography>
+                            {highlight.channel === "opacity" ? (
+                                <Slider
+                                    value={active}
+                                    aria-labelledby="discrete-slider"
+                                    valueLabelDisplay="auto"
+                                    min={0.0}
+                                    max={1.0}
+                                    step={0.05}
+                                    onChange={handleActiveChange}
+                                    onChangeCommitted={handleActiveChangeCommitted}
+                                />
+                            ) : (
+                                <Box className={css.picker}>
+                                    {colors.map((color) => (
+                                        <Box
+                                            className={css.color}
+                                            bgcolor={color}
+                                            border={color === active ? 1 : 0}
+                                            onMouseUp={(e) => handleActiveChangeCommitted(e, color)}
+                                        />
+                                    ))}
+                                </Box>
+                            )}
+                            <Typography variant="caption">Inactive</Typography>
+                            {highlight.channel === "opacity" ? (
+                                <Slider
+                                    value={inactive}
+                                    aria-labelledby="discrete-slider"
+                                    valueLabelDisplay="auto"
+                                    min={0.0}
+                                    max={1.0}
+                                    step={0.05}
+                                    onChange={handleInactiveChange}
+                                    onChangeCommitted={handleInactiveChangeCommitted}
+                                />
+                            ) : (
+                                <Box className={css.picker}>
+                                    {colors.map((color) => (
+                                        <Box
+                                            className={css.color}
+                                            bgcolor={color}
+                                            border={color === inactive ? 1 : 0}
+                                            onMouseUp={(e) =>
+                                                handleInactiveChangeCommitted(e, color)
+                                            }
+                                        />
+                                    ))}
+                                </Box>
+                            )}
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Box>
             </Box>
-        </Box>
+        </div>
     );
 }
 

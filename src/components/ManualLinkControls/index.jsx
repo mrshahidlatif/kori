@@ -174,7 +174,7 @@ export default function ManualLinkControls(props) {
                 top={25}
                 className={css.panel}
             >
-                <ButtonGroup size="small" variant="contained" aria-label="small button group">
+                <ButtonGroup size="small" variant="contained" aria-label="smaller button group">
                     <Button onMouseDown={handleAcceptClick}>Accept</Button>
                     <Button onMouseDown={handleResetClick}>Cancel</Button>
                 </ButtonGroup>

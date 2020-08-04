@@ -7,9 +7,11 @@ import { parse } from "vega-parser";
 import { View } from "vega-view";
 import ChartConfigPanel from "components/ChartConfigPanel";
 import { useParams } from "react-router-dom";
-
 import ManualLinkControls from "components/ManualLinkControls";
 import { setTextSelection } from "ducks/ui";
+import IconButton from "@material-ui/core/IconButton";
+import SettingsIcon from "@material-ui/icons/Settings";
+import Box from "@material-ui/core/Box";
 
 export default memo(function ChartBlock({
     block,
@@ -42,6 +44,7 @@ export default memo(function ChartBlock({
     const [selectedMarks, setSelectedMarks] = useState([]);
     const [viewData, setViewData] = useState([]);
     const [brush, setBrush] = useState([]);
+    const [toggleSettings, setToggleSettings] = useState(false);
 
     // TODO: use a memoized selector for performance
     const links = useSelector(
@@ -148,6 +151,9 @@ export default memo(function ChartBlock({
         }
     }, [view, links]);
 
+    function handleSettingClick() {
+        setToggleSettings(!toggleSettings);
+    }
     const showConfig = selection.getAnchorKey() === block.getKey(); // show only clicking this block
     const highlightStyle =
         chartsInEditor.indexOf(chart.id) > -1 && !showConfig && textSelection
@@ -160,13 +166,23 @@ export default memo(function ChartBlock({
             {...elementProps}
             // style={{ ...style, position: "relative", borderStyle: "solid" }} // absolute positioning config panel
             style={highlightStyle}
+            display={"flex"}
             // onMouseEnter={()=>setResizing(true)}
             // onMouseLeave={()=>setResizing(false)}
         >
+            {showConfig && (
+                <IconButton
+                    onMouseDown={handleSettingClick}
+                    aria-label="settings"
+                    // color="primary"
+                >
+                    <SettingsIcon />
+                </IconButton>
+            )}
             {/* <Vega spec={spec} onNewView={handleView} onParseError={handleError} /> */}
             <div ref={chartEl} />
-            {/* TODO: Commented our for now as it interferes with manual creation of links! */}
             {/* {showConfig && !textSelection && <ChartConfigPanel chart={chart} />} */}
+            {showConfig && toggleSettings && <ChartConfigPanel chart={chart} />}
             {/* {resizing && <AspectRatioIcon style={{color: grey[500], zIndex:2, marginLeft:"-30px"}}/>} */}
             {showConfig && textSelection && (
                 <ManualLinkControls
