@@ -149,11 +149,11 @@ export default function Editor(props) {
                 ? setSuggestions(suggestions)
                 : setSuggestions([{ text: "NoLinkFound!" }]);
         }
-
+        console.log("TextSelectionInStore", textSelectionInStore);
         if (exitManualLink && textSelectionInStore) {
+            setEditorState(highlightTextSelection(textSelectionInStore, editorState, true));
             dispatch(setTextSelection(null));
             dispatch(exitManualLinkMode(false));
-            setEditorState(highlightTextSelection(textSelectionInStore, editorState, true));
             //TODO: problem managing control back to editor!
         }
 
@@ -276,6 +276,7 @@ export default function Editor(props) {
                     blockRendererFn={blockRendererFn}
                     decorators={editorDecorators}
                     ref={editorEl}
+                    // readOnly={true}
                 />
             </div>
             {suggestions.length >= 1 && chartsInEditor.length > 0 && (
