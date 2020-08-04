@@ -22,7 +22,7 @@ export default function SuggestionPanel(props) {
     const selection = window.getSelection();
     const pos = selection.rangeCount > 0 ? selection.getRangeAt(0).getBoundingClientRect() : null;
 
-    const padding = 10;
+    const padding = 20;
 
     function handleClick(suggestion, event) {
         event.preventDefault();
@@ -31,8 +31,8 @@ export default function SuggestionPanel(props) {
     }
 
     function handleCreateLink() {
-        dispatch(setTextSelection(props.textSelection));
         props.onCreateLinkSelect();
+        dispatch(setTextSelection(props.textSelection));
     }
     return pos ? (
         <Box

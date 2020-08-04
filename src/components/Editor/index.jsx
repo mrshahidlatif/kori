@@ -7,6 +7,7 @@ import {
     AtomicBlockUtils,
     RichUtils,
     convertToRaw,
+    convertFromRaw,
     Modifier,
     ContentState,
 } from "draft-js";
@@ -39,22 +40,28 @@ export default function Editor(props) {
     let { docId } = useParams();
     const doc = useSelector((state) => state.docs[docId]);
     const charts = useSelector((state) => getCharts(state, docId));
+    const storedEditorState = useSelector((state) => state.docs[docId].editorRawState);
     const chartsInEditor = useSelector((state) => getChartsInEditor(state, docId));
     const selectedLink = useSelector((state) => state.ui.selectedLink);
     const allLinks = useSelector((state) => state.links);
     const exitManualLink = useSelector((state) => state.ui.exitManualLink);
     const manualLinkId = useSelector((state) => state.ui.manualLinkId);
+
     const textSelectionInStore = useSelector((state) => state.ui.textSelection);
     const [tempTextSelection, setTempTextSelection] = useState(textSelectionInStore);
 
     const editorEl = useRef(null); //https://reactjs.org/docs/hooks-reference.html#useref
-
     const [suggestions, setSuggestions] = useState([]);
     const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
+    //Disabling edit functions in view mode!
+    const viewMode = props.viewMode;
+
     useEffect(() => {
         // console.log('editor', props.editor)
-        // const contentState = convertFromRaw(editor);
+        console.log("Previous editor state", storedEditorState);
+        //TODO: restoring state doesn't restore links!!!
+        // const contentState = convertFromRaw(storedEditorState);
         // setEditorState(EditorState.createWithContent(contentState));
         // setLastTypedWord('');
         // let editorNode = document.getElementById("mainEditor");
@@ -76,7 +83,7 @@ export default function Editor(props) {
                 const action = createLinks(doc.id, links); // need ids
                 // console.log("action.links", action.links);
                 editorState = insertLinks(action.links, editorState, "Auto");
-
+                setEditorState(editorState);
                 dispatch(action);
             }
         }
@@ -134,11 +141,14 @@ export default function Editor(props) {
         let textSelection = getTextSelection(
             editorState.getCurrentContent(),
             currentSelection,
-            " "
+            " " //delimiter
         );
         //Hide the floating controls when no text is selected
         setTempTextSelection(textSelection);
 
+        //search for suggestions on text selection
+        console.log("TEXT Selection", textSelection);
+        console.log("TEMP TEXT Selection", tempTextSelection);
         if (textSelection) {
             const suggestions = findSuggestions(
                 chartsInEditor,
@@ -149,7 +159,7 @@ export default function Editor(props) {
                 ? setSuggestions(suggestions)
                 : setSuggestions([{ text: "NoLinkFound!" }]);
         }
-        console.log("TextSelectionInStore", textSelectionInStore);
+
         if (exitManualLink && textSelectionInStore) {
             setEditorState(highlightTextSelection(textSelectionInStore, editorState, true));
             dispatch(setTextSelection(null));
@@ -265,7 +275,7 @@ export default function Editor(props) {
     }
     return (
         <Fragment>
-            <EditorToolbar />
+            {!viewMode && <EditorToolbar />}
             <div className={css.editor} onDragOver={handleDragOver} onDrop={handleDrop}>
                 <DraftEditor
                     editorState={editorState}
@@ -276,7 +286,7 @@ export default function Editor(props) {
                     blockRendererFn={blockRendererFn}
                     decorators={editorDecorators}
                     ref={editorEl}
-                    // readOnly={true}
+                    readOnly={viewMode}
                 />
             </div>
             {suggestions.length >= 1 && chartsInEditor.length > 0 && (

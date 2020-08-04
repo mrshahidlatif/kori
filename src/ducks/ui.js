@@ -2,6 +2,7 @@ export const SET_SELECTED_LINK = "SET_SELECTED_LINK";
 export const SET_TEXT_SELECTION = "SET_TEXT_SELECTION";
 export const SET_MANUAL_LINK_ID = "SET_MANUAL_LINK_ID";
 export const EXIT_MANUAL_LINK_MODE = "EXIT_MANUAL_LINK_MODE";
+export const SET_CURRENT_DOC_ID = "SET_CURRENT_DOC_ID";
 
 export const setSelectedLink = (link) => {
     return { type: SET_SELECTED_LINK, link };
@@ -15,6 +16,11 @@ export const setManualLinkId = (linkId) => {
 export const exitManualLinkMode = (exit) => {
     return { type: EXIT_MANUAL_LINK_MODE, exit };
 };
+
+export const SetCurrentDocId = (docId) => {
+    return { type: SET_CURRENT_DOC_ID, docId };
+};
+
 //reducers
 const initialState = {};
 
@@ -39,6 +45,11 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 exitManualLink: action.exit,
+            };
+        case SET_CURRENT_DOC_ID:
+            return {
+                ...state,
+                docId: action.docId,
             };
         default:
             return state;

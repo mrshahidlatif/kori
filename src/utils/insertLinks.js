@@ -38,7 +38,7 @@ export const insertLink = (link, editorState, method = "Auto") => {
         entityKey
     );
     const caretNewIndex = end > blockEndIndex ? end : blockEndIndex;
-    let newEditorState = EditorState.push(editorState, newContent, "apply-entity");
+    let newEditorState = EditorState.push(editorState, newContent, "LINK");
     let newSelection = newEditorState.getSelection().merge({
         focusOffset: caretNewIndex,
         anchorOffset: caretNewIndex,
