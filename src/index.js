@@ -31,6 +31,9 @@ const theme = createMuiTheme({ //https://material-ui.com/customization/palette/
     },
     success:{
       main:"#4caf50"
+    },
+    textSecondary:{
+      main:'#bdbdbd'
     }
   }
 });

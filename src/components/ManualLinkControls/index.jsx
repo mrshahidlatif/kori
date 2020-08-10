@@ -162,31 +162,26 @@ export default function ManualLinkControls(props) {
             top={0}
             className={css.panel}
         >
-            <ButtonGroup size="small" variant="contained" aria-label="small button group">
-                <Button onMouseDown={handleAcceptClick}>Accept</Button>
-                <Button onMouseDown={handleResetClick}>Cancel</Button>
-            </ButtonGroup>
-            <Grid container direction="column" alignItems="center">
-                <Grid item xs={12}>
-                    <ButtonGroup
-                        variant="contained"
-                        // color="primary"
-                        ref={anchorRef}
-                        aria-label="split button"
-                    >
-                        <Button
-                            onClick={handleClick} // color="primary"
-                            size="small"
+            <Paper elevation={1}>
+                <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
+                    
+                    <Button
+                         ref={anchorRef}
                             aria-controls={open ? "split-button-menu" : undefined}
                             aria-expanded={open ? "true" : undefined}
                             aria-label="Select an axis"
                             aria-haspopup="menu"
                             onClick={handleToggle}
+                            endIcon={<ArrowDropDownIcon />}
                         >
                             {options[selectedIndex]}
-                            <ArrowDropDownIcon />
-                        </Button>
-                    </ButtonGroup>
+                            
+                    </Button>
+                </ButtonGroup>
+                <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
+                    <Button onMouseDown={handleAcceptClick}>Accept</Button>
+                    <Button onMouseDown={handleResetClick}>Cancel</Button>
+                </ButtonGroup>
                     <Popper
                         open={open}
                         anchorEl={anchorRef.current}
@@ -223,8 +218,13 @@ export default function ManualLinkControls(props) {
                             </Grow>
                         )}
                     </Popper>
+            </Paper>
+           
+            {/* <Grid container direction="column" alignItems="center">
+                <Grid item xs={12}>
+                    
                 </Grid>
-            </Grid>
+            </Grid> */}
         </Box>
     ) : (
         ""

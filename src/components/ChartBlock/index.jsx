@@ -117,7 +117,7 @@ export default memo(function ChartBlock({
         if (view) {
             const { width } = containerEl.current.getBoundingClientRect();
             const height = ratio * width;
-            view.resize().height(height).width(width).run();
+            view.resize().height(height).width(width).runAsync();
         }
     }
 
@@ -143,10 +143,10 @@ export default memo(function ChartBlock({
                         fieldY: link.fieldY || "",
                         rangeX: link.rangeX || [0, 0],
                         rangeY: link.rangeY || [0, 0],
-                    }).run();
+                    }).runAsync();
                 });
         } else {
-            view.signal("highlight", { enabled: false }).run();
+            view.signal("highlight", { enabled: false }).runAsync();
         }
     }, [view, links]);
 
