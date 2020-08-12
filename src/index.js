@@ -34,6 +34,24 @@ const theme = createMuiTheme({
             main: "#4caf50",
         },
     },
+    secondary: {
+        main: "#e91e63",
+    },
+    info: {
+        main: "#1976d2",
+    },
+    error: {
+        main: "#f44336",
+    },
+    warning: {
+        main: "#ff9800",
+    },
+    success: {
+        main: "#4caf50",
+    },
+    textSecondary: {
+        main: "#bdbdbd",
+    },
 });
 // console.log(logger);
 

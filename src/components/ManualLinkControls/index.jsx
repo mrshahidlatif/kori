@@ -155,90 +155,76 @@ export default function ManualLinkControls(props) {
     }
 
     return pos && props.textSelection ? (
-        <div>
-            <Box
-                // zIndex="modal"
-                // left={pos.x + padding}
-                // top={pos.y + padding}
-                right={0}
-                top={0}
-                className={css.message}
-            >
-                Select visual marks and a dimension to link.
-            </Box>
-            <Box
-                // zIndex="modal"
-                // left={pos.x + padding}
-                // top={pos.y + padding}
-                right={0}
-                top={25}
-                className={css.panel}
-            >
-                <ButtonGroup size="small" variant="contained" aria-label="small button group">
+        <Box
+            // zIndex="modal"
+            // left={pos.x + padding}
+            // top={pos.y + padding}
+            right={0}
+            top={0}
+            className={css.panel}
+        >
+            <Paper elevation={1}>
+                <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
+                    <Button
+                        ref={anchorRef}
+                        aria-controls={open ? "split-button-menu" : undefined}
+                        aria-expanded={open ? "true" : undefined}
+                        aria-label="Select an axis"
+                        aria-haspopup="menu"
+                        onClick={handleToggle}
+                        endIcon={<ArrowDropDownIcon />}
+                    >
+                        {options[selectedIndex]}
+                    </Button>
+                </ButtonGroup>
+                <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
                     <Button onMouseDown={handleAcceptClick}>Accept</Button>
                     <Button onMouseDown={handleResetClick}>Cancel</Button>
                 </ButtonGroup>
-                <Grid container direction="column" alignItems="center">
-                    <Grid item xs={12}>
-                        <ButtonGroup
-                            variant="contained"
-                            // color="primary"
-                            ref={anchorRef}
-                            aria-label="split button"
+                <Popper
+                    open={open}
+                    anchorEl={anchorRef.current}
+                    role={undefined}
+                    transition
+                    disablePortal
+                >
+                    {({ TransitionProps, placement }) => (
+                        <Grow
+                            {...TransitionProps}
+                            style={{
+                                transformOrigin:
+                                    placement === "bottom" ? "center top" : "center bottom",
+                            }}
                         >
-                            <Button
-                                onClick={handleClick} // color="primary"
-                                size="small"
-                                aria-controls={open ? "split-button-menu" : undefined}
-                                aria-expanded={open ? "true" : undefined}
-                                aria-label="Select an axis"
-                                aria-haspopup="menu"
-                                onClick={handleToggle}
-                            >
-                                {options[selectedIndex]}
-                                <ArrowDropDownIcon />
-                            </Button>
-                        </ButtonGroup>
-                        <Popper
-                            open={open}
-                            anchorEl={anchorRef.current}
-                            role={undefined}
-                            transition
-                            disablePortal
-                        >
-                            {({ TransitionProps, placement }) => (
-                                <Grow
-                                    {...TransitionProps}
-                                    style={{
-                                        transformOrigin:
-                                            placement === "bottom" ? "center top" : "center bottom",
-                                    }}
-                                >
-                                    <Paper>
-                                        <ClickAwayListener onClickAway={handleClose}>
-                                            <MenuList id="split-button-menu">
-                                                {options.map((option, index) => (
-                                                    <MenuItem
-                                                        key={option}
-                                                        // disabled={index === 2}
-                                                        selected={index === selectedIndex}
-                                                        onClick={(event) =>
-                                                            handleMenuItemClick(event, index)
-                                                        }
-                                                    >
-                                                        {option}
-                                                    </MenuItem>
-                                                ))}
-                                            </MenuList>
-                                        </ClickAwayListener>
-                                    </Paper>
-                                </Grow>
-                            )}
-                        </Popper>
-                    </Grid>
+                            <Paper>
+                                <ClickAwayListener onClickAway={handleClose}>
+                                    <MenuList id="split-button-menu">
+                                        {options.map((option, index) => (
+                                            <MenuItem
+                                                key={option}
+                                                // disabled={index === 2}
+                                                selected={index === selectedIndex}
+                                                onClick={(event) =>
+                                                    handleMenuItemClick(event, index)
+                                                }
+                                            >
+                                                {option}
+                                            </MenuItem>
+                                        ))}
+                                    </MenuList>
+                                </ClickAwayListener>
+                            </Paper>
+                        </Grow>
+                    )}
+                </Popper>
+            </Paper>
+
+            {/* <Grid container direction="column" alignItems="center">
+                <Grid item xs={12}>
+                    
                 </Grid>
-            </Box>
-        </div>
+            </Grid> */}
+        </Box>
     ) : (
         ""
     );

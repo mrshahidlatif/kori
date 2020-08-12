@@ -12,6 +12,8 @@ import ListItemText from "@material-ui/core/ListItemText";
 import Typography from "@material-ui/core/Typography";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Avatar from "@material-ui/core/Avatar";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import LinkIcon from '@material-ui/icons/Link';
 import PropTypes from "prop-types";
 
 import { setTextSelection } from "ducks/ui";
@@ -42,13 +44,19 @@ export default function SuggestionPanel(props) {
             className={css.suggestionPanel}
         >
             <Paper>
-                <ListItem key={"visLink"} button dense onMouseDown={handleCreateLink}>
-                    <ListItemAvatar>
-                        <Avatar alt="chart" src={process.env.PUBLIC_URL + "/" + "linkIcon.png"} />
-                    </ListItemAvatar>
-                    Create a link
-                </ListItem>
+
                 <List>
+                    <ListItem button onMouseDown={handleCreateLink}>
+                        {/* <ListItemAvatar>
+                            <Avatar>
+                            <LinkIcon />
+                            </Avatar>
+                        </ListItemAvatar> */}
+                        <ListItemIcon>
+                            <LinkIcon />
+                        </ListItemIcon>
+                        Create Link
+                    </ListItem>
                     {
                         // should we rank suggestions
 
@@ -65,7 +73,7 @@ export default function SuggestionPanel(props) {
                                 <ListItemText
                                     primary={suggestion.text}
                                     secondary={
-                                        <Typography component="span" variant="caption">
+                                        <Typography component="span" variant="caption" color='textSecondary'>
                                             {suggestion.chartId}
                                         </Typography>
                                     }
