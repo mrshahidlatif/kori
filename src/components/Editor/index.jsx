@@ -52,18 +52,15 @@ export default function Editor(props) {
 
     const editorEl = useRef(null); //https://reactjs.org/docs/hooks-reference.html#useref
     const [suggestions, setSuggestions] = useState([]);
-    const [editorState, setEditorState] = useState(EditorState.createEmpty());
+
+    const contentState =
+        storedEditorState === null
+            ? EditorState.createEmpty().getCurrentContent()
+            : convertFromRaw(storedEditorState);
+    const [editorState, setEditorState] = useState(EditorState.createWithContent(contentState));
 
     //Disabling edit functions in view mode!
     const viewMode = props.viewMode;
-
-    useEffect(() => {
-        // console.log('editor', props.editor)
-        console.log("Previous editor state", storedEditorState);
-        //TODO: restoring state doesn't restore links!!!
-        const contentState = convertFromRaw(storedEditorState);
-        setEditorState(EditorState.createWithContent(contentState));
-    }, []);
 
     useEffect(() => {
         const editorRawState = convertToRaw(editorState.getCurrentContent());
