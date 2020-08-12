@@ -59,12 +59,15 @@ export default function Editor(props) {
             : convertFromRaw(storedEditorState);
     const [editorState, setEditorState] = useState(EditorState.createWithContent(contentState));
 
+    //To keep track what sentences have already been searched for links!
+    const [sentences, setSentences] = useState(doc.sentences);
+
     //Disabling edit functions in view mode!
     const viewMode = props.viewMode;
 
     useEffect(() => {
         const editorRawState = convertToRaw(editorState.getCurrentContent());
-        dispatch(updateDoc(doc.id, { editorRawState }));
+        dispatch(updateDoc(doc.id, { editorRawState, sentences }));
     }, [editorState]);
 
     async function handleEditorChange(editorState) {
@@ -73,19 +76,23 @@ export default function Editor(props) {
 
         const lastTypedWord = getLastTypedWord(editorState);
         const lastSentence = getLastTypedSentence(editorState);
-        // console.log("last typed word", lastTypedWord);
-        // console.log("last typed sentence", lastSentence);
+
+        if (lastSentence && sentences.indexOf(lastSentence.text) === -1)
+            setSentences(sentences.concat(lastSentence.text));
 
         if (lastSentence) {
-            const links = await findLinks(chartsInEditor, lastSentence);
+            const alreadySearched = sentences.indexOf(lastSentence.text) > -1 ? true : false;
+            if (!alreadySearched) {
+                const links = await findLinks(chartsInEditor, lastSentence);
 
-            if (links.length > 0) {
-                // console.log("Links before actions", links);
-                const action = createLinks(doc.id, links); // need ids
-                // console.log("action.links", action.links);
-                editorState = insertLinks(action.links, editorState, "Auto");
-                setEditorState(editorState);
-                dispatch(action);
+                if (links.length > 0) {
+                    // console.log("Links before actions", links);
+                    const action = createLinks(doc.id, links); // need ids
+                    // console.log("action.links", action.links);
+                    editorState = insertLinks(action.links, editorState, "Auto");
+                    setEditorState(editorState);
+                    dispatch(action);
+                }
             }
         }
 
@@ -210,7 +217,6 @@ export default function Editor(props) {
             id: chart.id, // wil get chart info from store
         });
         const entityKey = contentState.getLastCreatedEntityKey();
-        console.log("entityKey", entityKey);
         const newEditorState = AtomicBlockUtils.insertAtomicBlock(editorState, entityKey, " ");
         setEditorState(newEditorState);
     }

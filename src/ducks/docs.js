@@ -15,6 +15,7 @@ export const createDoc = (attrs = {}) => {
         title: "Untitled",
         editorRawState: null,
         timestamp: Date.now(),
+        sentences: [],
         charts: [],
         chartsInEditor: [],
         ...attrs,
@@ -49,17 +50,18 @@ const initialState = {
         timestamp: Date.now(),
         charts: ["testchart"],
         chartsInEditor: [],
+        sentences: [],
         editorRawState: {
             blocks: [
                 {
                     key: "8i090",
-                    text: "Hello CodePulse!",
+                    text: "Welcome to Vis-Text Editor",
                     type: "unstyled",
                     depth: 0,
                     inlineStyleRanges: [
                         {
                             offset: 0,
-                            length: 16,
+                            length: 26,
                             style: "BOLD",
                         },
                     ],
@@ -68,13 +70,13 @@ const initialState = {
                 },
                 {
                     key: "42ncd",
-                    text: "This text should be underlined.",
+                    text: "Here you can compose interactive articles",
                     type: "unstyled",
                     depth: 0,
                     inlineStyleRanges: [
                         {
                             offset: 0,
-                            length: 31,
+                            length: 42,
                             style: "UNDERLINE",
                         },
                     ],
@@ -83,13 +85,14 @@ const initialState = {
                 },
                 {
                     key: "327r6",
-                    text: "And this text should be italic.",
+                    text:
+                        "Start dragging the chart from Chart Gallery to the editor and start creating! ;)",
                     type: "unstyled",
                     depth: 0,
                     inlineStyleRanges: [
                         {
                             offset: 0,
-                            length: 31,
+                            length: 81,
                             style: "ITALIC",
                         },
                     ],
