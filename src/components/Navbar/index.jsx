@@ -25,9 +25,7 @@ const useStyles = makeStyles((theme) => ({
 export default function () {
     const classes = useStyles();
     const dispatch = useDispatch();
-    // const docId = useSelector((state) => state.ui.currentDocId);
-    //TODO: Current DocId hardcoded for now! To work on Viewer!
-    const docId = "testdoc";
+    const docId = useSelector((state) => state.ui.currentDocId);
     const doc = useSelector((state) => state.docs[docId]);
 
     function handleChange(e) {
@@ -55,7 +53,7 @@ export default function () {
 
           
           </Typography> */}
-                {doc && (
+                {docId && (
                     <TextField
                         value={doc.title}
                         onChange={handleChange}

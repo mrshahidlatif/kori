@@ -6,7 +6,6 @@ import AddIcon from "@material-ui/icons/Add";
 import Button from "@material-ui/core/Button";
 import { Link as RouterLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import Doc from "components/Doc";
 
 import { createDoc } from "ducks/docs";
 import { SetCurrentDocId } from "ducks/ui";
@@ -27,32 +26,27 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function Docs() {
+function Doc(props) {
     const classes = useStyles();
     const dispatch = useDispatch();
-    const docs = useSelector((state) => Object.values(state.docs));
 
     function handleClick() {
-        const action = createDoc();
-        dispatch(action);
+        dispatch(SetCurrentDocId(props.docId));
     }
 
     return (
-        <Grid container spacing={1}>
-            <Grid item xs={2}>
-                <Button className={classes.button} onClick={handleClick}>
-                    <Paper className={classes.paper} variant="outlined">
-                        <AddIcon />
-                    </Paper>
-                </Button>
-            </Grid>
-            {docs.map((doc) => (
-                <Grid key={doc.id} item xs={2}>
-                    <Doc doc={doc} docId={doc.id} />
-                </Grid>
-            ))}
-        </Grid>
+        <Button
+            className={classes.button}
+            component={RouterLink}
+            to={`/docs/${props.docId}`}
+            onClick={handleClick}
+        >
+            <Paper className={classes.paper} elevation={2}>
+                {props.doc.title}
+                <div></div>
+            </Paper>
+        </Button>
     );
 }
 
-export default Docs;
+export default Doc;

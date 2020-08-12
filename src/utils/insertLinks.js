@@ -1,6 +1,5 @@
 import { Modifier, EditorState } from "draft-js";
 export default (links, editorState, method = "Auto") => {
-    console.log("Manual Link in INSERTLINS ", links);
     links.forEach((link) => {
         editorState = insertLink(link, editorState, method);
     });
@@ -38,7 +37,7 @@ export const insertLink = (link, editorState, method = "Auto") => {
         entityKey
     );
     const caretNewIndex = end > blockEndIndex ? end : blockEndIndex;
-    let newEditorState = EditorState.push(editorState, newContent, "LINK");
+    let newEditorState = EditorState.push(editorState, newContent, "apply-entity");
     let newSelection = newEditorState.getSelection().merge({
         focusOffset: caretNewIndex,
         anchorOffset: caretNewIndex,

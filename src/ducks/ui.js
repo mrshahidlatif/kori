@@ -49,7 +49,7 @@ export default (state = initialState, action) => {
         case SET_CURRENT_DOC_ID:
             return {
                 ...state,
-                docId: action.docId,
+                currentDocId: action.docId,
             };
         default:
             return state;

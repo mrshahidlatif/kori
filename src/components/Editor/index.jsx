@@ -61,7 +61,7 @@ export default function Editor(props) {
         // console.log('editor', props.editor)
         console.log("Previous editor state", storedEditorState);
         //TODO: restoring state doesn't restore links!!!
-        // const contentState = convertFromRaw(storedEditorState);
+        const contentState = convertFromRaw(storedEditorState);
         // setEditorState(EditorState.createWithContent(contentState));
         // setLastTypedWord('');
         // let editorNode = document.getElementById("mainEditor");
