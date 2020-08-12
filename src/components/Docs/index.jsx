@@ -4,12 +4,10 @@ import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import AddIcon from "@material-ui/icons/Add";
 import Button from "@material-ui/core/Button";
-import { Link as RouterLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Doc from "components/Doc";
 
 import { createDoc } from "ducks/docs";
-import { SetCurrentDocId } from "ducks/ui";
 
 const useStyles = makeStyles((theme) => ({
     button: {

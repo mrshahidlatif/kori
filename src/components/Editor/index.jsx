@@ -62,14 +62,18 @@ export default function Editor(props) {
         console.log("Previous editor state", storedEditorState);
         //TODO: restoring state doesn't restore links!!!
         const contentState = convertFromRaw(storedEditorState);
-        // setEditorState(EditorState.createWithContent(contentState));
-        // setLastTypedWord('');
-        // let editorNode = document.getElementById("mainEditor");
-        // let editorPosition = editorNode.getBoundingClientRect();
-        // editorPosition = JSON.parse(JSON.stringify(editorPosition));
+        setEditorState(EditorState.createWithContent(contentState));
     }, []);
 
+    useEffect(() => {
+        const editorRawState = convertToRaw(editorState.getCurrentContent());
+        dispatch(updateDoc(doc.id, { editorRawState }));
+    }, [editorState]);
+
     async function handleEditorChange(editorState) {
+        setEditorState(editorState);
+        const editorRawState = convertToRaw(editorState.getCurrentContent());
+
         const lastTypedWord = getLastTypedWord(editorState);
         const lastSentence = getLastTypedSentence(editorState);
         // console.log("last typed word", lastTypedWord);
@@ -100,12 +104,6 @@ export default function Editor(props) {
         } else {
             setSuggestions([]);
         }
-
-        // Update Editor State
-        setEditorState(editorState);
-        //TODO: PERFORMANCE: Do not push data to store on each key store: It is slowing down the whole thing!
-        const editorRawState = convertToRaw(editorState.getCurrentContent());
-        dispatch(updateDoc(doc.id, { editorRawState }));
 
         // TODO: see if we can catch an event for adding or removing a chart.
         // Updating charts in store when a chart is added to or removed from document
@@ -147,8 +145,6 @@ export default function Editor(props) {
         setTempTextSelection(textSelection);
 
         //search for suggestions on text selection
-        console.log("TEXT Selection", textSelection);
-        console.log("TEMP TEXT Selection", tempTextSelection);
         if (textSelection) {
             const suggestions = findSuggestions(
                 chartsInEditor,
