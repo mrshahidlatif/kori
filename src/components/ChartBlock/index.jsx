@@ -8,10 +8,8 @@ import { View } from "vega-view";
 import ChartConfigPanel from "components/ChartConfigPanel";
 import { useParams } from "react-router-dom";
 import ManualLinkControls from "components/ManualLinkControls";
-import { setTextSelection } from "ducks/ui";
 import IconButton from "@material-ui/core/IconButton";
 import SettingsIcon from "@material-ui/icons/Settings";
-import Box from "@material-ui/core/Box";
 
 export default memo(function ChartBlock({
     block,
@@ -71,13 +69,16 @@ export default memo(function ChartBlock({
             const canvas = await tempView.toCanvas();
             const ratio = canvas.height / canvas.width;
             setRatio(ratio);
+
             // add autosize: has limitations: https://vega.github.io/vega-lite/docs/size.html#limitations
-            //TODO: brushes interfere with autosize
+            //TODO: brush interfere with autosize
+
             // spec.autosize = {
             //     type: "fit",
             //     contains: "padding",
+            //     resize: false,
             // };
-            console.log("Vega Specs", spec);
+
             const result = await vegaEmbed(chartEl.current, spec, { actions: false });
             const view = result.view;
 
@@ -96,13 +97,6 @@ export default memo(function ChartBlock({
             } catch (error) {
                 //No brush_store if no brush added
             }
-
-            // view.addEventListener("click", function (event, item) {
-            //     // console.log("CLICK", item.datum);
-            //     setSelectedMarks(selectedMarks.push(item.datum));
-            //     // console.log("SELECTED MARKS", selectedMarks);
-            //     // highlightMarks(view);
-            // });
             setView(view);
         };
         asyncExec();
@@ -157,43 +151,48 @@ export default memo(function ChartBlock({
     const showConfig = selection.getAnchorKey() === block.getKey(); // show only clicking this block
     const highlightStyle =
         chartsInEditor.indexOf(chart.id) > -1 && !showConfig && textSelection
-            ? { ...style, position: "relative", borderStyle: "solid" }
-            : { ...style, position: "relative" };
+            ? {
+                  ...style,
+                  position: "relative",
+                  borderStyle: "solid",
+                  borderColor: "gray",
+                  //   width: "fit-content",
+              }
+            : {
+                  ...style,
+                  position: "relative",
+                  //   width: "fit-content",
+              };
 
     return (
-        <div
-            ref={containerEl}
-            {...elementProps}
-            // style={{ ...style, position: "relative", borderStyle: "solid" }} // absolute positioning config panel
-            style={highlightStyle}
-            // onMouseEnter={()=>setResizing(true)}
-            // onMouseLeave={()=>setResizing(false)}
-        >
-            {showConfig && (
-                <IconButton
-                    onMouseDown={handleSettingClick}
-                    aria-label="settings"
-                    // color="primary"
-                >
-                    <SettingsIcon />
-                </IconButton>
-            )}
-
-            {/* <Vega spec={spec} onNewView={handleView} onParseError={handleError} /> */}
-            <div ref={chartEl} />
-            {/* {showConfig && !textSelection && <ChartConfigPanel chart={chart} />} */}
-            {showConfig && toggleSettings && <ChartConfigPanel chart={chart} />}
-            {/* {resizing && <AspectRatioIcon style={{color: grey[500], zIndex:2, marginLeft:"-30px"}}/>} */}
-            {showConfig && textSelection && (
-                <ManualLinkControls
-                    currentDoc={doc}
-                    selectedChart={chart}
-                    textSelection={textSelection}
-                    selectedMarks={selectedMarks}
-                    brush={brush}
-                    viewData={viewData}
-                />
-            )}
-        </div>
+        <React.Fragment>
+            <div ref={containerEl} {...elementProps} style={highlightStyle}>
+                <div>
+                    {showConfig && (
+                        <IconButton
+                            onMouseDown={handleSettingClick}
+                            aria-label="settings"
+                            // color="primary"
+                        >
+                            <SettingsIcon />
+                        </IconButton>
+                    )}
+                </div>
+                <div ref={chartEl} />
+                {/* {showConfig && !textSelection && <ChartConfigPanel chart={chart} />} */}
+                {showConfig && toggleSettings && <ChartConfigPanel chart={chart} />}
+                {/* {resizing && <AspectRatioIcon style={{color: grey[500], zIndex:2, marginLeft:"-30px"}}/>} */}
+                {showConfig && textSelection && (
+                    <ManualLinkControls
+                        currentDoc={doc}
+                        selectedChart={chart}
+                        textSelection={textSelection}
+                        selectedMarks={selectedMarks}
+                        brush={brush}
+                        viewData={viewData}
+                    />
+                )}
+            </div>
+        </React.Fragment>
     );
 });

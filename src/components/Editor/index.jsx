@@ -77,14 +77,17 @@ export default function Editor(props) {
     }, [exitManualLink]);
 
     useEffect(() => {
-        if (exitManualLink && allLinks[manualLinkId] === undefined)
+        if (exitManualLink && allLinks[manualLinkId] === undefined) {
             //clear selection in case no brushing and pressing 'Accept'
             setEditorState(deHighlightTextSelection(currentSelectionState, editorState));
+            setCurrentSelectionState(null);
+        }
         if (allLinks[manualLinkId]) {
             setEditorState(
                 insertLinks([allLinks[manualLinkId]], editorState, currentSelectionState)
             );
             dispatch(setManualLinkId(null));
+            setCurrentSelectionState(null);
         }
     }, [manualLinkId, exitManualLink]);
 
@@ -94,8 +97,6 @@ export default function Editor(props) {
     }, [editorState]);
 
     async function handleEditorChange(editorState) {
-        console.log("SelectionState", currentSelectionState);
-
         setEditorState(editorState);
         const editorRawState = convertToRaw(editorState.getCurrentContent());
 
@@ -111,9 +112,7 @@ export default function Editor(props) {
                 const links = await findLinks(chartsInEditor, lastSentence);
 
                 if (links.length > 0) {
-                    // console.log("Links before actions", links);
                     const action = createLinks(doc.id, links); // need ids
-                    // console.log("action.links", action.links);
                     editorState = insertLinks(action.links, editorState);
                     setEditorState(editorState);
                     dispatch(action);
@@ -257,6 +256,7 @@ export default function Editor(props) {
         setEditorState(newEditorState);
     }
     function handleCreateLinkSelect() {
+        dispatch(exitManualLinkMode(false));
         setCurrentSelectionState(editorState.getSelection());
         setEditorState(highlightTextSelection(tempTextSelection, editorState));
     }
@@ -312,7 +312,6 @@ export default function Editor(props) {
                 />
             )}
             <PotentialLinkControls selectedLink={selectedLink} onDiscard={handleLinkDiscard} />
-            {/* <FloatingToolbar textSelection={tempTextSelection} /> */}
         </Fragment>
     );
 }
