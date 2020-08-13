@@ -2,8 +2,6 @@
 //TODO: Maybe follow the next comment (on the above) and use getContentStateFragment function!
 
 export default (contentState, selection, blockDelimiter) => {
-    let start = 0;
-    let end = 0;
     blockDelimiter = blockDelimiter || "\n";
     var startKey = selection.getStartKey();
     var endKey = selection.getEndKey();
@@ -29,8 +27,8 @@ export default (contentState, selection, blockDelimiter) => {
             var key = block.getKey();
             var text = block.getText();
 
-            start = 0;
-            end = text.length;
+            let start = 0;
+            let end = text.length;
 
             if (key === startKey) {
                 start = selection.getStartOffset();
@@ -42,5 +40,7 @@ export default (contentState, selection, blockDelimiter) => {
             return text;
         })
         .join(blockDelimiter);
-    return start !== end ? { text: text, startIndex: start, endIndex: end } : null;
+    return selection.getStartOffset() !== selection.getEndOffset()
+        ? { text: text, startIndex: selection.getStartOffset(), endIndex: selection.getEndOffset() }
+        : null;
 };

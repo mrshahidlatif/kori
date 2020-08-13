@@ -24,26 +24,26 @@ export default function ManualLinkControls(props) {
     const selection = window.getSelection();
     const pos = selection.rangeCount > 0 ? selection.getRangeAt(0).getBoundingClientRect() : null;
     const padding = 10;
+    let options = [];
+
     const chartProperties = props.selectedChart.properties;
-    let options = chartProperties.axes.map((cp) => cp.field);
+    options = chartProperties.axes.map((cp) => cp.field);
     let featureFields = chartProperties.features.map((f) => f.field);
 
     options = options.concat(featureFields);
     options = [...new Set(options)];
-    console.log("Options", options);
 
     function handleResetClick(event) {
+        dispatch(exitManualLinkMode(true));
         event.preventDefault();
         event.stopPropagation();
-        dispatch(exitManualLinkMode(true));
-
-        // dispatch(setTextSelection(null));
     }
     function handleAcceptClick(event) {
         event.preventDefault();
         event.stopPropagation();
         makeManualLink(props.textSelection, props.selectedMarks, props.brush, props.viewData);
         dispatch(setTextSelection(null));
+        dispatch(exitManualLinkMode(true));
     }
 
     const [open, setOpen] = React.useState(false);
@@ -149,9 +149,11 @@ export default function ManualLinkControls(props) {
                 rangeY: rangeY,
             };
         }
-        const action = createLinks(props.currentDoc.id, [link]);
-        dispatch(action);
-        dispatch(setManualLinkId(action.links[0].id));
+        if (link !== null) {
+            const action = createLinks(props.currentDoc.id, [link]);
+            dispatch(action);
+            dispatch(setManualLinkId(action.links[0].id));
+        } else dispatch(setManualLinkId(null));
     }
 
     return pos && props.textSelection ? (

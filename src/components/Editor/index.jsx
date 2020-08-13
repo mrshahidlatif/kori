@@ -34,6 +34,7 @@ import getLastTypedWord from "utils/getLastTypedWord";
 import getLastTypedSentence from "utils/getLastTypedSentence";
 import getTextSelection from "utils/getTextSelection";
 import highlightTextSelection from "utils/highlightTextSelection";
+import deHighlightTextSelection from "utils/deHighlightTextSelection";
 
 export default function Editor(props) {
     const dispatch = useDispatch();
@@ -61,9 +62,31 @@ export default function Editor(props) {
 
     //To keep track what sentences have already been searched for links!
     const [sentences, setSentences] = useState(doc.sentences);
+    const [currentSelectionState, setCurrentSelectionState] = useState(null);
 
     //Disabling edit functions in view mode!
     const viewMode = props.viewMode;
+
+    useEffect(() => {
+        if (exitManualLink) {
+            setEditorState(deHighlightTextSelection(currentSelectionState, editorState));
+            editorEl.current.focus();
+            dispatch(exitManualLinkMode(false));
+            setCurrentSelectionState(null);
+        }
+    }, [exitManualLink]);
+
+    useEffect(() => {
+        console.log("Accept manual link!!!", allLinks[manualLinkId], exitManualLink);
+        if (exitManualLink && allLinks[manualLinkId] === undefined)
+            setEditorState(deHighlightTextSelection(currentSelectionState, editorState));
+        if (allLinks[manualLinkId]) {
+            setEditorState(
+                insertLinks([allLinks[manualLinkId]], editorState, currentSelectionState)
+            );
+            dispatch(setManualLinkId(null));
+        }
+    }, [manualLinkId, exitManualLink]);
 
     useEffect(() => {
         const editorRawState = convertToRaw(editorState.getCurrentContent());
@@ -89,7 +112,7 @@ export default function Editor(props) {
                     // console.log("Links before actions", links);
                     const action = createLinks(doc.id, links); // need ids
                     // console.log("action.links", action.links);
-                    editorState = insertLinks(action.links, editorState, "Auto");
+                    editorState = insertLinks(action.links, editorState);
                     setEditorState(editorState);
                     dispatch(action);
                 }
@@ -160,17 +183,17 @@ export default function Editor(props) {
                 : setSuggestions([{ text: "NoLinkFound!" }]);
         }
 
-        if (exitManualLink && textSelectionInStore) {
-            setEditorState(highlightTextSelection(textSelectionInStore, editorState, true));
-            dispatch(setTextSelection(null));
-            dispatch(exitManualLinkMode(false));
-            //TODO: problem managing control back to editor!
-        }
+        // if (exitManualLink && textSelectionInStore) {
+        //     setEditorState(highlightTextSelection(textSelectionInStore, editorState, true));
+        //     // dispatch(setTextSelection(null));
+        //     dispatch(exitManualLinkMode(false));
+        //     //TODO: problem managing control back to editor!
+        // }
 
-        if (allLinks[manualLinkId]) {
-            setEditorState(insertLinks([allLinks[manualLinkId]], editorState, "Manual"));
-            dispatch(setManualLinkId(null));
-        }
+        // if (allLinks[manualLinkId]) {
+        //     setEditorState(insertLinks([allLinks[manualLinkId]], editorState, "Manual"));
+        //     dispatch(setManualLinkId(null));
+        // }
     }
 
     function handleKeyCommand(command) {
@@ -237,13 +260,14 @@ export default function Editor(props) {
             endIndex: suggestion.startIndex + suggestion.text.length,
             isConfirmed: true,
         }); // need ids
-        const newEditorState = insertLinks([action.attrs], editorState, "Manual");
+        const newEditorState = insertLinks([action.attrs], editorState);
         dispatch(action);
 
         setSuggestions([]);
         setEditorState(newEditorState);
     }
     function handleCreateLinkSelect() {
+        setCurrentSelectionState(editorState.getSelection());
         setEditorState(highlightTextSelection(tempTextSelection, editorState, false));
     }
 
@@ -272,6 +296,7 @@ export default function Editor(props) {
 
         dispatch(deleteLink(link.id));
     }
+
     return (
         <Fragment>
             {!viewMode && <EditorToolbar />}
