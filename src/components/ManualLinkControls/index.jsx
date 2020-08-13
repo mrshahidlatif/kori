@@ -37,6 +37,7 @@ export default function ManualLinkControls(props) {
         dispatch(exitManualLinkMode(true));
         event.preventDefault();
         event.stopPropagation();
+        dispatch(setTextSelection(null));
     }
     function handleAcceptClick(event) {
         event.preventDefault();

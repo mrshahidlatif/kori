@@ -40,7 +40,13 @@ export default (contentState, selection, blockDelimiter) => {
             return text;
         })
         .join(blockDelimiter);
+    let sIndex = selection.getStartOffset();
+    let eIndex = selection.getEndOffset();
+    if (selection.isBackward) {
+        sIndex = selection.getEndOffset();
+        eIndex = selection.getStartOffset();
+    }
     return selection.getStartOffset() !== selection.getEndOffset()
-        ? { text: text, startIndex: selection.getStartOffset(), endIndex: selection.getEndOffset() }
+        ? { text: text, startIndex: sIndex, endIndex: eIndex }
         : null;
 };

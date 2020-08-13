@@ -1,8 +1,6 @@
 import { Modifier, EditorState, ContentState } from "draft-js";
 
-export default (textSelection, editorState, deSelect) => {
-    //deSelect = true removes the highlighting
-    console.log("Text Selection", textSelection);
+export default (textSelection, editorState) => {
     const currentContent = editorState.getCurrentContent();
     const currentSelection = editorState.getSelection();
 
@@ -10,8 +8,6 @@ export default (textSelection, editorState, deSelect) => {
         ...textSelection,
     });
 
-    // if (deSelect) newContent = currentContent.createEntity();
-    if (deSelect) newContent = ContentState.createFromText("");
     const entityKey = newContent.getLastCreatedEntityKey();
 
     const insertTextSelection = currentSelection.merge({

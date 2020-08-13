@@ -77,8 +77,8 @@ export default function Editor(props) {
     }, [exitManualLink]);
 
     useEffect(() => {
-        console.log("Accept manual link!!!", allLinks[manualLinkId], exitManualLink);
         if (exitManualLink && allLinks[manualLinkId] === undefined)
+            //clear selection in case no brushing and pressing 'Accept'
             setEditorState(deHighlightTextSelection(currentSelectionState, editorState));
         if (allLinks[manualLinkId]) {
             setEditorState(
@@ -94,6 +94,8 @@ export default function Editor(props) {
     }, [editorState]);
 
     async function handleEditorChange(editorState) {
+        console.log("SelectionState", currentSelectionState);
+
         setEditorState(editorState);
         const editorRawState = convertToRaw(editorState.getCurrentContent());
 
@@ -126,7 +128,7 @@ export default function Editor(props) {
                 lastTypedWord.text.slice(1),
                 lastTypedWord.startIndex
             );
-            console.log("suggestions", suggestions);
+
             setSuggestions(suggestions);
         } else {
             setSuggestions([]);
@@ -182,18 +184,6 @@ export default function Editor(props) {
                 ? setSuggestions(suggestions)
                 : setSuggestions([{ text: "NoLinkFound!" }]);
         }
-
-        // if (exitManualLink && textSelectionInStore) {
-        //     setEditorState(highlightTextSelection(textSelectionInStore, editorState, true));
-        //     // dispatch(setTextSelection(null));
-        //     dispatch(exitManualLinkMode(false));
-        //     //TODO: problem managing control back to editor!
-        // }
-
-        // if (allLinks[manualLinkId]) {
-        //     setEditorState(insertLinks([allLinks[manualLinkId]], editorState, "Manual"));
-        //     dispatch(setManualLinkId(null));
-        // }
     }
 
     function handleKeyCommand(command) {
@@ -268,7 +258,7 @@ export default function Editor(props) {
     }
     function handleCreateLinkSelect() {
         setCurrentSelectionState(editorState.getSelection());
-        setEditorState(highlightTextSelection(tempTextSelection, editorState, false));
+        setEditorState(highlightTextSelection(tempTextSelection, editorState));
     }
 
     function handleLinkDiscard(link) {
