@@ -64,9 +64,6 @@ export default function Editor(props) {
     const [sentences, setSentences] = useState(doc.sentences);
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
 
-    //Disabling edit functions in view mode!
-    const viewMode = props.viewMode;
-
     useEffect(() => {
         if (exitManualLink) {
             setEditorState(deHighlightTextSelection(currentSelectionState, editorState));
@@ -289,7 +286,7 @@ export default function Editor(props) {
 
     return (
         <Fragment>
-            {!viewMode && <EditorToolbar />}
+            {<EditorToolbar />}
             <div className={css.editor} onDragOver={handleDragOver} onDrop={handleDrop}>
                 <DraftEditor
                     editorState={editorState}
@@ -300,7 +297,6 @@ export default function Editor(props) {
                     blockRendererFn={blockRendererFn}
                     decorators={editorDecorators}
                     ref={editorEl}
-                    readOnly={viewMode}
                 />
             </div>
             {suggestions.length >= 1 && chartsInEditor.length > 0 && (
