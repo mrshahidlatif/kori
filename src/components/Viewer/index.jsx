@@ -1,6 +1,5 @@
 import React, { Fragment, useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import PropTypes from "prop-types";
 import { useParams } from "react-router-dom";
 import { EditorState, RichUtils, convertFromRaw } from "draft-js";
 
@@ -8,10 +7,10 @@ import DraftEditor from "draft-js-plugins-editor";
 
 import css from "./index.module.css";
 
-import EditorToolbar, { EditorPlugins } from "components/EditorToolbar";
+import { EditorPlugins } from "components/EditorToolbar";
 import editorDecorators from "utils/editorDecorators";
 
-export default function Editor(props) {
+export default function Viewer(props) {
     const dispatch = useDispatch();
     let { docId } = useParams();
     const doc = useSelector((state) => state.docs[docId]);
@@ -44,7 +43,6 @@ export default function Editor(props) {
 
     return (
         <Fragment>
-            {!viewMode && <EditorToolbar />}
             <div className={css.viewer}>
                 <DraftEditor
                     editorState={editorState}

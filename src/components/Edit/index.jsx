@@ -1,25 +1,27 @@
-import React from 'react';
+import React from "react";
+import { useDispatch } from "react-redux";
 // import TextField from '@material-ui/core/TextField';
-import ChartGallery from 'components/ChartGallery';
-import Editor from 'components/Editor';
+import ChartGallery from "components/ChartGallery";
+import Editor from "components/Editor";
 
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
+import { setViewMode } from "ducks/ui";
 
-
-export default function Edit(props){
-
+export default function Edit(props) {
+    const dispatch = useDispatch();
+    dispatch(setViewMode(false));
     return (
-    <Grid container spacing={2} >
-        <Grid item xs={4}>
-            <Typography variant="overline" display="block" gutterBottom>
-                Chart Gallery
-            </Typography>
-            <ChartGallery/>
+        <Grid container spacing={2}>
+            <Grid item xs={4}>
+                <Typography variant="overline" display="block" gutterBottom>
+                    Chart Gallery
+                </Typography>
+                <ChartGallery />
+            </Grid>
+            <Grid item xs={8}>
+                <Editor />
+            </Grid>
         </Grid>
-        <Grid item xs={8}>
-           <Editor/>
-        </Grid>
-    </Grid>
-    )
+    );
 }
