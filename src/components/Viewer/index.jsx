@@ -9,19 +9,20 @@ import css from "./index.module.css";
 
 import { EditorPlugins } from "components/EditorToolbar";
 import editorDecorators from "utils/editorDecorators";
+import removePotentialLinks from "utils/removePotentialLinks";
 
 export default function Viewer(props) {
     const dispatch = useDispatch();
     let { docId } = useParams();
     const doc = useSelector((state) => state.docs[docId]);
 
-    const storedEditorState = useSelector((state) => state.docs[docId].editorRawState);
+    const rawEditorState = useSelector((state) => state.docs[docId].editorRawState);
     const editorEl = useRef(null); //https://reactjs.org/docs/hooks-reference.html#useref
 
     const contentState =
-        storedEditorState === null
+        rawEditorState === null
             ? EditorState.createEmpty().getCurrentContent()
-            : convertFromRaw(storedEditorState);
+            : convertFromRaw(removePotentialLinks(rawEditorState));
     const [editorState, setEditorState] = useState(EditorState.createWithContent(contentState));
 
     //Disabling edit functions in view mode!

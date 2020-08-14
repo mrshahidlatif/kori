@@ -283,6 +283,9 @@ export default function Editor(props) {
 
         dispatch(deleteLink(link.id));
     }
+    function handleLinkAccept(linkId) {
+        setEditorState(insertLinks([allLinks[linkId]], editorState, editorState.getSelection()));
+    }
 
     return (
         <Fragment>
@@ -307,7 +310,11 @@ export default function Editor(props) {
                     onCreateLinkSelect={handleCreateLinkSelect}
                 />
             )}
-            <PotentialLinkControls selectedLink={selectedLink} onDiscard={handleLinkDiscard} />
+            <PotentialLinkControls
+                selectedLink={selectedLink}
+                onDiscard={handleLinkDiscard}
+                onAccept={handleLinkAccept}
+            />
         </Fragment>
     );
 }
