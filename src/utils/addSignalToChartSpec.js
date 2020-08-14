@@ -5,7 +5,6 @@ import { compile } from "vega-lite/build/vega-lite";
 
 export default (highlight, liteSpec) => {
     addBrushToVegaLiteSpec(liteSpec);
-    console.log("VegaLite Spec After adding brush", liteSpec);
 
     const spec = compile(liteSpec).spec; // vega spec
     // support vega-lite sample datasets

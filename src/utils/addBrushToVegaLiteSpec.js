@@ -1,7 +1,5 @@
 const CLEAR_SELECTION_TIMER = 10000; //time in ms
 export default (liteSpec) => {
-    console.log("VegaLite Spec", liteSpec);
-
     const selectionClearCondition = {
         type: "timer",
         throttle: CLEAR_SELECTION_TIMER,

@@ -109,7 +109,6 @@ export default async function (spec) {
             }
         });
     const properties = { axes: Object.values(axesMap), features: Object.values(featureMap) };
-    console.log("properties", properties);
     return properties;
 }
 
@@ -138,7 +137,6 @@ export const searchFieldName = (spec, scaleName) => {
 export const extractChartAxes = (spec) => {
     let axesMap = {};
     spec.scales.forEach((scale) => {
-        console.log("Scales in Chart:", scale);
         //TODO: handle cases where data is aggregated e.g., stack bar chart, stack area chart, pie chart,
         const name = scale.name;
         const field =
