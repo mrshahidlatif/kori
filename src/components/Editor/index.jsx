@@ -7,6 +7,7 @@ import {
     AtomicBlockUtils,
     RichUtils,
     convertToRaw,
+    convertFromRaw,
     Modifier,
     ContentState,
 } from "draft-js";
@@ -23,7 +24,7 @@ import PotentialLinkControls from "components/PotentialLinkControls";
 import { updateDoc, updateChartsInEditor } from "ducks/docs";
 import { createLinks, createLink, deleteLink } from "ducks/links";
 import { getChartsInEditor, getCharts } from "ducks/charts";
-import { setSelectedLink } from "ducks/ui";
+import { setSelectedLink, setManualLinkId, exitManualLinkMode, setTextSelection } from "ducks/ui";
 
 import editorDecorators from "utils/editorDecorators";
 import findSuggestions from "utils/findSuggestions";
@@ -31,46 +32,91 @@ import findLinks from "utils/findLinks";
 import insertLinks from "utils/insertLinks";
 import getLastTypedWord from "utils/getLastTypedWord";
 import getLastTypedSentence from "utils/getLastTypedSentence";
+import getTextSelection from "utils/getTextSelection";
+import highlightTextSelection from "utils/highlightTextSelection";
+import deHighlightTextSelection from "utils/deHighlightTextSelection";
 
 export default function Editor(props) {
     const dispatch = useDispatch();
     let { docId } = useParams();
     const doc = useSelector((state) => state.docs[docId]);
     const charts = useSelector((state) => getCharts(state, docId));
+    const storedEditorState = useSelector((state) => state.docs[docId].editorRawState);
     const chartsInEditor = useSelector((state) => getChartsInEditor(state, docId));
     const selectedLink = useSelector((state) => state.ui.selectedLink);
+    const allLinks = useSelector((state) => state.links);
+    const exitManualLink = useSelector((state) => state.ui.exitManualLink);
+    const manualLinkId = useSelector((state) => state.ui.manualLinkId);
+
+    const textSelectionInStore = useSelector((state) => state.ui.textSelection);
+    const [tempTextSelection, setTempTextSelection] = useState(textSelectionInStore);
 
     const editorEl = useRef(null); //https://reactjs.org/docs/hooks-reference.html#useref
-
     const [suggestions, setSuggestions] = useState([]);
-    const [editorState, setEditorState] = useState(EditorState.createEmpty());
+
+    const contentState =
+        storedEditorState === null
+            ? EditorState.createEmpty().getCurrentContent()
+            : convertFromRaw(storedEditorState);
+    const [editorState, setEditorState] = useState(EditorState.createWithContent(contentState));
+
+    //To keep track what sentences have already been searched for links!
+    const [sentences, setSentences] = useState(doc.sentences);
+    const [currentSelectionState, setCurrentSelectionState] = useState(null);
+
+    //Disabling edit functions in view mode!
+    const viewMode = props.viewMode;
 
     useEffect(() => {
-        // console.log('editor', props.editor)
-        // const contentState = convertFromRaw(editor);
-        // setEditorState(EditorState.createWithContent(contentState));
-        // setLastTypedWord('');
-        // let editorNode = document.getElementById("mainEditor");
-        // let editorPosition = editorNode.getBoundingClientRect();
-        // editorPosition = JSON.parse(JSON.stringify(editorPosition));
-    }, []);
+        if (exitManualLink) {
+            setEditorState(deHighlightTextSelection(currentSelectionState, editorState));
+            editorEl.current.focus();
+            dispatch(exitManualLinkMode(false));
+            setCurrentSelectionState(null);
+        }
+    }, [exitManualLink]);
+
+    useEffect(() => {
+        if (exitManualLink && allLinks[manualLinkId] === undefined) {
+            //clear selection in case no brushing and pressing 'Accept'
+            setEditorState(deHighlightTextSelection(currentSelectionState, editorState));
+            setCurrentSelectionState(null);
+        }
+        if (allLinks[manualLinkId]) {
+            setEditorState(
+                insertLinks([allLinks[manualLinkId]], editorState, currentSelectionState)
+            );
+            dispatch(setManualLinkId(null));
+            setCurrentSelectionState(null);
+        }
+    }, [manualLinkId, exitManualLink]);
+
+    useEffect(() => {
+        const editorRawState = convertToRaw(editorState.getCurrentContent());
+        dispatch(updateDoc(doc.id, { editorRawState, sentences }));
+    }, [editorState]);
 
     async function handleEditorChange(editorState) {
+        setEditorState(editorState);
+        const editorRawState = convertToRaw(editorState.getCurrentContent());
+
         const lastTypedWord = getLastTypedWord(editorState);
         const lastSentence = getLastTypedSentence(editorState);
-        console.log("last typed word", lastTypedWord);
-        console.log("last typed sentence", lastSentence);
+
+        if (lastSentence && sentences.indexOf(lastSentence.text) === -1)
+            setSentences(sentences.concat(lastSentence.text));
 
         if (lastSentence) {
-            const links = await findLinks(chartsInEditor, lastSentence);
+            const alreadySearched = sentences.indexOf(lastSentence.text) > -1 ? true : false;
+            if (!alreadySearched) {
+                const links = await findLinks(chartsInEditor, lastSentence);
 
-            if (links.length > 0) {
-                console.log("Links before actions", links);
-                const action = createLinks(doc.id, links); // need ids
-                console.log("action.links", action.links);
-                editorState = insertLinks(action.links, editorState, "Auto");
-
-                dispatch(action);
+                if (links.length > 0) {
+                    const action = createLinks(doc.id, links); // need ids
+                    editorState = insertLinks(action.links, editorState);
+                    setEditorState(editorState);
+                    dispatch(action);
+                }
             }
         }
 
@@ -81,17 +127,11 @@ export default function Editor(props) {
                 lastTypedWord.text.slice(1),
                 lastTypedWord.startIndex
             );
-            console.log("suggestions", suggestions);
+
             setSuggestions(suggestions);
         } else {
             setSuggestions([]);
         }
-
-        // Update Editor State
-        setEditorState(editorState);
-        //TODO: PERFORMANCE: Do not push data to store on each key store: It is slowing down the whole thing!
-        const editorRawState = convertToRaw(editorState.getCurrentContent());
-        dispatch(updateDoc(doc.id, { editorRawState }));
 
         // TODO: see if we can catch an event for adding or removing a chart.
         // Updating charts in store when a chart is added to or removed from document
@@ -110,6 +150,8 @@ export default function Editor(props) {
         const currentSelection = editorState.getSelection();
         const caretPosition = currentSelection.getAnchorOffset();
         const activeBlockKey = currentSelection.getAnchorKey();
+        //Hide the link accept/delete button when cursor not in link range
+        //TODO: what if selection spans more than one block?
         if (selectedLink && activeBlockKey) {
             if (
                 activeBlockKey !== selectedLink.blockKey ||
@@ -121,6 +163,26 @@ export default function Editor(props) {
         }
 
         console.log("editorRawState", editorRawState);
+
+        let textSelection = getTextSelection(
+            editorState.getCurrentContent(),
+            currentSelection,
+            " " //delimiter
+        );
+        //Hide the floating controls when no text is selected
+        setTempTextSelection(textSelection);
+
+        //search for suggestions on text selection
+        if (textSelection) {
+            const suggestions = findSuggestions(
+                chartsInEditor,
+                textSelection.text.trim(),
+                textSelection.startIndex
+            );
+            suggestions.length !== 0
+                ? setSuggestions(suggestions)
+                : setSuggestions([{ text: "NoLinkFound!" }]);
+        }
     }
 
     function handleKeyCommand(command) {
@@ -167,7 +229,6 @@ export default function Editor(props) {
             id: chart.id, // wil get chart info from store
         });
         const entityKey = contentState.getLastCreatedEntityKey();
-        console.log("entityKey", entityKey);
         const newEditorState = AtomicBlockUtils.insertAtomicBlock(editorState, entityKey, " ");
         setEditorState(newEditorState);
     }
@@ -188,12 +249,18 @@ export default function Editor(props) {
             endIndex: suggestion.startIndex + suggestion.text.length,
             isConfirmed: true,
         }); // need ids
-        const newEditorState = insertLinks([action.attrs], editorState, "Manual");
+        const newEditorState = insertLinks([action.attrs], editorState);
         dispatch(action);
 
         setSuggestions([]);
         setEditorState(newEditorState);
     }
+    function handleCreateLinkSelect() {
+        dispatch(exitManualLinkMode(false));
+        setCurrentSelectionState(editorState.getSelection());
+        setEditorState(highlightTextSelection(tempTextSelection, editorState));
+    }
+
     function handleLinkDiscard(link) {
         //TODO: Some code is similar to insertLinks.js. Consider refactoring!
         const currentSelection = editorState.getSelection();
@@ -219,9 +286,10 @@ export default function Editor(props) {
 
         dispatch(deleteLink(link.id));
     }
+
     return (
         <Fragment>
-            <EditorToolbar />
+            {!viewMode && <EditorToolbar />}
             <div className={css.editor} onDragOver={handleDragOver} onDrop={handleDrop}>
                 <DraftEditor
                     editorState={editorState}
@@ -232,10 +300,16 @@ export default function Editor(props) {
                     blockRendererFn={blockRendererFn}
                     decorators={editorDecorators}
                     ref={editorEl}
+                    readOnly={viewMode}
                 />
             </div>
-            {suggestions.length > 0 && (
-                <SuggestionPanel suggestions={suggestions} onSelected={handleSuggestionSelected} />
+            {suggestions.length >= 1 && chartsInEditor.length > 0 && (
+                <SuggestionPanel
+                    suggestions={suggestions.filter((s) => s.text !== "NoLinkFound!")}
+                    textSelection={tempTextSelection}
+                    onSelected={handleSuggestionSelected}
+                    onCreateLinkSelect={handleCreateLinkSelect}
+                />
             )}
             <PotentialLinkControls selectedLink={selectedLink} onDiscard={handleLinkDiscard} />
         </Fragment>

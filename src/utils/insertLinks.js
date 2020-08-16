@@ -1,23 +1,27 @@
 import { Modifier, EditorState } from "draft-js";
-export default (links, editorState, method = "Auto") => {
+export default (links, editorState, currentSelection) => {
     links.forEach((link) => {
-        editorState = insertLink(link, editorState, method);
+        editorState = insertLink(link, editorState, currentSelection);
     });
     return editorState;
 };
-export const insertLink = (link, editorState, method = "Auto") => {
+export const insertLink = (link, editorState, currentSelection) => {
     //TODO: remove duplicates
     const currentContent = editorState.getCurrentContent();
-    const currentSelection = editorState.getSelection();
+    console.log("jcurrent selection", currentSelection);
+    currentSelection = currentSelection || editorState.getSelection();
     const blockEndIndex = currentSelection.getAnchorOffset();
     const blockKey = currentSelection.getAnchorKey();
     let start = link.startIndex;
     let end = link.endIndex;
     if (start < 0) start = 0;
+
+    //TODO: properly fix this object not extensible problem!
+    link = JSON.parse(JSON.stringify(link));
     link["blockKey"] = blockKey;
+
     let newContent = currentContent.createEntity(`LINK`, "MUTABLE", {
         ...link,
-        method, // do we need to know this?
     });
     const entityKey = newContent.getLastCreatedEntityKey();
 

@@ -1,0 +1,23 @@
+{
+    "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+    "description": "A simple bar chart with embedded data.",
+    "width": 300,
+    "height": 200,
+    "data": {
+        "values": [
+            { "category": "Apple", "amount": 28 },
+            { "category": "Amazon", "amount": 55 },
+            { "category": "Facebook", "amount": 43 },
+            { "category": "Netflix", "amount": 91 },
+            { "category": "Microsoft", "amount": 81 },
+            { "category": "Samsung", "amount": 53 },
+            { "category": "Twitter", "amount": 19 },
+            { "category": "Linkedin", "amount": 87 }
+        ]
+    },
+    "mark": "bar",
+    "encoding": {
+        "x": { "field": "category", "type": "ordinal", "axis": { "labelAngle": 90 } },
+        "y": { "field": "amount", "type": "quantitative" }
+    }
+}

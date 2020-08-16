@@ -8,6 +8,7 @@ import ButtonGroup from "@material-ui/core/ButtonGroup";
 import PropTypes from "prop-types";
 import { setSelectedLink } from "ducks/ui";
 import { confirmLink, deleteLink } from "ducks/links";
+import Paper from '@material-ui/core/Paper';
 
 export default function PotentialLinkControls(props) {
     const dispatch = useDispatch();
@@ -32,22 +33,20 @@ export default function PotentialLinkControls(props) {
     }
     return pos && props.selectedLink ? (
         <Box
-            // zIndex="modal"
+            zIndex="modal"
             left={pos.x + padding}
             top={pos.y + padding}
             className={css.potentialLinkControls}
         >
-            <ButtonGroup size="small" variant="contained" aria-label="small button group">
-                <Button onMouseDown={handleAcceptClick}>Accept</Button>
-                <Button onMouseDown={handleDiscardClick}>Discard</Button>
-            </ButtonGroup>
+            <Paper elevation={1}>
+                <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
+                    <Button onMouseDown={handleAcceptClick}>Accept</Button>
+                    <Button onMouseDown={handleDiscardClick}>Discard</Button>
+                </ButtonGroup>
+            </Paper>
+
         </Box>
     ) : (
         ""
     );
 }
-
-PotentialLinkControls.propTypes = {
-    suggestions: PropTypes.array,
-    onSelected: PropTypes.func,
-};

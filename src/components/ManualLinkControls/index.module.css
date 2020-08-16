@@ -1,0 +1,22 @@
+.potentialLinkControls {
+    position: fixed;
+    min-width: 150px;
+    /* opacity: 0.75; */
+    z-index: 10;
+}
+.panel {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    cursor: default;
+    transform: translate(100%, 0);
+}
+.message {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    cursor: default;
+    transform: translate(100%, 0);
+    font-size: small;
+    color: gray;
+}

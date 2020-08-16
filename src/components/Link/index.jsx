@@ -15,7 +15,8 @@ export default function Link(props) {
     }
 
     function handleMouseOver() {
-        if (links[link.id].isConfirmed) dispatch(activateLink(link.id));
+        // if (links[link.id].isConfirmed)
+        dispatch(activateLink(link.id));
     }
     function handleMouseLeave() {
         deactivateLink(link.id);

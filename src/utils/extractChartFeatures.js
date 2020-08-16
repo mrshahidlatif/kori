@@ -53,7 +53,7 @@ export default async function (spec) {
     spec.data.forEach((datum) => {
         // for each data table
         const viewdata = view.data(datum.name);
-        console.log("viewdata", viewdata);
+        // console.log("viewdata", viewdata);
     });
     //Extracting Axes of the charts
     const axesMap = extractChartAxes(spec);

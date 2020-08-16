@@ -5,7 +5,7 @@ export default (charts, partialText, startIndex) => {
               ...charts.map((chart) =>
                   chart.properties.features
                       .filter((d) => {
-                          if (d.type === "string") {
+                          if (d.type === "string" && d.value) {
                               return d.value.toLowerCase().startsWith(partialText.toLowerCase());
                           } else if (d.type === "date") {
                               //temporary
