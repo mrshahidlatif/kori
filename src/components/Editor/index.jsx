@@ -244,7 +244,7 @@ export default function Editor(props) {
             active: false,
             type: "point", //TODO: range selection
             sentence: suggestion.text,
-            data: [suggestion.text],
+            data: [isNaN(Number(suggestion.text)) ? suggestion.text : Number(suggestion.text)],
             startIndex: suggestion.startIndex,
             endIndex: suggestion.startIndex + suggestion.text.length,
             isConfirmed: true,

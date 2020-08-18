@@ -32,7 +32,6 @@ export default function PotentialLinkControls(props) {
         props.onAccept(props.selectedLink.id);
         dispatch(setSelectedLink(null));
     }
-    console.log("Selected Link", props.selectedLink);
     return pos && props.selectedLink && !props.selectedLink.isConfirmed ? (
         <Box
             zIndex="modal"

@@ -85,6 +85,8 @@ export default memo(function ChartBlock({
             const viewData = view.data("source_0");
             setViewData(viewData);
 
+            console.log("View data", viewData);
+
             view.addDataListener("paintbrush_store", function (name, value) {
                 console.log(name, value);
                 setSelectedMarks(selectedMarks.concat(value));

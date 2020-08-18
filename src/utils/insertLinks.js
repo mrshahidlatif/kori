@@ -8,7 +8,6 @@ export default (links, editorState, currentSelection) => {
 export const insertLink = (link, editorState, currentSelection) => {
     //TODO: remove duplicates
     const currentContent = editorState.getCurrentContent();
-    console.log("jcurrent selection", currentSelection);
     currentSelection = currentSelection || editorState.getSelection();
     const blockEndIndex = currentSelection.getAnchorOffset();
     const blockKey = currentSelection.getAnchorKey();
