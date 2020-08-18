@@ -82,10 +82,14 @@ export default memo(function ChartBlock({
             const result = await vegaEmbed(chartEl.current, spec, { actions: false });
             const view = result.view;
 
-            const viewData = view.data("source_0");
+            // const viewData = view.data("source_0");
+            const viewData = !chart.liteSpec.data.hasOwnProperty("url")
+                ? view.data("data_0")
+                : view.data("source_0");
             setViewData(viewData);
 
-            console.log("View data", viewData);
+            console.log("spec", chart);
+            console.log("viewData", viewData);
 
             view.addDataListener("paintbrush_store", function (name, value) {
                 console.log(name, value);

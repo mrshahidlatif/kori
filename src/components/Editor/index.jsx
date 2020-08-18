@@ -287,7 +287,6 @@ export default function Editor(props) {
         dispatch(deleteLink(link.id));
     }
     function handleLinkAccept(linkId) {
-        console.log("about to confirm", allLinks[linkId]);
         const newEditorState = insertLinks([allLinks[linkId]], editorState);
         setEditorState(newEditorState);
     }

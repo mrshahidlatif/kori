@@ -73,21 +73,21 @@ export default function ManualLinkControls(props) {
     };
 
     function makeManualLink(textSelection, multiPoint, brush, viewData) {
-        console.log("Selected Points", multiPoint);
-        console.log("Selected Brush", brush);
-        console.log("View Data", viewData);
-
         let link = null;
         if (multiPoint.length > 0) {
-            //TODO: _vegasid_ doesn't exist for charts that have built-in data (e.g., canada.json) Strange!
-            //TODO: handle multi selection on maps; data is inside viewData.properties: We don't have an example for it.
-            console.log("Handle MultiPoint Selection");
-            var points = [];
+            let points = [];
             for (let i = 0; i < multiPoint.length; i++) {
                 for (let j = 0; j < viewData.length; j++) {
                     if (multiPoint[i].values[0] === viewData[j]._vgsid_) points.push(viewData[j]);
                 }
             }
+            let data = [];
+            points.forEach(function (p) {
+                if (p.hasOwnProperty("properties")) {
+                    //Special case: Maps
+                    data.push(p["properties"][options[selectedIndex]]);
+                } else data.push(p[options[selectedIndex]]);
+            });
 
             link = {
                 text: textSelection.text,
@@ -95,7 +95,7 @@ export default function ManualLinkControls(props) {
                 chartId: props.selectedChart.id,
                 active: false,
                 type: "multipoint",
-                data: points.map((d) => d[options[selectedIndex]]),
+                data: data,
                 startIndex: props.textSelection.startIndex,
                 endIndex: props.textSelection.endIndex,
                 sentence: "",
@@ -103,7 +103,6 @@ export default function ManualLinkControls(props) {
             };
         }
         if (brush.length > 0) {
-            console.log("Handle Brush Selection");
             let points;
             let fieldX;
             let fieldY;
