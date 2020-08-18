@@ -8,7 +8,7 @@ import ButtonGroup from "@material-ui/core/ButtonGroup";
 import PropTypes from "prop-types";
 import { setSelectedLink } from "ducks/ui";
 import { confirmLink, deleteLink } from "ducks/links";
-import Paper from '@material-ui/core/Paper';
+import Paper from "@material-ui/core/Paper";
 
 export default function PotentialLinkControls(props) {
     const dispatch = useDispatch();
@@ -29,9 +29,11 @@ export default function PotentialLinkControls(props) {
         event.stopPropagation();
 
         dispatch(confirmLink(props.selectedLink.id));
+        props.onAccept(props.selectedLink.id);
         dispatch(setSelectedLink(null));
     }
-    return pos && props.selectedLink ? (
+    console.log("Selected Link", props.selectedLink);
+    return pos && props.selectedLink && !props.selectedLink.isConfirmed ? (
         <Box
             zIndex="modal"
             left={pos.x + padding}
@@ -44,7 +46,6 @@ export default function PotentialLinkControls(props) {
                     <Button onMouseDown={handleDiscardClick}>Discard</Button>
                 </ButtonGroup>
             </Paper>
-
         </Box>
     ) : (
         ""

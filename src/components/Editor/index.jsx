@@ -286,6 +286,11 @@ export default function Editor(props) {
 
         dispatch(deleteLink(link.id));
     }
+    function handleLinkAccept(linkId) {
+        console.log("about to confirm", allLinks[linkId]);
+        const newEditorState = insertLinks([allLinks[linkId]], editorState);
+        setEditorState(newEditorState);
+    }
 
     return (
         <Fragment>
@@ -311,7 +316,11 @@ export default function Editor(props) {
                     onCreateLinkSelect={handleCreateLinkSelect}
                 />
             )}
-            <PotentialLinkControls selectedLink={selectedLink} onDiscard={handleLinkDiscard} />
+            <PotentialLinkControls
+                selectedLink={selectedLink ? allLinks[selectedLink.id] : selectedLink}
+                onDiscard={handleLinkDiscard}
+                onAccept={handleLinkAccept}
+            />
         </Fragment>
     );
 }
