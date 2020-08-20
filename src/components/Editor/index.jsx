@@ -2,6 +2,7 @@ import React, { Fragment, useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import { useParams } from "react-router-dom";
+import nlp from "compromise";
 import {
     EditorState,
     AtomicBlockUtils,
@@ -60,9 +61,8 @@ export default function Editor(props) {
             : convertFromRaw(storedEditorState);
     const [editorState, setEditorState] = useState(EditorState.createWithContent(contentState));
 
-    //To keep track what sentences have already been searched for links!
-    const [sentences, setSentences] = useState(doc.sentences);
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
+    const [pastedText, setPastedText] = useState(null);
 
     //Disabling edit functions in view mode!
     const viewMode = props.viewMode;
@@ -93,7 +93,7 @@ export default function Editor(props) {
 
     useEffect(() => {
         const editorRawState = convertToRaw(editorState.getCurrentContent());
-        dispatch(updateDoc(doc.id, { editorRawState, sentences }));
+        dispatch(updateDoc(doc.id, { editorRawState }));
     }, [editorState]);
 
     async function handleEditorChange(editorState) {
@@ -103,20 +103,14 @@ export default function Editor(props) {
         const lastTypedWord = getLastTypedWord(editorState);
         const lastSentence = getLastTypedSentence(editorState);
 
-        if (lastSentence && sentences.indexOf(lastSentence.text) === -1)
-            setSentences(sentences.concat(lastSentence.text));
-
         if (lastSentence) {
-            const alreadySearched = sentences.indexOf(lastSentence.text) > -1 ? true : false;
-            if (!alreadySearched) {
-                const links = await findLinks(chartsInEditor, lastSentence);
+            const links = await findLinks(chartsInEditor, lastSentence);
 
-                if (links.length > 0) {
-                    const action = createLinks(doc.id, links); // need ids
-                    editorState = insertLinks(action.links, editorState);
-                    setEditorState(editorState);
-                    dispatch(action);
-                }
+            if (links.length > 0) {
+                const action = createLinks(doc.id, links); // need ids
+                editorState = insertLinks(action.links, editorState);
+                setEditorState(editorState);
+                dispatch(action);
             }
         }
 
@@ -182,6 +176,18 @@ export default function Editor(props) {
             suggestions.length !== 0
                 ? setSuggestions(suggestions)
                 : setSuggestions([{ text: "NoLinkFound!" }]);
+        }
+
+        if (pastedText) {
+            const links = await findLinks(chartsInEditor, pastedText);
+
+            if (links.length > 0) {
+                const action = createLinks(doc.id, links); // need ids
+                editorState = insertLinks(action.links, editorState);
+                setEditorState(editorState);
+                dispatch(action);
+            }
+            setPastedText(null);
         }
     }
 
@@ -290,6 +296,16 @@ export default function Editor(props) {
         const newEditorState = insertLinks([allLinks[linkId]], editorState);
         setEditorState(newEditorState);
     }
+    async function handlePastedText(text) {
+        const end = editorState.getSelection().getAnchorOffset() + text.length;
+        const offset = end - text.length;
+
+        setPastedText({
+            text: text,
+            startIndex: offset,
+            endIndex: end,
+        });
+    }
 
     return (
         <Fragment>
@@ -305,6 +321,7 @@ export default function Editor(props) {
                     decorators={editorDecorators}
                     ref={editorEl}
                     readOnly={viewMode}
+                    handlePastedText={handlePastedText}
                 />
             </div>
             {suggestions.length >= 1 && chartsInEditor.length > 0 && (
