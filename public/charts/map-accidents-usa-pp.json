@@ -3,7 +3,7 @@
   "width": 500,
   "height": 300,
   "data": {
-    "url": "data/us-10m.json",
+    "url": "data/usa-states.json",
     "format": {
       "type": "topojson",
       "feature": "states"
