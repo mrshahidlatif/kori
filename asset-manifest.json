@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "/vis-text-editor/static/css/main.f1ba32a2.chunk.css",
+    "main.js": "/vis-text-editor/static/js/main.8a165854.chunk.js",
+    "main.js.map": "/vis-text-editor/static/js/main.8a165854.chunk.js.map",
+    "runtime-main.js": "/vis-text-editor/static/js/runtime-main.73280aa9.js",
+    "runtime-main.js.map": "/vis-text-editor/static/js/runtime-main.73280aa9.js.map",
+    "static/css/2.4c0ab1a8.chunk.css": "/vis-text-editor/static/css/2.4c0ab1a8.chunk.css",
+    "static/js/2.9b41bbd8.chunk.js": "/vis-text-editor/static/js/2.9b41bbd8.chunk.js",
+    "static/js/2.9b41bbd8.chunk.js.map": "/vis-text-editor/static/js/2.9b41bbd8.chunk.js.map",
+    "index.html": "/vis-text-editor/index.html",
+    "precache-manifest.509a1b7ce17e4c632865218249d92956.js": "/vis-text-editor/precache-manifest.509a1b7ce17e4c632865218249d92956.js",
+    "service-worker.js": "/vis-text-editor/service-worker.js",
+    "static/css/2.4c0ab1a8.chunk.css.map": "/vis-text-editor/static/css/2.4c0ab1a8.chunk.css.map",
+    "static/css/main.f1ba32a2.chunk.css.map": "/vis-text-editor/static/css/main.f1ba32a2.chunk.css.map",
+    "static/js/2.9b41bbd8.chunk.js.LICENSE": "/vis-text-editor/static/js/2.9b41bbd8.chunk.js.LICENSE"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.73280aa9.js",
+    "static/css/2.4c0ab1a8.chunk.css",
+    "static/js/2.9b41bbd8.chunk.js",
+    "static/css/main.f1ba32a2.chunk.css",
+    "static/js/main.8a165854.chunk.js"
+  ]
+}

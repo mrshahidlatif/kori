@@ -1,0 +1,22 @@
+{
+    "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+    "description": "A simple bar chart with embedded data.",
+    "data": {
+        "values": [
+            { "cats": "Aa", "speed": 28 },
+            { "cats": "Bb", "speed": 55 },
+            { "cats": "Cc", "speed": 43 },
+            { "cats": "Dd", "speed": 91 },
+            { "cats": "Ee", "speed": 81 },
+            { "cats": "Ff", "speed": 53 },
+            { "cats": "Gg", "speed": 19 },
+            { "cats": "Hh", "speed": 87 },
+            { "cats": "Ii", "speed": 52 }
+        ]
+    },
+    "mark": "bar",
+    "encoding": {
+        "x": { "field": "cats", "type": "ordinal", "axis": { "labelAngle": 0 } },
+        "y": { "field": "speed", "type": "quantitative" }
+    }
+}
