@@ -64,9 +64,6 @@ export default function Editor(props) {
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
     const [pastedText, setPastedText] = useState(null);
 
-    //Disabling edit functions in view mode!
-    const viewMode = props.viewMode;
-
     useEffect(() => {
         if (exitManualLink) {
             setEditorState(deHighlightTextSelection(currentSelectionState, editorState));
@@ -309,7 +306,7 @@ export default function Editor(props) {
 
     return (
         <Fragment>
-            {!viewMode && <EditorToolbar />}
+            {<EditorToolbar />}
             <div className={css.editor} onDragOver={handleDragOver} onDrop={handleDrop}>
                 <DraftEditor
                     editorState={editorState}

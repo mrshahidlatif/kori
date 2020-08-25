@@ -43,6 +43,7 @@ export default memo(function ChartBlock({
     const [viewData, setViewData] = useState([]);
     const [brush, setBrush] = useState([]);
     const [toggleSettings, setToggleSettings] = useState(false);
+    const viewMode = useSelector((state) => state.ui.viewMode);
 
     // TODO: use a memoized selector for performance
     const links = useSelector(
@@ -151,7 +152,8 @@ export default memo(function ChartBlock({
     function handleSettingClick() {
         setToggleSettings(!toggleSettings);
     }
-    const showConfig = selection.getAnchorKey() === block.getKey(); // show only clicking this block
+    const showConfig = viewMode ? false : selection.getAnchorKey() === block.getKey(); // show only clicking this block
+
     const highlightStyle =
         chartsInEditor.indexOf(chart.id) > -1 && !showConfig && textSelection
             ? {
