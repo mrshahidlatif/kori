@@ -14,11 +14,13 @@ export default (liteSpec) => {
         : {
               brush: {
                   type: "interval",
+                  clear: "window:keypress",
                   //   clear: selectionClearCondition,
               },
               paintbrush: {
                   type: "multi",
                   toggle: true,
+                  clear: "window:keypress",
                   //   clear: selectionClearCondition,
               },
           };

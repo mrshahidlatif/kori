@@ -42,7 +42,11 @@ export const findWordLink = (chart, sentence) => {
                 chartId: chart.id,
                 active: false,
                 type: "point",
-                data: [m.matchedFeature.value],
+                data: [
+                    isNaN(Number(m.matchedFeature.value))
+                        ? m.matchedFeature.value
+                        : Number(m.matchedFeature.value),
+                ],
                 startIndex: linkStartIndex,
                 endIndex: linkEndIndex,
                 sentence: sentence.text,

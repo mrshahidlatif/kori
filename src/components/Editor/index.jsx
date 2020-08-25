@@ -60,9 +60,8 @@ export default function Editor(props) {
             : convertFromRaw(storedEditorState);
     const [editorState, setEditorState] = useState(EditorState.createWithContent(contentState));
 
-    //To keep track what sentences have already been searched for links!
-    const [sentences, setSentences] = useState(doc.sentences);
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
+    const [pastedText, setPastedText] = useState(null);
 
     useEffect(() => {
         if (exitManualLink) {
@@ -90,7 +89,7 @@ export default function Editor(props) {
 
     useEffect(() => {
         const editorRawState = convertToRaw(editorState.getCurrentContent());
-        dispatch(updateDoc(doc.id, { editorRawState, sentences }));
+        dispatch(updateDoc(doc.id, { editorRawState }));
     }, [editorState]);
 
     async function handleEditorChange(editorState) {
@@ -100,20 +99,14 @@ export default function Editor(props) {
         const lastTypedWord = getLastTypedWord(editorState);
         const lastSentence = getLastTypedSentence(editorState);
 
-        if (lastSentence && sentences.indexOf(lastSentence.text) === -1)
-            setSentences(sentences.concat(lastSentence.text));
-
         if (lastSentence) {
-            const alreadySearched = sentences.indexOf(lastSentence.text) > -1 ? true : false;
-            if (!alreadySearched) {
-                const links = await findLinks(chartsInEditor, lastSentence);
+            const links = await findLinks(chartsInEditor, lastSentence);
 
-                if (links.length > 0) {
-                    const action = createLinks(doc.id, links); // need ids
-                    editorState = insertLinks(action.links, editorState);
-                    setEditorState(editorState);
-                    dispatch(action);
-                }
+            if (links.length > 0) {
+                const action = createLinks(doc.id, links); // need ids
+                editorState = insertLinks(action.links, editorState);
+                setEditorState(editorState);
+                dispatch(action);
             }
         }
 
@@ -180,6 +173,18 @@ export default function Editor(props) {
                 ? setSuggestions(suggestions)
                 : setSuggestions([{ text: "NoLinkFound!" }]);
         }
+
+        if (pastedText) {
+            const links = await findLinks(chartsInEditor, pastedText);
+
+            if (links.length > 0) {
+                const action = createLinks(doc.id, links); // need ids
+                editorState = insertLinks(action.links, editorState);
+                setEditorState(editorState);
+                dispatch(action);
+            }
+            setPastedText(null);
+        }
     }
 
     function handleKeyCommand(command) {
@@ -241,7 +246,7 @@ export default function Editor(props) {
             active: false,
             type: "point", //TODO: range selection
             sentence: suggestion.text,
-            data: [suggestion.text],
+            data: [isNaN(Number(suggestion.text)) ? suggestion.text : Number(suggestion.text)],
             startIndex: suggestion.startIndex,
             endIndex: suggestion.startIndex + suggestion.text.length,
             isConfirmed: true,
@@ -286,6 +291,16 @@ export default function Editor(props) {
     function handleLinkAccept(linkId) {
         setEditorState(insertLinks([allLinks[linkId]], editorState, editorState.getSelection()));
     }
+    async function handlePastedText(text) {
+        const end = editorState.getSelection().getAnchorOffset() + text.length;
+        const offset = end - text.length;
+
+        setPastedText({
+            text: text,
+            startIndex: offset,
+            endIndex: end,
+        });
+    }
 
     return (
         <Fragment>
@@ -300,6 +315,7 @@ export default function Editor(props) {
                     blockRendererFn={blockRendererFn}
                     decorators={editorDecorators}
                     ref={editorEl}
+                    handlePastedText={handlePastedText}
                 />
             </div>
             {suggestions.length >= 1 && chartsInEditor.length > 0 && (
