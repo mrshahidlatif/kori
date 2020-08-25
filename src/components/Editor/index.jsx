@@ -2,7 +2,6 @@ import React, { Fragment, useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import { useParams } from "react-router-dom";
-import nlp from "compromise";
 import {
     EditorState,
     AtomicBlockUtils,
@@ -317,7 +316,6 @@ export default function Editor(props) {
                     blockRendererFn={blockRendererFn}
                     decorators={editorDecorators}
                     ref={editorEl}
-                    readOnly={viewMode}
                     handlePastedText={handlePastedText}
                 />
             </div>
