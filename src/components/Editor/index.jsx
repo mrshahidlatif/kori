@@ -289,8 +289,7 @@ export default function Editor(props) {
         dispatch(deleteLink(link.id));
     }
     function handleLinkAccept(linkId) {
-        const newEditorState = insertLinks([allLinks[linkId]], editorState);
-        setEditorState(newEditorState);
+        setEditorState(insertLinks([allLinks[linkId]], editorState, editorState.getSelection()));
     }
     async function handlePastedText(text) {
         const end = editorState.getSelection().getAnchorOffset() + text.length;
@@ -328,7 +327,7 @@ export default function Editor(props) {
                 />
             )}
             <PotentialLinkControls
-                selectedLink={selectedLink ? allLinks[selectedLink.id] : selectedLink}
+                selectedLink={selectedLink}
                 onDiscard={handleLinkDiscard}
                 onAccept={handleLinkAccept}
             />
