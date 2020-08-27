@@ -3,10 +3,12 @@ import splitTextIntoNWordsList from "./splitTextIntoNWordsList";
 import { Wit } from "node-wit";
 import { isArray } from "vega";
 import parseWitResponse from "./parseWitResponse";
+import util from "util";
+const request = require("request");
 
 const MIN_MATCH_THRESHOLD = 0.8;
 const client = new Wit({
-    accessToken: "FFJCMCE6JAQ3CT52WH5YBFED5TKENKTI",
+    accessToken: "LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N",
     // logger: new log.Logger(log.DEBUG), // optional
 });
 
@@ -17,6 +19,15 @@ export default async (charts, sentence) => {
         links = links.concat(findWordLink(chart, sentence).filter((link) => link !== null));
         const link = await findPhraseLink(chart, sentence);
         if (link !== null) links.push(link);
+        links = links.filter((link) => link !== undefined);
+        //only call when there is one phrase link!
+        if (link !== null && links.length > 1) {
+            const joinableLinks = await groupLinks(sentence, links);
+            if (joinableLinks.length > 1) {
+                const groupLink = createGroupLink(sentence, joinableLinks, links);
+                links.push(groupLink);
+            }
+        }
     }
     return links;
 };
@@ -81,7 +92,6 @@ export async function findPhraseLink(chart, sentence) {
     if (match !== null) {
         const response = await client.message(sentence.text, {});
         const parsedResponse = parseWitResponse(response);
-        console.log("Parsed Response", parsedResponse);
         if (parsedResponse !== null) {
             //TODO: Also see if we can check if Wit.ai can also give us numbers described
             // as words (e.g., fifty, thirty four, etc.)
@@ -106,7 +116,7 @@ export async function findPhraseLink(chart, sentence) {
                         feature: match.matchedFeature, //information about how the link was found
                         chartId: chart.id,
                         active: false,
-                        type: parsedResponse.intent,
+                        type: "range",
                         data: isArray(match.matchedFeature.field)
                             ? match.matchedFeature.field
                             : [match.matchedFeature.field],
@@ -119,64 +129,7 @@ export async function findPhraseLink(chart, sentence) {
                         isConfirmed: false,
                     };
                     break;
-                case "comparison":
-                    let group1Matches = [];
-                    let group2Matches = [];
-                    if (parsedResponse.group1 && parsedResponse.group2) {
-                        // only if group has more than 2 values otherwise it is point link
-                        group1Matches = findMatchesInChartFeatures(parsedResponse.group1, chart);
-                        group2Matches = findMatchesInChartFeatures(parsedResponse.group2, chart);
-                    }
-                    if (group1Matches && group2Matches) {
-                        let group1Data = group1Matches.map((m) => m.matchedFeature.value);
-                        let group2Data = group2Matches.map((m) => m.matchedFeature.value);
-                        const data = [...group1Data, ...group2Data];
-                        link = {
-                            text: sentence.text,
-                            feature: group1Matches[0].matchedFeature, //information about how the link was found
-                            chartId: chart.id,
-                            active: false,
-                            type: parsedResponse.intent,
-                            data: data,
-                            startIndex: sentence.startIndex,
-                            endIndex: sentence.endIndex,
-                            sentence: sentence.text,
-                            isConfirmed: false,
-                        };
-                    }
-                    break;
-                case "group_selection":
-                    let matches = [];
-                    if (parsedResponse.group.length > 1) {
-                        // only if group has more than 2 values otherwise it is point link
-                        matches = findMatchesInChartFeatures(parsedResponse.group, chart);
-                    }
-                    if (matches.length === parsedResponse.group.length) {
-                        const linkStartIndex = sentence.text.indexOf(matches[0].userTyped);
-                        const linkEndIndex =
-                            sentence.text.indexOf(matches[matches.length - 1].userTyped) +
-                            matches[matches.length - 1].userTyped.length;
-                        const linkPhrase = sentence.text.substring(
-                            linkStartIndex,
-                            linkEndIndex,
-                            matches[matches.length - 1].userTyped
-                        );
-                        link = {
-                            text: linkPhrase,
-                            feature: matches[0].matchedFeature, //information about how the link was found
-                            chartId: chart.id,
-                            active: false,
-                            type: parsedResponse.intent,
-                            data: matches.map((m) => m.matchedFeature.value),
-                            startIndex: sentence.startIndex + linkStartIndex,
-                            endIndex: sentence.startIndex + linkEndIndex,
-                            sentence: sentence.text,
-                            isConfirmed: false,
-                        };
-                    }
-                    break;
             }
-            console.log("Phrase Link", link);
             return link;
         }
     }
@@ -192,4 +145,49 @@ function findMatchesInChartFeatures(terms, chart) {
         });
     }
     return matches;
+}
+async function groupLinks(sentence, links) {
+    const singleLinks = links.map((l) => l.text);
+    const sen = { text: sentence["text"], links: singleLinks };
+
+    const options = {
+        uri: "http://localhost:8885/processjson",
+        method: "POST",
+        headers: {
+            Accept: "application/json",
+            "Accept-Charset": "utf-8",
+        },
+        json: true,
+        body: sen,
+    };
+
+    const promRequest = util.promisify(request);
+    const response = await promRequest(options);
+    return response.body.data;
+}
+
+function createGroupLink(sentence, data, links) {
+    if (sentence === undefined || links.length < 2 || data === undefined) return;
+    const pointLink = links.find((l) => l.text === data[0] && l.type === "point");
+    const rangeLink = links.find((l) => l.text === data[1] && l.type === "range");
+    const linkStartIndex = sentence.text.indexOf(pointLink.text);
+    const linkEndIndex = sentence.text.indexOf(rangeLink.text) + rangeLink.text.length;
+    const linkText = sentence.text.substring(linkStartIndex, linkEndIndex);
+    const glink = {
+        text: linkText,
+        feature: pointLink.feature, //information about how the link was found
+        chartId: pointLink.chartId,
+        active: false,
+        type: "group",
+        data: pointLink.data,
+        startIndex: sentence.startIndex + sentence.text.indexOf(linkText),
+        endIndex: sentence.startIndex + linkText.length,
+        sentence: sentence.text,
+        rangeField: rangeLink.feature.field,
+        rangeMin: rangeLink.rangeMin,
+        rangeMax: rangeLink.rangeMax,
+        isConfirmed: false,
+    };
+    console.log("Group Link", glink);
+    return glink;
 }

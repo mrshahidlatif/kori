@@ -1,6 +1,5 @@
 const MIN_INTENT_COFIDENCE = 0.8;
 export default (response) => {
-    //TODO: This function will be modified depending on the training on Wit.ai service!
     //TODO: Updated Version of Wit.ai will store *Intents* and *Entities* separately in the response!
     let parsedResponse = null;
     let intent;
@@ -14,23 +13,22 @@ export default (response) => {
             const min = response.entities.hasOwnProperty("min")
                 ? response.entities.min[0].value
                 : -Infinity;
+            const minBody = response.entities.hasOwnProperty("min")
+                ? response.entities.min[0].body
+                : "";
             const max = response.entities.hasOwnProperty("max")
                 ? response.entities.max[0].value
                 : Infinity;
-            parsedResponse = { intent: intent, min: min, max: max };
-            break;
-        case "group_selection":
-            if (response.entities.object_in_group) {
-                const group = response.entities.object_in_group.map((obj) => obj.value);
-                parsedResponse = { intent: intent, group: group };
-            }
-            break;
-        case "comparison":
-            if (response.entities.group_one && response.entities.group_two) {
-                const group1 = response.entities.group_one.map((obj) => obj.value);
-                const group2 = response.entities.group_two.map((obj) => obj.value);
-                parsedResponse = { intent: intent, group1: group1, group2: group2 };
-            }
+            const maxBody = response.entities.hasOwnProperty("max")
+                ? response.entities.max[0].body
+                : "";
+            parsedResponse = {
+                intent: intent,
+                min: min,
+                minText: minBody,
+                max: max,
+                maxText: maxBody,
+            };
             break;
     }
     return parsedResponse;

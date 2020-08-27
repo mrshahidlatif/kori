@@ -135,6 +135,7 @@ export default memo(function ChartBlock({
                         field: link.feature.field,
                         enabled: true,
                         //Next 2 fields refer to range selection links
+                        rangeField: link.rangeField || "",
                         rangeMin: link.rangeMin || 0,
                         rangeMax: link.rangeMax || 0,
                         //Rectangular Brushes

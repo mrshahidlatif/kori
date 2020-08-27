@@ -40,15 +40,27 @@ export function addSignalToMark(mark, highlight) {
     }
     const isMap = mark.type === "shape" && mark.style.includes("geoshape");
     const activePredicate = `highlight.enabled===true && (
-        (indexof(highlight.data, ${isMap ? "datum.properties" : "datum"}[highlight.field])!=-1) ||
+        (highlight.rangeField === '' && indexof(highlight.data, ${
+            isMap ? "datum.properties" : "datum"
+        }[highlight.field])!=-1) ||
+        (highlight.rangeField != '' && indexof(highlight.data, ${
+            isMap ? "datum.properties" : "datum"
+        }[highlight.field])!=-1 && (datum[highlight.rangeField] > highlight.rangeMin && datum[highlight.rangeField]<highlight.rangeMax)) ||
         (datum[highlight.field] > highlight.rangeMin && datum[highlight.field]<highlight.rangeMax) ||
         (datum[highlight.fieldX] > highlight.rangeX[0] && datum[highlight.fieldX] < highlight.rangeX[1] &&
             datum[highlight.fieldY] < highlight.rangeY[0] && datum[highlight.fieldY] > highlight.rangeY[1] )
     )`;
     //TODO: reduce redundant checking
     const inactivePredicate = `highlight.enabled===true && !(
-        (indexof(highlight.data, ${isMap ? "datum.properties" : "datum"}[highlight.field])!=-1) ||
-        (datum[highlight.field] > highlight.rangeMin && datum[highlight.field]<highlight.rangeMax)
+        (highlight.rangeField === '' && indexof(highlight.data, ${
+            isMap ? "datum.properties" : "datum"
+        }[highlight.field])!=-1) ||
+        (highlight.rangeField != '' && indexof(highlight.data, ${
+            isMap ? "datum.properties" : "datum"
+        }[highlight.field])!=-1 && (datum[highlight.rangeField] > highlight.rangeMin && datum[highlight.rangeField]<highlight.rangeMax)) ||
+        (datum[highlight.field] > highlight.rangeMin && datum[highlight.field]<highlight.rangeMax) ||
+        (datum[highlight.fieldX] > highlight.rangeX[0] && datum[highlight.fieldX] < highlight.rangeX[1] &&
+            datum[highlight.fieldY] < highlight.rangeY[0] && datum[highlight.fieldY] > highlight.rangeY[1] )
     )`;
     const oldProp = mark.encode.update[highlight.channel];
     const highlightProp = [
