@@ -15,13 +15,14 @@ const client = new Wit({
 export default async (charts, sentence) => {
     let links = [];
     //forEach loop doesn't work with async-await!
+
     for (const chart of charts) {
         links = links.concat(findWordLink(chart, sentence).filter((link) => link !== null));
-        const link = await findPhraseLink(chart, sentence);
-        if (link !== null) links.push(link);
+        const rangeLink = await findPhraseLink(chart, sentence);
+        if (rangeLink !== null) links.push(rangeLink);
         links = links.filter((link) => link !== undefined);
         //only call when there is one phrase link!
-        if (link !== null && links.length > 1) {
+        if (rangeLink !== null && rangeLink !== undefined && links.length > 1) {
             const joinableLinks = await groupLinks(sentence, links);
             if (joinableLinks.length > 1) {
                 const groupLink = createGroupLink(sentence, joinableLinks, links);
@@ -29,6 +30,7 @@ export default async (charts, sentence) => {
             }
         }
     }
+
     return links;
 };
 
@@ -173,6 +175,8 @@ function createGroupLink(sentence, data, links) {
     const linkStartIndex = sentence.text.indexOf(pointLink.text);
     const linkEndIndex = sentence.text.indexOf(rangeLink.text) + rangeLink.text.length;
     const linkText = sentence.text.substring(linkStartIndex, linkEndIndex);
+    console.log("LInks ", pointLink, rangeLink);
+    console.log("text", data);
     const glink = {
         text: linkText,
         feature: pointLink.feature, //information about how the link was found

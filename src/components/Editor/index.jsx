@@ -35,6 +35,7 @@ import getLastTypedSentence from "utils/getLastTypedSentence";
 import getTextSelection from "utils/getTextSelection";
 import highlightTextSelection from "utils/highlightTextSelection";
 import deHighlightTextSelection from "utils/deHighlightTextSelection";
+import getBlockText from "utils/getBlockText";
 
 export default function Editor(props) {
     const dispatch = useDispatch();
@@ -62,6 +63,7 @@ export default function Editor(props) {
 
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
     const [pastedText, setPastedText] = useState(null);
+    const [blockText, setBlockText] = useState("");
 
     useEffect(() => {
         if (exitManualLink) {
@@ -92,6 +94,25 @@ export default function Editor(props) {
         dispatch(updateDoc(doc.id, { editorRawState }));
     }, [editorState]);
 
+    useEffect(() => {
+        const asyncExec = async () => {
+            console.log("Find links now", blockText);
+            if (blockText !== "") {
+                const textObject = { text: blockText, startIndex: 0, endIndex: blockText.length };
+                console.log("Text", textObject);
+                const links = await findLinks(chartsInEditor, textObject);
+
+                if (links.length > 0) {
+                    const action = createLinks(doc.id, links); // need ids
+                    setEditorState(insertLinks(action.links, editorState));
+                    dispatch(action);
+                }
+                setBlockText("");
+            }
+        };
+        asyncExec();
+    }, [blockText]);
+
     async function handleEditorChange(editorState) {
         setEditorState(editorState);
         const editorRawState = convertToRaw(editorState.getCurrentContent());
@@ -99,16 +120,7 @@ export default function Editor(props) {
         const lastTypedWord = getLastTypedWord(editorState);
         const lastSentence = getLastTypedSentence(editorState);
 
-        if (lastSentence) {
-            const links = await findLinks(chartsInEditor, lastSentence);
-
-            if (links.length > 0) {
-                const action = createLinks(doc.id, links); // need ids
-                editorState = insertLinks(action.links, editorState);
-                setEditorState(editorState);
-                dispatch(action);
-            }
-        }
+        console.log("Text", blockText);
 
         //Enable SuggestionMenu on @
         if (lastTypedWord.text.startsWith("@")) {
@@ -186,6 +198,11 @@ export default function Editor(props) {
             setPastedText(null);
         }
     }
+    function handleReturn() {
+        // setBlockText(getTextByOffset(editorState));
+        // console.log("return", blockText);
+        // return "handled";
+    }
 
     function handleKeyCommand(command) {
         // handle common key bindings (e.g., bold, italic, etc.)
@@ -195,6 +212,12 @@ export default function Editor(props) {
             return "handled";
         }
         return "not-handled";
+    }
+    function handleTab(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setBlockText(getBlockText(editorState));
+        return "handled";
     }
 
     function handleDragOver(e) {
@@ -316,6 +339,8 @@ export default function Editor(props) {
                     decorators={editorDecorators}
                     ref={editorEl}
                     handlePastedText={handlePastedText}
+                    handleReturn={handleReturn}
+                    onTab={handleTab}
                 />
             </div>
             {suggestions.length >= 1 && chartsInEditor.length > 0 && (
