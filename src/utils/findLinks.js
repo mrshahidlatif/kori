@@ -4,6 +4,7 @@ import { Wit } from "node-wit";
 import { isArray } from "vega";
 import parseWitResponse from "./parseWitResponse";
 import util from "util";
+import { link } from "fs";
 const request = require("request");
 
 const MIN_MATCH_THRESHOLD = 0.8;
@@ -167,19 +168,32 @@ async function findGroupableLinks(sentence, links) {
 function createGroupLink(sentence, groupableLinks, links) {
     if (sentence === undefined || links.length < 2 || groupableLinks === undefined) return;
 
-    const pointLink = links.find((l) => l.text === groupableLinks[0] && l.type === "point");
-    const rangeLink = links.find((l) => l.text === groupableLinks[1] && l.type === "range");
-    const linkStartIndex = sentence.text.indexOf(pointLink.text);
-    const linkEndIndex = sentence.text.indexOf(rangeLink.text) + rangeLink.text.length;
-    const linkText = sentence.text.substring(linkStartIndex, linkEndIndex);
+    const pointLinks = links.filter((link) => link.type === "point");
+    const rangeLink = links.filter((link) => link.type === "range")[0];
+
+    const firstIndividualLink = links.reduce(function (prev, curr) {
+        return prev.startIndex < curr.startIndex ? prev : curr;
+    });
+
+    const lastIndividualLink = links.reduce(function (prev, curr) {
+        return prev.endIndex > curr.endIndex ? prev : curr;
+    });
+
+    const linkStartIndex = firstIndividualLink.startIndex;
+    const linkEndIndex = lastIndividualLink.endIndex;
+
+    const linkText = sentence.text.substring(
+        firstIndividualLink.startIndex,
+        lastIndividualLink.endIndex
+    );
 
     const groupLink = {
         text: linkText,
-        feature: pointLink.feature, //information about how the link was found
-        chartId: pointLink.chartId,
+        feature: pointLinks[0].feature, //information about how the link was found
+        chartId: pointLinks[0].chartId,
         active: false,
         type: "group",
-        data: pointLink.data,
+        data: pointLinks.map((pointLink) => pointLink.data[0]),
         startIndex: linkStartIndex,
         endIndex: linkEndIndex,
         sentence: sentence.text,
