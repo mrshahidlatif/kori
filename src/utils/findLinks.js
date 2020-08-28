@@ -100,6 +100,11 @@ export async function findRangeLinks(chart, sentence) {
         if (parsedResponse !== null) {
             //TODO: Also see if we can check if Wit.ai can also give us numbers described
             // as words (e.g., fifty, thirty four, etc.)
+            if (
+                Math.abs(parsedResponse.min) == Infinity &&
+                Math.abs(parsedResponse.max) == Infinity
+            )
+                return;
             switch (parsedResponse.intent) {
                 case "range_selection":
                     const linkStartIndex = sentence.text.indexOf(match.userTyped);
