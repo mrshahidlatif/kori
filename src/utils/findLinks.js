@@ -15,14 +15,13 @@ const client = new Wit({
 export default async (charts, sentence) => {
     let links = [];
     //forEach loop doesn't work with async-await!
-
     for (const chart of charts) {
         links = links.concat(findWordLink(chart, sentence).filter((link) => link !== null));
         const rangeLink = await findPhraseLink(chart, sentence);
-        if (rangeLink !== null) links.push(rangeLink);
+        if (rangeLink != null) links.push(rangeLink);
         links = links.filter((link) => link !== undefined);
         //only call when there is one phrase link!
-        if (rangeLink !== null && rangeLink !== undefined && links.length > 1) {
+        if (rangeLink != null && links.length > 1) {
             const joinableLinks = await groupLinks(sentence, links);
             if (joinableLinks.length > 1) {
                 const groupLink = createGroupLink(sentence, joinableLinks, links);
@@ -30,7 +29,6 @@ export default async (charts, sentence) => {
             }
         }
     }
-
     return links;
 };
 
@@ -91,7 +89,7 @@ export async function findPhraseLink(chart, sentence) {
         }
     });
     //only send request to Wit.ai when we have a potential match!
-    if (match !== null) {
+    if (match != null) {
         const response = await client.message(sentence.text, {});
         const parsedResponse = parseWitResponse(response);
         if (parsedResponse !== null) {
@@ -169,11 +167,12 @@ async function groupLinks(sentence, links) {
 }
 
 function createGroupLink(sentence, data, links) {
-    if (sentence === undefined || links.length < 2 || data === undefined) return;
+    if (sentence == null || links.length < 2 || data == null) return;
+
     const pointLink = links.find((l) => l.text === data[0] && l.type === "point");
     const rangeLink = links.find((l) => l.text === data[1] && l.type === "range");
     const linkStartIndex = sentence.text.indexOf(pointLink.text);
-    const linkEndIndex = sentence.text.indexOf(rangeLink.text) + rangeLink.text.length;
+    const linkEndIndex = rangeLink.endIndex;
     const linkText = sentence.text.substring(linkStartIndex, linkEndIndex);
     console.log("LInks ", pointLink, rangeLink);
     console.log("text", data);
@@ -184,8 +183,8 @@ function createGroupLink(sentence, data, links) {
         active: false,
         type: "group",
         data: pointLink.data,
-        startIndex: sentence.startIndex + sentence.text.indexOf(linkText),
-        endIndex: sentence.startIndex + linkText.length,
+        startIndex: linkStartIndex,
+        endIndex: linkEndIndex,
         sentence: sentence.text,
         rangeField: rangeLink.feature.field,
         rangeMin: rangeLink.rangeMin,

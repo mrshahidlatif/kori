@@ -36,6 +36,7 @@ import getTextSelection from "utils/getTextSelection";
 import highlightTextSelection from "utils/highlightTextSelection";
 import deHighlightTextSelection from "utils/deHighlightTextSelection";
 import getBlockText from "utils/getBlockText";
+import nlp from "compromise";
 
 export default function Editor(props) {
     const dispatch = useDispatch();
@@ -96,14 +97,24 @@ export default function Editor(props) {
 
     useEffect(() => {
         const asyncExec = async () => {
-            console.log("Find links now", blockText);
             if (blockText !== "") {
-                const textObject = { text: blockText, startIndex: 0, endIndex: blockText.length };
-                console.log("Text", textObject);
-                const links = await findLinks(chartsInEditor, textObject);
-
-                if (links.length > 0) {
-                    const action = createLinks(doc.id, links); // need ids
+                const sentences = await nlp(blockText).sentences().json();
+                let sentenceOffset = 0;
+                let allLinks = [];
+                for (let i = 0; i < sentences.length; i++) {
+                    const { text } = sentences[i];
+                    const sentenceObject = {
+                        text: text,
+                        startIndex: sentenceOffset,
+                        endIndex: sentenceOffset + text.length,
+                    };
+                    sentenceOffset = sentenceOffset + text.length + 1; //+1 for white space between sentences
+                    console.log({ sentenceObject });
+                    const links = await findLinks(chartsInEditor, sentenceObject);
+                    allLinks = allLinks.concat(links);
+                }
+                if (allLinks.length > 0) {
+                    const action = createLinks(doc.id, allLinks);
                     setEditorState(insertLinks(action.links, editorState));
                     dispatch(action);
                 }

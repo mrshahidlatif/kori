@@ -1,6 +1,7 @@
 const MIN_INTENT_COFIDENCE = 0.8;
 export default (response) => {
     //TODO: Updated Version of Wit.ai will store *Intents* and *Entities* separately in the response!
+    console.log("Parsed response", response);
     let parsedResponse = null;
     let intent;
     if (response.entities.hasOwnProperty("intent")) {
