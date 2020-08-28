@@ -7,6 +7,7 @@ import util from "util";
 const request = require("request");
 
 const MIN_MATCH_THRESHOLD = 0.8;
+const WIT_CHARACTER_LIMIT = 280;
 const client = new Wit({
     accessToken: "LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N",
     // logger: new log.Logger(log.DEBUG), // optional
@@ -16,23 +17,26 @@ export default async (charts, sentence) => {
     let links = [];
     //forEach loop doesn't work with async-await!
     for (const chart of charts) {
-        links = links.concat(findWordLink(chart, sentence).filter((link) => link !== null));
-        const rangeLink = await findPhraseLink(chart, sentence);
-        if (rangeLink != null) links.push(rangeLink);
+        links = links.concat(
+            findWordOrPhraseLinks(chart, sentence).filter((link) => link !== null)
+        );
+        const rangeLink = await findRangeLinks(chart, sentence);
+        if (rangeLink !== null) links.push(rangeLink);
         links = links.filter((link) => link !== undefined);
         //only call when there is one phrase link!
-        if (rangeLink != null && links.length > 1) {
-            const joinableLinks = await groupLinks(sentence, links);
-            if (joinableLinks.length > 1) {
-                const groupLink = createGroupLink(sentence, joinableLinks, links);
+        if (rangeLink !== null && rangeLink !== undefined && links.length > 1) {
+            const groupableLinks = await findGroupableLinks(sentence, links);
+            if (groupableLinks.length > 1) {
+                const groupLink = createGroupLink(sentence, groupableLinks, links);
                 links.push(groupLink);
             }
         }
     }
+
     return links;
 };
 
-export const findWordLink = (chart, sentence) => {
+export const findWordOrPhraseLinks = (chart, sentence) => {
     let matches = [];
     chart.properties.features.forEach(function (f) {
         const fsResult = fuzzyMatch(sentence.text, f.value); //returns a [score, word] pair!
@@ -42,7 +46,7 @@ export const findWordLink = (chart, sentence) => {
             matches.push({ userTyped: fsResult[1], matchedFeature: f });
         }
     });
-    let links = [];
+    let pointLinks = [];
     if (matches.length > 0)
         matches.forEach(function (m) {
             const linkStartIndex = sentence.startIndex + sentence.text.indexOf(m.userTyped);
@@ -63,9 +67,9 @@ export const findWordLink = (chart, sentence) => {
                 sentence: sentence.text,
                 isConfirmed: false,
             };
-            links.push(link);
+            pointLinks.push(link);
         });
-    return links;
+    return pointLinks;
 };
 function fuzzyMatch(sentence, word) {
     if (typeof word === "string") {
@@ -78,9 +82,9 @@ function fuzzyMatch(sentence, word) {
     } else return [0, ""];
 }
 
-export async function findPhraseLink(chart, sentence) {
+export async function findRangeLinks(chart, sentence) {
     let match = null;
-    let link = null;
+    let rangeLink = null;
     chart.properties.axes.forEach(function (a) {
         const fsResult = fuzzyMatch(sentence.text, a.title); //returns a [score, word] pair!
         // TODO: Later check only if the f.type is a number!
@@ -89,7 +93,8 @@ export async function findPhraseLink(chart, sentence) {
         }
     });
     //only send request to Wit.ai when we have a potential match!
-    if (match != null) {
+    if (match !== null) {
+        if (sentence.text.length > WIT_CHARACTER_LIMIT) return;
         const response = await client.message(sentence.text, {});
         const parsedResponse = parseWitResponse(response);
         if (parsedResponse !== null) {
@@ -111,9 +116,9 @@ export async function findPhraseLink(chart, sentence) {
                                 : sentence.text.length - 1
                             : sentence.text.length - 1;
                     const linkPhrase = sentence.text.substring(linkStartIndex, linkEndIndex);
-                    link = {
+                    rangeLink = {
                         text: linkPhrase,
-                        feature: match.matchedFeature, //information about how the link was found
+                        feature: match.matchedFeature, //information about how the rangeLink was found
                         chartId: chart.id,
                         active: false,
                         type: "range",
@@ -130,25 +135,13 @@ export async function findPhraseLink(chart, sentence) {
                     };
                     break;
             }
-            return link;
+            return rangeLink;
         }
     }
 }
-function findMatchesInChartFeatures(terms, chart) {
-    let matches = [];
-    for (let i = 0; i < terms.length; i++) {
-        chart.properties.features.forEach(function (f) {
-            const fsResult = fuzzyMatch(terms[i], f.value); //returns a [score, word] pair!
-            if (f.type === "string" && fsResult[0] > MIN_MATCH_THRESHOLD) {
-                matches.push({ userTyped: fsResult[1], matchedFeature: f });
-            }
-        });
-    }
-    return matches;
-}
-async function groupLinks(sentence, links) {
-    const singleLinks = links.map((l) => l.text);
-    const sen = { text: sentence["text"], links: singleLinks };
+async function findGroupableLinks(sentence, links) {
+    const pointLinks = links.map((l) => l.text);
+    const sentenceObject = { text: sentence["text"], links: pointLinks };
 
     const options = {
         uri: "http://localhost:8885/processjson",
@@ -158,25 +151,24 @@ async function groupLinks(sentence, links) {
             "Accept-Charset": "utf-8",
         },
         json: true,
-        body: sen,
+        body: sentenceObject,
     };
 
-    const promRequest = util.promisify(request);
-    const response = await promRequest(options);
+    const requestPromise = util.promisify(request);
+    const response = await requestPromise(options);
     return response.body.data;
 }
 
-function createGroupLink(sentence, data, links) {
-    if (sentence == null || links.length < 2 || data == null) return;
+function createGroupLink(sentence, groupableLinks, links) {
+    if (sentence === undefined || links.length < 2 || groupableLinks === undefined) return;
 
-    const pointLink = links.find((l) => l.text === data[0] && l.type === "point");
-    const rangeLink = links.find((l) => l.text === data[1] && l.type === "range");
+    const pointLink = links.find((l) => l.text === groupableLinks[0] && l.type === "point");
+    const rangeLink = links.find((l) => l.text === groupableLinks[1] && l.type === "range");
     const linkStartIndex = sentence.text.indexOf(pointLink.text);
-    const linkEndIndex = rangeLink.endIndex;
+    const linkEndIndex = sentence.text.indexOf(rangeLink.text) + rangeLink.text.length;
     const linkText = sentence.text.substring(linkStartIndex, linkEndIndex);
-    console.log("LInks ", pointLink, rangeLink);
-    console.log("text", data);
-    const glink = {
+
+    const groupLink = {
         text: linkText,
         feature: pointLink.feature, //information about how the link was found
         chartId: pointLink.chartId,
@@ -191,6 +183,5 @@ function createGroupLink(sentence, data, links) {
         rangeMax: rangeLink.rangeMax,
         isConfirmed: false,
     };
-    console.log("Group Link", glink);
-    return glink;
+    return groupLink;
 }

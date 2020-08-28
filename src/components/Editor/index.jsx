@@ -31,11 +31,11 @@ import findSuggestions from "utils/findSuggestions";
 import findLinks from "utils/findLinks";
 import insertLinks from "utils/insertLinks";
 import getLastTypedWord from "utils/getLastTypedWord";
-import getLastTypedSentence from "utils/getLastTypedSentence";
 import getTextSelection from "utils/getTextSelection";
 import highlightTextSelection from "utils/highlightTextSelection";
 import deHighlightTextSelection from "utils/deHighlightTextSelection";
 import getBlockText from "utils/getBlockText";
+import filterAlreadyConfirmedLinksInEditor from "utils/filterAlreadyConfirmedLinksInEditor";
 import nlp from "compromise";
 
 export default function Editor(props) {
@@ -100,7 +100,7 @@ export default function Editor(props) {
             if (blockText !== "") {
                 const sentences = await nlp(blockText).sentences().json();
                 let sentenceOffset = 0;
-                let allLinks = [];
+                let allLinksInCurrentBlockText = [];
                 for (let i = 0; i < sentences.length; i++) {
                     const { text } = sentences[i];
                     const sentenceObject = {
@@ -109,12 +109,16 @@ export default function Editor(props) {
                         endIndex: sentenceOffset + text.length,
                     };
                     sentenceOffset = sentenceOffset + text.length + 1; //+1 for white space between sentences
-                    console.log({ sentenceObject });
                     const links = await findLinks(chartsInEditor, sentenceObject);
-                    allLinks = allLinks.concat(links);
+                    allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
                 }
-                if (allLinks.length > 0) {
-                    const action = createLinks(doc.id, allLinks);
+                if (allLinksInCurrentBlockText.length > 0) {
+                    const rawEditorState = convertToRaw(editorState.getCurrentContent());
+                    allLinksInCurrentBlockText = filterAlreadyConfirmedLinksInEditor(
+                        rawEditorState,
+                        allLinksInCurrentBlockText
+                    );
+                    const action = createLinks(doc.id, allLinksInCurrentBlockText);
                     setEditorState(insertLinks(action.links, editorState));
                     dispatch(action);
                 }
@@ -127,11 +131,7 @@ export default function Editor(props) {
     async function handleEditorChange(editorState) {
         setEditorState(editorState);
         const editorRawState = convertToRaw(editorState.getCurrentContent());
-
         const lastTypedWord = getLastTypedWord(editorState);
-        const lastSentence = getLastTypedSentence(editorState);
-
-        console.log("Text", blockText);
 
         //Enable SuggestionMenu on @
         if (lastTypedWord.text.startsWith("@")) {
@@ -145,7 +145,6 @@ export default function Editor(props) {
         } else {
             setSuggestions([]);
         }
-
         // TODO: see if we can catch an event for adding or removing a chart.
         // Updating charts in store when a chart is added to or removed from document
         const entityMap = editorRawState.entityMap;
@@ -174,8 +173,6 @@ export default function Editor(props) {
                 dispatch(setSelectedLink(null));
             }
         }
-
-        console.log("editorRawState", editorRawState);
 
         let textSelection = getTextSelection(
             editorState.getCurrentContent(),
@@ -209,11 +206,7 @@ export default function Editor(props) {
             setPastedText(null);
         }
     }
-    function handleReturn() {
-        // setBlockText(getTextByOffset(editorState));
-        // console.log("return", blockText);
-        // return "handled";
-    }
+    function handleReturn() {}
 
     function handleKeyCommand(command) {
         // handle common key bindings (e.g., bold, italic, etc.)

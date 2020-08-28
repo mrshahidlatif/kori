@@ -3,7 +3,7 @@ export default (editorState) => {
     const currentSelection = editorState.getSelection();
     const blockKey = currentSelection.getAnchorKey();
     const currentBlock = currentContent.getBlockForKey(blockKey);
-    const blockTextBeforeCaret = currentBlock.getText();
+    const blockText = currentBlock.getText();
 
-    return blockTextBeforeCaret;
+    return blockText;
 };
