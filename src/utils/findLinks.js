@@ -168,6 +168,13 @@ async function findGroupableLinks(sentence, links) {
 function createGroupLink(sentence, groupableLinks, links) {
     if (sentence === undefined || links.length < 2 || groupableLinks === undefined) return;
 
+    links = links.filter((link) => {
+        let shouldKeep = false;
+        groupableLinks.forEach((glink) => {
+            if (link.text === glink) shouldKeep = true;
+        });
+        return shouldKeep;
+    });
     const pointLinks = links.filter((link) => link.type === "point");
     const rangeLink = links.filter((link) => link.type === "range")[0];
 
