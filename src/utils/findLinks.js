@@ -166,6 +166,7 @@ async function findGroupableLinks(sentence, links) {
 }
 
 function createGroupLink(sentence, groupableLinks, links) {
+    //Limited to ONE range link with multiple individual links of same chart FIELD!
     if (sentence === undefined || links.length < 2 || groupableLinks === undefined) return;
 
     links = links.filter((link) => {
@@ -193,7 +194,6 @@ function createGroupLink(sentence, groupableLinks, links) {
         firstIndividualLink.startIndex,
         lastIndividualLink.endIndex
     );
-
     const groupLink = {
         text: linkText,
         feature: pointLinks[0].feature, //information about how the link was found
