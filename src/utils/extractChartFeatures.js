@@ -31,7 +31,10 @@ export default async function (spec) {
 
         for (const datum of data) {
             const isMap = mark.type === "shape" && mark.style.includes("geoshape");
-            const entries = Object.entries(isMap ? datum.properties : datum);
+            let entries = Object.entries(datum); //Object.entries(isMap ? datum : datum);
+            if (isMap){ // combine with map properties
+                entries = entries.concat(Object.entries(datum.properties));
+            }
             for (const [field, value] of entries) {
                 if (!isString(value)) {
                     // only categorical data
@@ -44,6 +47,7 @@ export default async function (spec) {
                     data: datum.name,
                 };
             }
+
         }
     }
     // Note: The following logic addressses two missing cases

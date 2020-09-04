@@ -36,11 +36,11 @@ export default function ChartGallery(props) {
         if (!file) {
             return;
         }
-        if (file.size > 1000000) {
-            // larger than 1 MB
-            setErrorMsg("Size too big (>1MB)!");
-            return;
-        }
+        // if (file.size > 1000000) {
+        //     // larger than 1 MB
+        //     setErrorMsg("Size too big (>1MB)!");
+        //     return;
+        // }
         if (file.type.match("application/json")) {
             const reader = new FileReader();
 
