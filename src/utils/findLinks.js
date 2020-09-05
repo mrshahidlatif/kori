@@ -167,7 +167,7 @@ async function findGroupableLinks(sentence, links) {
 
 function createGroupLink(sentence, groupableLinks, links) {
     //Limited to ONE range link with multiple individual links of same chart FIELD!
-    if (sentence === undefined || links.length < 2 || groupableLinks === undefined) return;
+    if (!sentence || links.length < 2 || !groupableLinks) return;
 
     links = links.filter((link) => {
         let shouldKeep = false;
@@ -177,8 +177,9 @@ function createGroupLink(sentence, groupableLinks, links) {
         return shouldKeep;
     });
     const pointLinks = links.filter((link) => link.type === "point");
-    const rangeLink = links.filter((link) => link.type === "range")[0];
 
+    const rangeLink = links.filter((link) => link.type === "range")[0];
+    if (!rangeLink) return;
     const firstIndividualLink = links.reduce(function (prev, curr) {
         return prev.startIndex < curr.startIndex ? prev : curr;
     });
@@ -204,7 +205,7 @@ function createGroupLink(sentence, groupableLinks, links) {
         startIndex: linkStartIndex,
         endIndex: linkEndIndex,
         sentence: sentence.text,
-        rangeField: rangeLink.feature.field,
+        rangeField: rangeLink?.feature?.field ? rangeLink.feature.field : "",
         rangeMin: rangeLink.rangeMin,
         rangeMax: rangeLink.rangeMax,
         isConfirmed: false,

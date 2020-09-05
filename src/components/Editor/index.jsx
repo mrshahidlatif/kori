@@ -38,6 +38,8 @@ import getBlockText from "utils/getBlockText";
 import filterAlreadyConfirmedLinksInEditor from "utils/filterAlreadyConfirmedLinksInEditor";
 import nlp from "compromise";
 
+const AUTOMATIC_SUGGESTION_TIMEOUT = 30000;
+
 export default function Editor(props) {
     const dispatch = useDispatch();
     let { docId } = useParams();
@@ -63,8 +65,21 @@ export default function Editor(props) {
     const [editorState, setEditorState] = useState(EditorState.createWithContent(contentState));
 
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
-    const [pastedText, setPastedText] = useState(null);
     const [blockText, setBlockText] = useState("");
+    let interval = useRef();
+
+    const startTimer = () => {
+        interval = setInterval(() => {
+            console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
+            setBlockText(getBlockText(editorEl.current.props.editorState));
+        }, AUTOMATIC_SUGGESTION_TIMEOUT);
+        return () => clearInterval(interval.current);
+    };
+
+    useEffect(() => {
+        startTimer();
+        return () => clearInterval(interval.current);
+    }, []);
 
     useEffect(() => {
         if (exitManualLink) {
@@ -193,20 +208,7 @@ export default function Editor(props) {
                 ? setSuggestions(suggestions)
                 : setSuggestions([{ text: "NoLinkFound!" }]);
         }
-
-        if (pastedText) {
-            const links = await findLinks(chartsInEditor, pastedText);
-
-            if (links.length > 0) {
-                const action = createLinks(doc.id, links); // need ids
-                editorState = insertLinks(action.links, editorState);
-                setEditorState(editorState);
-                dispatch(action);
-            }
-            setPastedText(null);
-        }
     }
-    function handleReturn() {}
 
     function handleKeyCommand(command) {
         // handle common key bindings (e.g., bold, italic, etc.)
@@ -318,16 +320,6 @@ export default function Editor(props) {
     function handleLinkAccept(linkId) {
         setEditorState(insertLinks([allLinks[linkId]], editorState, editorState.getSelection()));
     }
-    async function handlePastedText(text) {
-        const end = editorState.getSelection().getAnchorOffset() + text.length;
-        const offset = end - text.length;
-
-        setPastedText({
-            text: text,
-            startIndex: offset,
-            endIndex: end,
-        });
-    }
 
     return (
         <Fragment>
@@ -342,8 +334,6 @@ export default function Editor(props) {
                     blockRendererFn={blockRendererFn}
                     decorators={editorDecorators}
                     ref={editorEl}
-                    handlePastedText={handlePastedText}
-                    handleReturn={handleReturn}
                     onTab={handleTab}
                 />
             </div>
