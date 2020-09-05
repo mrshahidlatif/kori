@@ -24,14 +24,10 @@ export default function ManualLinkControls(props) {
     const selection = window.getSelection();
     const pos = selection.rangeCount > 0 ? selection.getRangeAt(0).getBoundingClientRect() : null;
     const padding = 10;
-    let options = [];
 
     const chartProperties = props.selectedChart.properties;
-    options = chartProperties.axes.map((cp) => cp.field);
-    let featureFields = chartProperties.features.map((f) => f.field);
-
-    options = options.concat(featureFields);
-    options = [...new Set(options)];
+    const fields = chartProperties.features.map((f) => f.field);
+    const options = [...new Set(fields)];
 
     function handleResetClick(event) {
         dispatch(exitManualLinkMode(true));
@@ -49,7 +45,7 @@ export default function ManualLinkControls(props) {
 
     const [open, setOpen] = React.useState(false);
     const anchorRef = React.useRef(null);
-    const [selectedIndex, setSelectedIndex] = React.useState(1);
+    const [selectedIndex, setSelectedIndex] = React.useState(0);
 
     const handleClick = () => {
         console.info(`You clicked ${options[selectedIndex]}`);
@@ -74,6 +70,7 @@ export default function ManualLinkControls(props) {
 
     function makeManualLink(textSelection, multiPoint, brush, viewData) {
         console.log("View Data", viewData);
+        console.log("Options", options);
         let link = null;
         if (multiPoint.length > 0) {
             let points = [];
