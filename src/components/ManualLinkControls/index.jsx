@@ -86,7 +86,10 @@ export default function ManualLinkControls(props) {
             points.forEach(function (p) {
                 if (p.hasOwnProperty("properties")) {
                     //Special case: Maps
-                    data.push(p["properties"][options[selectedIndex]]);
+                    //Look for data in TopoJSON Properties or in the datafile!
+                    if (!p["properties"][options[selectedIndex]]) {
+                        data.push(p[options[selectedIndex]]);
+                    } else data.push(p["properties"][options[selectedIndex]]);
                 } else data.push(p[options[selectedIndex]]);
             });
 
