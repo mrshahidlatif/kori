@@ -32,7 +32,8 @@ export default async function (spec) {
         for (const datum of data) {
             const isMap = mark.type === "shape" && mark.style.includes("geoshape");
             let entries = Object.entries(datum); //Object.entries(isMap ? datum : datum);
-            if (isMap){ // combine with map properties
+            if (isMap) {
+                // combine with map properties
                 entries = entries.concat(Object.entries(datum.properties));
             }
             for (const [field, value] of entries) {
@@ -47,7 +48,6 @@ export default async function (spec) {
                     data: datum.name,
                 };
             }
-
         }
     }
     // Note: The following logic addressses two missing cases
@@ -117,9 +117,7 @@ export default async function (spec) {
 }
 
 export const searchFieldName = (spec, scaleName) => {
-    console.log(scaleName);
     for (const mark of spec.marks) {
-        console.log("mark");
         if (mark.encode.enter) {
             for (const [, props] of Object.entries(mark.encode.enter)) {
                 if (props.scale === scaleName && props.field) {

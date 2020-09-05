@@ -47,7 +47,7 @@ export default function () {
                     component={RouterLink}
                     to="/"
                 >
-                    GORI
+                    KORI
                 </Link>
                 {/* <Typography variant="h6" className={classes.title} >
 

@@ -88,12 +88,12 @@ export default memo(function ChartBlock({
                 ? view.data("data_0")
                 : view.data("source_0");
             setViewData(viewData);
-
-            view.addDataListener("paintbrush_store", function (name, value) {
-                console.log(name, value);
-                setSelectedMarks(selectedMarks.concat(value));
-            });
             try {
+                view.addDataListener("paintbrush_store", function (name, value) {
+                    console.log(name, value);
+                    setSelectedMarks(selectedMarks.concat(value));
+                });
+
                 view.addDataListener("brush_store", function (name, value) {
                     console.log(name, value);
                     setBrush(brush.concat(value));

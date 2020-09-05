@@ -4,7 +4,9 @@ import addBrushToVegaLiteSpec from "utils/addBrushToVegaLiteSpec";
 import { compile } from "vega-lite/build/vega-lite";
 
 export default (highlight, liteSpec) => {
-    addBrushToVegaLiteSpec(liteSpec);
+    try {
+        addBrushToVegaLiteSpec(liteSpec);
+    } catch (e) {}
 
     const spec = compile(liteSpec).spec; // vega spec
     // support vega-lite sample datasets
@@ -40,16 +42,24 @@ export function addSignalToMark(mark, highlight) {
     }
     const isMap = mark.type === "shape" && mark.style.includes("geoshape");
     const activePredicate = `highlight.enabled===true && (
-        (highlight.rangeField === '' && (indexof(highlight.data, datum[highlight.field])!=-1 ${isMap? '|| indexof(highlight.data, datum.properties[highlight.field])!=-1)':')'}) ||
-        (highlight.rangeField != '' && (indexof(highlight.data, datum[highlight.field])!=-1 ${isMap? '|| indexof(highlight.data, datum.properties[highlight.field])!=-1)':')'} && (datum[highlight.rangeField] > highlight.rangeMin && datum[highlight.rangeField]<highlight.rangeMax)) ||
+        (highlight.rangeField === '' && (indexof(highlight.data, datum[highlight.field])!=-1 ${
+            isMap ? "|| indexof(highlight.data, datum.properties[highlight.field])!=-1)" : ")"
+        }) ||
+        (highlight.rangeField != '' && (indexof(highlight.data, datum[highlight.field])!=-1 ${
+            isMap ? "|| indexof(highlight.data, datum.properties[highlight.field])!=-1)" : ")"
+        } && (datum[highlight.rangeField] > highlight.rangeMin && datum[highlight.rangeField]<highlight.rangeMax)) ||
         (datum[highlight.field] > highlight.rangeMin && datum[highlight.field]<highlight.rangeMax) ||
         (datum[highlight.fieldX] > highlight.rangeX[0] && datum[highlight.fieldX] < highlight.rangeX[1] &&
             datum[highlight.fieldY] < highlight.rangeY[0] && datum[highlight.fieldY] > highlight.rangeY[1] )
     )`;
     //TODO: reduce redundant checking
     const inactivePredicate = `highlight.enabled===true && !(
-        (highlight.rangeField === '' && (indexof(highlight.data, datum[highlight.field])!=-1 ${isMap? '|| indexof(highlight.data, datum.properties[highlight.field])!=-1)':')'}) ||
-        (highlight.rangeField != '' && (indexof(highlight.data, datum[highlight.field])!=-1 ${isMap? '|| indexof(highlight.data, datum.properties[highlight.field])!=-1)':')'} && (datum[highlight.rangeField] > highlight.rangeMin && datum[highlight.rangeField]<highlight.rangeMax))
+        (highlight.rangeField === '' && (indexof(highlight.data, datum[highlight.field])!=-1 ${
+            isMap ? "|| indexof(highlight.data, datum.properties[highlight.field])!=-1)" : ")"
+        }) ||
+        (highlight.rangeField != '' && (indexof(highlight.data, datum[highlight.field])!=-1 ${
+            isMap ? "|| indexof(highlight.data, datum.properties[highlight.field])!=-1)" : ")"
+        } && (datum[highlight.rangeField] > highlight.rangeMin && datum[highlight.rangeField]<highlight.rangeMax))
     )`;
     const oldProp = mark.encode.update[highlight.channel];
     const highlightProp = [
