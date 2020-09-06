@@ -25,6 +25,7 @@
   "mark": "geoshape",
   "encoding": {
     "color": {
+	  "title":"deaths",
       "field": "deaths",
       "type": "quantitative"
     }

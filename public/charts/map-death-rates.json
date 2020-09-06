@@ -25,6 +25,7 @@
   "mark": "geoshape",
   "encoding": {
     "color": {
+	  "title":"death rate",
       "field": "deaths_per_pop",
       "type": "quantitative"
     }

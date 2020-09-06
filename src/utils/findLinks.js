@@ -121,6 +121,7 @@ export async function findRangeLinks(chart, sentence) {
                                   parsedResponse.min.toString().length
                                 : sentence.text.length - 1
                             : sentence.text.length - 1;
+
                     const linkPhrase = sentence.text.substring(linkStartIndex, linkEndIndex);
                     rangeLink = {
                         text: linkPhrase,
@@ -131,8 +132,14 @@ export async function findRangeLinks(chart, sentence) {
                         data: isArray(match.matchedFeature.field)
                             ? match.matchedFeature.field
                             : [match.matchedFeature.field],
-                        startIndex: sentence.startIndex + linkStartIndex,
-                        endIndex: sentence.startIndex + linkEndIndex,
+                        startIndex:
+                            linkStartIndex > linkEndIndex
+                                ? sentence.startIndex + linkEndIndex
+                                : sentence.startIndex + linkStartIndex,
+                        endIndex:
+                            linkEndIndex < linkStartIndex
+                                ? sentence.startIndex + linkStartIndex
+                                : sentence.startIndex + linkEndIndex,
 
                         sentence: sentence.text,
                         rangeMin: parsedResponse.min,

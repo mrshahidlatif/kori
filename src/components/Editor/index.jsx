@@ -71,7 +71,8 @@ export default function Editor(props) {
     const startTimer = () => {
         interval = setInterval(() => {
             console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
-            setBlockText(getBlockText(editorEl.current.props.editorState));
+            if (editorEl?.current?.props?.editorState)
+                setBlockText(getBlockText(editorEl.current.props.editorState));
         }, AUTOMATIC_SUGGESTION_TIMEOUT);
         return () => clearInterval(interval.current);
     };
@@ -106,6 +107,14 @@ export default function Editor(props) {
     }, [manualLinkId, exitManualLink]);
 
     useEffect(() => {
+        if (exitManualLink && allLinks[manualLinkId] === undefined) {
+            //clear selection in case no brushing and pressing 'Accept'
+            setEditorState(deHighlightTextSelection(currentSelectionState, editorState));
+            setCurrentSelectionState(null);
+        }
+    }, [editorState]);
+
+    useEffect(() => {
         const editorRawState = convertToRaw(editorState.getCurrentContent());
         dispatch(updateDoc(doc.id, { editorRawState }));
     }, [editorState]);
@@ -123,6 +132,7 @@ export default function Editor(props) {
                         startIndex: sentenceOffset,
                         endIndex: sentenceOffset + text.length,
                     };
+                    console.log("Sentences", sentenceObject);
                     sentenceOffset = sentenceOffset + text.length + 1; //+1 for white space between sentences
                     const links = await findLinks(chartsInEditor, sentenceObject);
                     allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
@@ -133,7 +143,9 @@ export default function Editor(props) {
                         rawEditorState,
                         allLinksInCurrentBlockText
                     );
+
                     const action = createLinks(doc.id, allLinksInCurrentBlockText);
+                    console.log("Actions", action);
                     setEditorState(insertLinks(action.links, editorState));
                     dispatch(action);
                 }
