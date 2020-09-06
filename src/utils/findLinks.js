@@ -41,7 +41,6 @@ export const findWordOrPhraseLinks = (chart, sentence) => {
     let matches = [];
     chart.properties.features.forEach(function (f) {
         const fsResult = fuzzyMatch(sentence.text, f.value); //returns a [score, word] pair!
-        console.log("FUZZY MATCH", f.value, fsResult);
         // if (f.type === "string" && sentence.text.includes(f.value)) {
         if (f.type === "string" && fsResult[0] > MIN_MATCH_THRESHOLD) {
             matches.push({ userTyped: fsResult[1], matchedFeature: f });

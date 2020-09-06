@@ -129,10 +129,9 @@ export default function Editor(props) {
                     const { text } = sentences[i];
                     const sentenceObject = {
                         text: text,
-                        startIndex: sentenceOffset,
+                        startIndex: blockText.indexOf(text),
                         endIndex: sentenceOffset + text.length,
                     };
-                    sentenceOffset = sentenceOffset + text.length + 1; //+1 for white space between sentences
                     const links = await findLinks(chartsInEditor, sentenceObject);
                     allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
                 }
