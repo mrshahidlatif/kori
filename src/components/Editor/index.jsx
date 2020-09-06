@@ -132,7 +132,6 @@ export default function Editor(props) {
                         startIndex: sentenceOffset,
                         endIndex: sentenceOffset + text.length,
                     };
-                    console.log("Sentences", sentenceObject);
                     sentenceOffset = sentenceOffset + text.length + 1; //+1 for white space between sentences
                     const links = await findLinks(chartsInEditor, sentenceObject);
                     allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
@@ -143,9 +142,7 @@ export default function Editor(props) {
                         rawEditorState,
                         allLinksInCurrentBlockText
                     );
-
                     const action = createLinks(doc.id, allLinksInCurrentBlockText);
-                    console.log("Actions", action);
                     setEditorState(insertLinks(action.links, editorState));
                     dispatch(action);
                 }

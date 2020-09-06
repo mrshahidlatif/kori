@@ -7,7 +7,7 @@ import util from "util";
 import { link } from "fs";
 const request = require("request");
 
-const MIN_MATCH_THRESHOLD = 0.8;
+const MIN_MATCH_THRESHOLD = 0.75;
 const WIT_CHARACTER_LIMIT = 280;
 const client = new Wit({
     accessToken: "LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N",
@@ -41,7 +41,7 @@ export const findWordOrPhraseLinks = (chart, sentence) => {
     let matches = [];
     chart.properties.features.forEach(function (f) {
         const fsResult = fuzzyMatch(sentence.text, f.value); //returns a [score, word] pair!
-        // console.log("FUZZY MATCH", fs_res);
+        console.log("FUZZY MATCH", f.value, fsResult);
         // if (f.type === "string" && sentence.text.includes(f.value)) {
         if (f.type === "string" && fsResult[0] > MIN_MATCH_THRESHOLD) {
             matches.push({ userTyped: fsResult[1], matchedFeature: f });
@@ -74,10 +74,9 @@ export const findWordOrPhraseLinks = (chart, sentence) => {
 };
 function fuzzyMatch(sentence, word) {
     if (typeof word === "string") {
+        const wordLength = word.split(/[_-\s]+/).length;
         let list =
-            word.split(" ").length === 1
-                ? sentence.split(" ")
-                : splitTextIntoNWordsList(sentence, word.split(" ").length);
+            wordLength == 1 ? sentence.split(" ") : splitTextIntoNWordsList(sentence, wordLength);
         let fs = FuzzySet(list);
         return fs.get(word) !== null ? fs.get(word).shift() : [0, ""];
     } else return [0, ""];

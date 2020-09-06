@@ -70,7 +70,6 @@ export default function ManualLinkControls(props) {
 
     function makeManualLink(textSelection, multiPoint, brush, viewData) {
         console.log("View Data", viewData);
-        console.log("Options", options);
         let link = null;
         if (multiPoint.length > 0) {
             let points = [];
