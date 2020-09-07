@@ -66,6 +66,8 @@ export default function Editor(props) {
 
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
     const [blockText, setBlockText] = useState("");
+    const [pastedText, setPastedText] = useState(null);
+
     let interval = useRef();
 
     const startTimer = () => {
@@ -216,6 +218,21 @@ export default function Editor(props) {
                 ? setSuggestions(suggestions)
                 : setSuggestions([{ text: "NoLinkFound!" }]);
         }
+
+        //Quickfix: when text (having links) is pasted, the links are still pointing to their old location and causes problems when accepting or discarding them!
+        //The following block re-runs the findLinks() to update (rediscover) them thus setting their locations right
+        //TODO: fix it properly (combine with setBlockText() )
+        if (pastedText) {
+            const links = await findLinks(chartsInEditor, pastedText);
+
+            if (links.length > 0) {
+                const action = createLinks(doc.id, links); // need ids
+                editorState = insertLinks(action.links, editorState);
+                setEditorState(editorState);
+                dispatch(action);
+            }
+            setPastedText(null);
+        }
     }
 
     function handleKeyCommand(command) {
@@ -329,6 +346,16 @@ export default function Editor(props) {
         setEditorState(insertLinks([allLinks[linkId]], editorState, editorState.getSelection()));
     }
 
+    function handlePastedText(text) {
+        const end = editorState.getSelection().getAnchorOffset() + text.length;
+        const offset = end - text.length;
+        setPastedText({
+            text: text,
+            startIndex: offset,
+            endIndex: end,
+        });
+    }
+
     return (
         <Fragment>
             {<EditorToolbar />}
@@ -343,6 +370,7 @@ export default function Editor(props) {
                     decorators={editorDecorators}
                     ref={editorEl}
                     onTab={handleTab}
+                    handlePastedText={handlePastedText}
                 />
             </div>
             {suggestions.length >= 1 && chartsInEditor.length > 0 && (
