@@ -1,5 +1,5 @@
 channels:
-  - defaults
   - conda-forge
+  - defaults  
 
 always_yes: true
