@@ -88,12 +88,12 @@ export default memo(function ChartBlock({
                 ? view.data("data_0")
                 : view.data("source_0");
             setViewData(viewData);
-
-            view.addDataListener("paintbrush_store", function (name, value) {
-                console.log(name, value);
-                setSelectedMarks(selectedMarks.concat(value));
-            });
             try {
+                view.addDataListener("paintbrush_store", function (name, value) {
+                    console.log(name, value);
+                    setSelectedMarks(selectedMarks.concat(value));
+                });
+
                 view.addDataListener("brush_store", function (name, value) {
                     console.log(name, value);
                     setBrush(brush.concat(value));
@@ -135,6 +135,7 @@ export default memo(function ChartBlock({
                         field: link.feature.field,
                         enabled: true,
                         //Next 2 fields refer to range selection links
+                        rangeField: link.rangeField || "",
                         rangeMin: link.rangeMin || 0,
                         rangeMax: link.rangeMax || 0,
                         //Rectangular Brushes

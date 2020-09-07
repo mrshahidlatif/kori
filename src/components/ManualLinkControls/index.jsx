@@ -24,14 +24,10 @@ export default function ManualLinkControls(props) {
     const selection = window.getSelection();
     const pos = selection.rangeCount > 0 ? selection.getRangeAt(0).getBoundingClientRect() : null;
     const padding = 10;
-    let options = [];
 
     const chartProperties = props.selectedChart.properties;
-    options = chartProperties.axes.map((cp) => cp.field);
-    let featureFields = chartProperties.features.map((f) => f.field);
-
-    options = options.concat(featureFields);
-    options = [...new Set(options)];
+    const fields = chartProperties.features.map((f) => f.field);
+    const options = [...new Set(fields)];
 
     function handleResetClick(event) {
         dispatch(exitManualLinkMode(true));
@@ -49,7 +45,7 @@ export default function ManualLinkControls(props) {
 
     const [open, setOpen] = React.useState(false);
     const anchorRef = React.useRef(null);
-    const [selectedIndex, setSelectedIndex] = React.useState(1);
+    const [selectedIndex, setSelectedIndex] = React.useState(0);
 
     const handleClick = () => {
         console.info(`You clicked ${options[selectedIndex]}`);
@@ -86,7 +82,10 @@ export default function ManualLinkControls(props) {
             points.forEach(function (p) {
                 if (p.hasOwnProperty("properties")) {
                     //Special case: Maps
-                    data.push(p["properties"][options[selectedIndex]]);
+                    //Look for data in TopoJSON Properties or in the datafile!
+                    if (!p["properties"][options[selectedIndex]]) {
+                        data.push(p[options[selectedIndex]]);
+                    } else data.push(p["properties"][options[selectedIndex]]);
                 } else data.push(p[options[selectedIndex]]);
             });
 

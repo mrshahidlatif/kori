@@ -3,7 +3,7 @@
   "width": 500,
   "height": 300,
   "data": {
-    "url": "data/usa-states.json",
+    "url": "data/us-10m-states.json",
     "format": {
       "type": "topojson",
       "feature": "states"
@@ -25,6 +25,7 @@
   "mark": "geoshape",
   "encoding": {
     "color": {
+	  "title":"deaths",
       "field": "deaths",
       "type": "quantitative"
     }

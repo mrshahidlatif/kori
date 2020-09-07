@@ -31,10 +31,14 @@ import findSuggestions from "utils/findSuggestions";
 import findLinks from "utils/findLinks";
 import insertLinks from "utils/insertLinks";
 import getLastTypedWord from "utils/getLastTypedWord";
-import getLastTypedSentence from "utils/getLastTypedSentence";
 import getTextSelection from "utils/getTextSelection";
 import highlightTextSelection from "utils/highlightTextSelection";
 import deHighlightTextSelection from "utils/deHighlightTextSelection";
+import getBlockText from "utils/getBlockText";
+import filterAlreadyConfirmedLinksInEditor from "utils/filterAlreadyConfirmedLinksInEditor";
+import nlp from "compromise";
+
+const AUTOMATIC_SUGGESTION_TIMEOUT = 30000;
 
 export default function Editor(props) {
     const dispatch = useDispatch();
@@ -61,7 +65,24 @@ export default function Editor(props) {
     const [editorState, setEditorState] = useState(EditorState.createWithContent(contentState));
 
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
+    const [blockText, setBlockText] = useState("");
     const [pastedText, setPastedText] = useState(null);
+
+    let interval = useRef();
+
+    const startTimer = () => {
+        interval = setInterval(() => {
+            console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
+            if (editorEl?.current?.props?.editorState)
+                setBlockText(getBlockText(editorEl.current.props.editorState));
+        }, AUTOMATIC_SUGGESTION_TIMEOUT);
+        return () => clearInterval(interval.current);
+    };
+
+    useEffect(() => {
+        startTimer();
+        return () => clearInterval(interval.current);
+    }, []);
 
     useEffect(() => {
         if (exitManualLink) {
@@ -88,27 +109,54 @@ export default function Editor(props) {
     }, [manualLinkId, exitManualLink]);
 
     useEffect(() => {
+        if (exitManualLink && allLinks[manualLinkId] === undefined) {
+            //clear selection in case no brushing and pressing 'Accept'
+            setEditorState(deHighlightTextSelection(currentSelectionState, editorState));
+            setCurrentSelectionState(null);
+        }
+    }, [editorState]);
+
+    useEffect(() => {
         const editorRawState = convertToRaw(editorState.getCurrentContent());
         dispatch(updateDoc(doc.id, { editorRawState }));
     }, [editorState]);
 
+    useEffect(() => {
+        const asyncExec = async () => {
+            if (blockText !== "") {
+                const sentences = await nlp(blockText).sentences().json();
+                let sentenceOffset = 0;
+                let allLinksInCurrentBlockText = [];
+                for (let i = 0; i < sentences.length; i++) {
+                    const { text } = sentences[i];
+                    const sentenceObject = {
+                        text: text,
+                        startIndex: blockText.indexOf(text),
+                        endIndex: sentenceOffset + text.length,
+                    };
+                    const links = await findLinks(chartsInEditor, sentenceObject);
+                    allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
+                }
+                if (allLinksInCurrentBlockText.length > 0) {
+                    const rawEditorState = convertToRaw(editorState.getCurrentContent());
+                    allLinksInCurrentBlockText = filterAlreadyConfirmedLinksInEditor(
+                        rawEditorState,
+                        allLinksInCurrentBlockText
+                    );
+                    const action = createLinks(doc.id, allLinksInCurrentBlockText);
+                    setEditorState(insertLinks(action.links, editorState));
+                    dispatch(action);
+                }
+                setBlockText("");
+            }
+        };
+        asyncExec();
+    }, [blockText]);
+
     async function handleEditorChange(editorState) {
         setEditorState(editorState);
         const editorRawState = convertToRaw(editorState.getCurrentContent());
-
         const lastTypedWord = getLastTypedWord(editorState);
-        const lastSentence = getLastTypedSentence(editorState);
-
-        if (lastSentence) {
-            const links = await findLinks(chartsInEditor, lastSentence);
-
-            if (links.length > 0) {
-                const action = createLinks(doc.id, links); // need ids
-                editorState = insertLinks(action.links, editorState);
-                setEditorState(editorState);
-                dispatch(action);
-            }
-        }
 
         //Enable SuggestionMenu on @
         if (lastTypedWord.text.startsWith("@")) {
@@ -122,7 +170,6 @@ export default function Editor(props) {
         } else {
             setSuggestions([]);
         }
-
         // TODO: see if we can catch an event for adding or removing a chart.
         // Updating charts in store when a chart is added to or removed from document
         const entityMap = editorRawState.entityMap;
@@ -152,8 +199,6 @@ export default function Editor(props) {
             }
         }
 
-        console.log("editorRawState", editorRawState);
-
         let textSelection = getTextSelection(
             editorState.getCurrentContent(),
             currentSelection,
@@ -174,6 +219,9 @@ export default function Editor(props) {
                 : setSuggestions([{ text: "NoLinkFound!" }]);
         }
 
+        //Quickfix: when text (having links) is pasted, the links are still pointing to their old location and causes problems when accepting or discarding them!
+        //The following block re-runs the findLinks() to update (rediscover) them thus setting their locations right
+        //TODO: fix it properly (combine with setBlockText() )
         if (pastedText) {
             const links = await findLinks(chartsInEditor, pastedText);
 
@@ -195,6 +243,12 @@ export default function Editor(props) {
             return "handled";
         }
         return "not-handled";
+    }
+    function handleTab(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setBlockText(getBlockText(editorState));
+        return "handled";
     }
 
     function handleDragOver(e) {
@@ -291,10 +345,10 @@ export default function Editor(props) {
     function handleLinkAccept(linkId) {
         setEditorState(insertLinks([allLinks[linkId]], editorState, editorState.getSelection()));
     }
-    async function handlePastedText(text) {
+
+    function handlePastedText(text) {
         const end = editorState.getSelection().getAnchorOffset() + text.length;
         const offset = end - text.length;
-
         setPastedText({
             text: text,
             startIndex: offset,
@@ -315,6 +369,7 @@ export default function Editor(props) {
                     blockRendererFn={blockRendererFn}
                     decorators={editorDecorators}
                     ref={editorEl}
+                    onTab={handleTab}
                     handlePastedText={handlePastedText}
                 />
             </div>
