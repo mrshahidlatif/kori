@@ -1,4 +1,47 @@
 
+
+## Mini-Conda
+
+### Requirement 
+- Conda
+
+### Install
+#### Create a virtual environment
+```bash
+conda create --name kori python=3.7.3
+```
+
+#### Activiate the environment
+```bash
+conda activate kori
+```
+
+#### Deactivate the environment
+```bash
+conda deactivate
+```
+
+#### Create the environment from environment.yml
+```bash
+conda env create -f environment.yml
+```
+
+#### Export the environment
+```bash
+conda env export > environment.yml
+```
+
+#### Update an environment
+```bash
+conda env update --prefix ./env --file environment.yml  --prune
+```
+#### Install new packages
+```bash
+conda install neuralcoref
+```
+
+## Pip
+
 ### Requirement 
 - Python3 
 - Pip3
@@ -36,4 +79,14 @@ pip3 install -U neuralcoref
 ```bash
 pip3 freeze >requirements.txt
 ```
+
+## Spacy
+
+### Install Spacy model
+```bash
+python -m spacy download en_core_web_sm
+```
+
+
+
 
