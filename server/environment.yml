@@ -1,5 +1,6 @@
 name: kori
 channels:
+  - conda-forge
   - defaults
 dependencies:
   - attrs=20.1.0=py_0
