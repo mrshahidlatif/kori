@@ -4,10 +4,7 @@ export default (rawEditorState, allLinksInCurrentBlockText) => {
         let shouldKeep = true;
         Object.keys(entityMap).forEach(function (key) {
             if (entityMap[key].type === "LINK") {
-                if (
-                    entityMap[key].data.isConfirmed &&
-                    entityMap[key].data.text === linkInCurrentBlockText.text
-                ) {
+                if (entityMap[key].data.text === linkInCurrentBlockText.text) {
                     shouldKeep = false;
                 }
             }

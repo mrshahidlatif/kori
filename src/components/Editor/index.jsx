@@ -129,6 +129,7 @@ export default function Editor(props) {
                 let allLinksInCurrentBlockText = [];
                 for (let i = 0; i < sentences.length; i++) {
                     const { text } = sentences[i];
+                    if (!text.includes(".")) continue;
                     const sentenceObject = {
                         text: text,
                         startIndex: blockText.indexOf(text),
@@ -143,9 +144,11 @@ export default function Editor(props) {
                         rawEditorState,
                         allLinksInCurrentBlockText
                     );
-                    const action = createLinks(doc.id, allLinksInCurrentBlockText);
-                    setEditorState(insertLinks(action.links, editorState));
-                    dispatch(action);
+                    if (allLinksInCurrentBlockText.length > 0) {
+                        const action = createLinks(doc.id, allLinksInCurrentBlockText);
+                        setEditorState(insertLinks(action.links, editorState));
+                        dispatch(action);
+                    }
                 }
                 setBlockText("");
             }
