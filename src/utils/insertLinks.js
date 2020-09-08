@@ -36,10 +36,12 @@ export const insertLink = (link, editorState, currentSelection) => {
         entityKey
     );
     const caretNewIndex = end > blockEndIndex ? end : blockEndIndex;
+    const caretOriginalIndex = currentSelection.getAnchorOffset();
+    const caretOffset = link.isConfirmed ? caretNewIndex : caretOriginalIndex;
     let newEditorState = EditorState.push(editorState, newContent, "apply-entity");
     let newSelection = newEditorState.getSelection().merge({
-        focusOffset: caretNewIndex,
-        anchorOffset: caretNewIndex,
+        focusOffset: caretOffset,
+        anchorOffset: caretOffset,
     });
     newEditorState = EditorState.moveSelectionToEnd(newEditorState);
     newEditorState = EditorState.forceSelection(newEditorState, newSelection);

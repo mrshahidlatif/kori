@@ -38,7 +38,7 @@ import getBlockText from "utils/getBlockText";
 import filterAlreadyConfirmedLinksInEditor from "utils/filterAlreadyConfirmedLinksInEditor";
 import nlp from "compromise";
 
-const AUTOMATIC_SUGGESTION_TIMEOUT = 30000;
+const AUTOMATIC_SUGGESTION_TIMEOUT = 5000;
 
 export default function Editor(props) {
     const dispatch = useDispatch();
@@ -66,6 +66,22 @@ export default function Editor(props) {
 
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
     const [blockText, setBlockText] = useState("");
+
+    let interval = useRef();
+
+    const startTimer = () => {
+        interval = setInterval(() => {
+            console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
+            if (editorEl?.current?.props?.editorState)
+                setBlockText(getBlockText(editorEl.current.props.editorState));
+        }, AUTOMATIC_SUGGESTION_TIMEOUT);
+        return () => clearInterval(interval.current);
+    };
+
+    useEffect(() => {
+        startTimer();
+        return () => clearInterval(interval.current);
+    }, []);
 
     useEffect(() => {
         if (exitManualLink) {
@@ -107,6 +123,7 @@ export default function Editor(props) {
     useEffect(() => {
         const asyncExec = async () => {
             if (blockText !== "") {
+                if (tempTextSelection) return;
                 const sentences = await nlp(blockText).sentences().json();
                 let sentenceOffset = 0;
                 let allLinksInCurrentBlockText = [];
@@ -187,6 +204,7 @@ export default function Editor(props) {
             currentSelection,
             " " //delimiter
         );
+        console.log("TExt selection", textSelection);
         //Hide the floating controls when no text is selected
         setTempTextSelection(textSelection);
 
