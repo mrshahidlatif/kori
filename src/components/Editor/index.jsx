@@ -360,6 +360,7 @@ export default function Editor(props) {
                 />
             )}
             <PotentialLinkControls
+                textSelection={tempTextSelection}
                 selectedLink={selectedLink}
                 onDiscard={handleLinkDiscard}
                 onAccept={handleLinkAccept}
