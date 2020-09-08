@@ -22,7 +22,7 @@ export default (contentState, selection, blockDelimiter) => {
             return result;
         });
     //Don't allow linking across multiple blocks
-    if (selectedBlock.length > 1) return null;
+    if (selectedBlock.length > 1) return "INVALID";
     const text = selectedBlock
         .map(function (block) {
             var key = block.getKey();

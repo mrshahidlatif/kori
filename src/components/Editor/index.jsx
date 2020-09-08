@@ -123,7 +123,8 @@ export default function Editor(props) {
     useEffect(() => {
         const asyncExec = async () => {
             if (blockText !== "") {
-                if (tempTextSelection) return;
+                if (tempTextSelection || tempTextSelection == "INVALID") return;
+                console.log("I m here");
                 const sentences = await nlp(blockText).sentences().json();
                 let sentenceOffset = 0;
                 let allLinksInCurrentBlockText = [];
@@ -142,7 +143,8 @@ export default function Editor(props) {
                     const rawEditorState = convertToRaw(editorState.getCurrentContent());
                     allLinksInCurrentBlockText = filterAlreadyConfirmedLinksInEditor(
                         rawEditorState,
-                        allLinksInCurrentBlockText
+                        allLinksInCurrentBlockText,
+                        blockText
                     );
                     if (allLinksInCurrentBlockText.length > 0) {
                         const action = createLinks(doc.id, allLinksInCurrentBlockText);
@@ -211,7 +213,7 @@ export default function Editor(props) {
         setTempTextSelection(textSelection);
 
         //search for suggestions on text selection
-        if (textSelection) {
+        if (textSelection && textSelection != "INVALID") {
             const suggestions = findSuggestions(
                 chartsInEditor,
                 textSelection.text.trim(),
