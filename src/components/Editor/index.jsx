@@ -124,7 +124,6 @@ export default function Editor(props) {
         const asyncExec = async () => {
             if (blockText !== "") {
                 if (tempTextSelection || tempTextSelection == "INVALID") return;
-                console.log("I m here");
                 const sentences = await nlp(blockText).sentences().json();
                 let sentenceOffset = 0;
                 let allLinksInCurrentBlockText = [];
