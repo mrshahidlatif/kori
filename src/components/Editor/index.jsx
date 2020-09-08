@@ -113,7 +113,7 @@ export default function Editor(props) {
             setEditorState(deHighlightTextSelection(currentSelectionState, editorState));
             setCurrentSelectionState(null);
         }
-    }, [editorState]);
+    }, [editorState, selectedLink]);
 
     useEffect(() => {
         const editorRawState = convertToRaw(editorState.getCurrentContent());
@@ -204,7 +204,6 @@ export default function Editor(props) {
             currentSelection,
             " " //delimiter
         );
-        console.log("TExt selection", textSelection);
         //Hide the floating controls when no text is selected
         setTempTextSelection(textSelection);
 
@@ -329,7 +328,10 @@ export default function Editor(props) {
         dispatch(deleteLink(link.id));
     }
     function handleLinkAccept(linkId) {
-        setEditorState(insertLinks([allLinks[linkId]], editorState, editorState.getSelection()));
+        //Quick and dirty fix! //TODO: Check later
+        const confirmedLink = JSON.parse(JSON.stringify(allLinks[linkId]));
+        confirmedLink.isConfirmed = true;
+        setEditorState(insertLinks([confirmedLink], editorState, editorState.getSelection()));
     }
 
     return (
