@@ -148,13 +148,13 @@ export default memo(function ChartBlock({
         } else {
             view.signal("highlight", { enabled: false }).runAsync();
         }
-    }, [view, links]);
+    }, [links]);
 
     function handleSettingClick() {
         setToggleSettings(!toggleSettings);
     }
-    const showConfig = viewMode ? false : selection.getAnchorKey() === block.getKey(); // show only clicking this block
 
+    const showConfig = viewMode ? false : selection.getAnchorKey() === block.getKey(); // show only clicking this block
     const highlightStyle =
         chartsInEditor.indexOf(chart.id) > -1 && !showConfig && textSelection
             ? {
