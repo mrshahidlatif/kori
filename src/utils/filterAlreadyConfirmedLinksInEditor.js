@@ -6,7 +6,7 @@ export default (rawEditorState, allLinksInCurrentBlockText, blockText) => {
             if (entityMap[key].type === "LINK") {
                 if (
                     entityMap[key].data.isConfirmed &&
-                    entityMap[key].data.text === linkInCurrentBlockText.text &&
+                    entityMap[key].data.text === linkInCurrentBlockText?.text &&
                     blockText.includes(entityMap[key].data.text)
                 ) {
                     shouldKeep = false;
