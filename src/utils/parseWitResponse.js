@@ -1,4 +1,4 @@
-const MIN_INTENT_COFIDENCE = 0.8;
+const MIN_INTENT_COFIDENCE = 0.999;
 export default (response) => {
     let parsedResponse = null;
     let intent;
