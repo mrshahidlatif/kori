@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import css from "./index.module.css";
 import { activateLink, deactivateLink } from "ducks/links";
-import { setSelectedLink } from "ducks/ui";
+import { setSelectedLink, setLinkActiveNoAutoTrigger } from "ducks/ui";
 
 export default function Link(props) {
     const dispatch = useDispatch();
@@ -17,10 +17,12 @@ export default function Link(props) {
     function handleMouseOver() {
         // if (links[link.id].isConfirmed)
         dispatch(activateLink(link.id));
+        dispatch(setLinkActiveNoAutoTrigger(true));
     }
     function handleMouseLeave() {
         deactivateLink(link.id);
         dispatch(deactivateLink(link.id));
+        dispatch(setLinkActiveNoAutoTrigger(false));
     }
     function handleClick() {
         dispatch(setSelectedLink(link));

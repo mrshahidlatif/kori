@@ -7,10 +7,14 @@ import Editor from "components/Editor";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import { setViewMode } from "ducks/ui";
+import { useEffect } from "react";
 
 export default function Edit(props) {
     const dispatch = useDispatch();
-    dispatch(setViewMode(false));
+    useEffect(() => {
+        dispatch(setViewMode(false));
+    }, []);
+
     return (
         <Grid container spacing={2}>
             <Grid item xs={4}>

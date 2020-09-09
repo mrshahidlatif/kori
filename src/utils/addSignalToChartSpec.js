@@ -59,7 +59,10 @@ export function addSignalToMark(mark, highlight) {
         }) ||
         (highlight.rangeField != '' && (indexof(highlight.data, datum[highlight.field])!=-1 ${
             isMap ? "|| indexof(highlight.data, datum.properties[highlight.field])!=-1)" : ")"
-        } && (datum[highlight.rangeField] > highlight.rangeMin && datum[highlight.rangeField]<highlight.rangeMax))
+        } && (datum[highlight.rangeField] > highlight.rangeMin && datum[highlight.rangeField]<highlight.rangeMax)) ||
+        (datum[highlight.field] > highlight.rangeMin && datum[highlight.field]<highlight.rangeMax) ||
+        (datum[highlight.fieldX] > highlight.rangeX[0] && datum[highlight.fieldX] < highlight.rangeX[1] &&
+            datum[highlight.fieldY] < highlight.rangeY[0] && datum[highlight.fieldY] > highlight.rangeY[1] )
     )`;
     const oldProp = mark.encode.update[highlight.channel];
     const highlightProp = [

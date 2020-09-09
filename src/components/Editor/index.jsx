@@ -24,7 +24,13 @@ import PotentialLinkControls from "components/PotentialLinkControls";
 import { updateDoc, updateChartsInEditor } from "ducks/docs";
 import { createLinks, createLink, deleteLink } from "ducks/links";
 import { getChartsInEditor, getCharts } from "ducks/charts";
-import { setSelectedLink, setManualLinkId, exitManualLinkMode, setTextSelection } from "ducks/ui";
+import {
+    setSelectedLink,
+    setManualLinkId,
+    exitManualLinkMode,
+    setTextSelection,
+    setLinkActiveNoAutoTrigger,
+} from "ducks/ui";
 
 import editorDecorators from "utils/editorDecorators";
 import findSuggestions from "utils/findSuggestions";
@@ -51,6 +57,8 @@ export default function Editor(props) {
     const allLinks = useSelector((state) => state.links);
     const exitManualLink = useSelector((state) => state.ui.exitManualLink);
     const manualLinkId = useSelector((state) => state.ui.manualLinkId);
+
+    const linkActiveNoAutoTrigger = useSelector((state) => state.ui.linkActiveNoAutoTrigger);
 
     const textSelectionInStore = useSelector((state) => state.ui.textSelection);
     const [tempTextSelection, setTempTextSelection] = useState(textSelectionInStore);
@@ -123,6 +131,8 @@ export default function Editor(props) {
     useEffect(() => {
         const asyncExec = async () => {
             if (blockText !== "") {
+                if (linkActiveNoAutoTrigger) return;
+                if (selectedLink) return;
                 if (tempTextSelection || tempTextSelection == "INVALID") return;
                 const sentences = await nlp(blockText).sentences().json();
                 let sentenceOffset = 0;
