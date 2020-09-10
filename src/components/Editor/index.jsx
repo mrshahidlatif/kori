@@ -87,6 +87,10 @@ export default function Editor(props) {
     };
 
     useEffect(() => {
+        dispatch(exitManualLinkMode(false));
+        setCurrentSelectionState(null);
+        dispatch(setTextSelection(null));
+        dispatch(setManualLinkId(null));
         startTimer();
         return () => clearInterval(interval.current);
     }, []);
@@ -273,6 +277,7 @@ export default function Editor(props) {
     }
 
     function blockRendererFn(block) {
+        console.log("render function.....!!!");
         //TODO: is this necessary given the plugin is there
         // ChartBlock Removed
     }

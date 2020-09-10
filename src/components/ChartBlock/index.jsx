@@ -77,7 +77,7 @@ export default memo(function ChartBlock({
             // spec.autosize = {
             //     type: "fit",
             //     contains: "padding",
-            //     resize: false,
+            //     resize: true,
             // };
 
             const result = await vegaEmbed(chartEl.current, spec, { actions: false });
@@ -116,7 +116,7 @@ export default memo(function ChartBlock({
         if (view) {
             const { width } = containerEl.current.getBoundingClientRect();
             const height = ratio * width;
-            view.resize().height(height).width(width).runAsync();
+            // view.resize().height(height).width(width).runAsync();
         }
     }
 
@@ -162,12 +162,12 @@ export default memo(function ChartBlock({
                   position: "relative",
                   borderStyle: "solid",
                   borderColor: "gray",
-                  //   width: "fit-content",
+                  width: "fit-content",
               }
             : {
                   ...style,
                   position: "relative",
-                  //   width: "fit-content",
+                  width: "fit-content",
               };
 
     return (

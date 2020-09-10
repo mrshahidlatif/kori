@@ -155,16 +155,8 @@ export default function ManualLinkControls(props) {
             dispatch(setManualLinkId(action.links[0].id));
         } else dispatch(setManualLinkId(null));
     }
-
     return pos && props.textSelection ? (
-        <Box
-            // zIndex="modal"
-            // left={pos.x + padding}
-            // top={pos.y + padding}
-            right={0}
-            top={0}
-            className={css.panel}
-        >
+        <Box zIndex="modal" right={0} top={0} className={css.panel}>
             <Paper elevation={1}>
                 <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
                     <Button
@@ -220,12 +212,6 @@ export default function ManualLinkControls(props) {
                     )}
                 </Popper>
             </Paper>
-
-            {/* <Grid container direction="column" alignItems="center">
-                <Grid item xs={12}>
-                    
-                </Grid>
-            </Grid> */}
         </Box>
     ) : (
         ""
