@@ -82,19 +82,23 @@ function fuzzyMatch(sentence, word) {
 }
 
 export async function findRangeLinks(chart, sentence) {
-    let match = null;
+    let match = [];
     let rangeLink = null;
     chart.properties.axes.forEach(function (a) {
         const fsResult = fuzzyMatch(sentence.text, a.title); //returns a [score, word] pair!
         // TODO: Later check only if the f.type is a number!
         if (fsResult[0] > MIN_MATCH_THRESHOLD) {
-            match = { userTyped: fsResult[1], matchedFeature: a };
+            match.push({
+                userTyped: fsResult[1],
+                matchedFeature: a,
+            });
         }
     });
     //only send request to Wit.ai when we have a potential match!
     if (match !== null) {
-        if (sentence.text.length > WIT_CHARACTER_LIMIT) return;
-        const response = await client.message(sentence.text, {});
+        const { text } = sentence;
+        if (text.length > WIT_CHARACTER_LIMIT) return;
+        const response = await client.message(text, {});
         const parsedResponse = parseWitResponse(response);
         if (parsedResponse !== null) {
             //TODO: Also see if we can check if Wit.ai can also give us numbers described
@@ -106,30 +110,38 @@ export async function findRangeLinks(chart, sentence) {
                 return;
             switch (parsedResponse.intent) {
                 case "range_selection":
-                    const linkStartIndex = sentence.text.indexOf(match.userTyped);
-                    const linkEndIndex =
-                        parsedResponse.max !== Infinity
-                            ? sentence.text.indexOf(parsedResponse.max) !== -1
-                                ? sentence.text.indexOf(parsedResponse.max) +
-                                  parsedResponse.max.toString().length
-                                : sentence.text.length - 1
-                            : parsedResponse.min !== -Infinity
-                            ? sentence.text.indexOf(parsedResponse.min) !== -1
-                                ? sentence.text.indexOf(parsedResponse.min) +
-                                  parsedResponse.min.toString().length
-                                : sentence.text.length - 1
-                            : sentence.text.length - 1;
+                    const fieldsOffsets = match.map((match) => {
+                        return text.indexOf(match.userTyped);
+                    });
 
-                    const linkPhrase = sentence.text.substring(linkStartIndex, linkEndIndex);
+                    const maxOffset = text.indexOf(parsedResponse.max);
+                    const minOffset = text.indexOf(parsedResponse.min);
+                    let distFromField = [];
+                    fieldsOffsets.forEach((offset) => {
+                        distFromField.push(
+                            Math.min(Math.abs(offset - minOffset), Math.abs(offset - maxOffset))
+                        );
+                    });
+                    const closestMatch = match[distFromField.indexOf(Math.min(...distFromField))];
+
+                    const linkStartIndex = text.indexOf(closestMatch.userTyped);
+
+                    let linkEndIndex =
+                        minOffset > maxOffset
+                            ? minOffset + text.indexOf(parsedResponse.min).toString().length
+                            : minOffset + text.indexOf(parsedResponse.max).toString().length;
+                    if (minOffset == -1 && maxOffset == -1) linkEndIndex = sentence.endIndex;
+
+                    const linkPhrase = text.substring(linkStartIndex, linkEndIndex);
                     rangeLink = {
                         text: linkPhrase,
-                        feature: match.matchedFeature, //information about how the rangeLink was found
+                        feature: closestMatch.matchedFeature, //information about how the rangeLink was found
                         chartId: chart.id,
                         active: false,
                         type: "range",
-                        data: isArray(match.matchedFeature.field)
-                            ? match.matchedFeature.field
-                            : [match.matchedFeature.field],
+                        data: isArray(closestMatch.matchedFeature.field)
+                            ? closestMatch.matchedFeature.field
+                            : [closestMatch.matchedFeature.field],
                         startIndex:
                             linkStartIndex > linkEndIndex
                                 ? sentence.startIndex + linkEndIndex
@@ -139,7 +151,7 @@ export async function findRangeLinks(chart, sentence) {
                                 ? sentence.startIndex + linkStartIndex
                                 : sentence.startIndex + linkEndIndex,
 
-                        sentence: sentence.text,
+                        sentence: text,
                         rangeMin: parsedResponse.min,
                         rangeMax: parsedResponse.max,
                         isConfirmed: false,

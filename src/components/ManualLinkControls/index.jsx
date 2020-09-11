@@ -1,19 +1,13 @@
 import React from "react";
 import css from "./index.module.css";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import Grow from "@material-ui/core/Grow";
+
 import Paper from "@material-ui/core/Paper";
-import Popper from "@material-ui/core/Popper";
-import MenuItem from "@material-ui/core/MenuItem";
-import MenuList from "@material-ui/core/MenuList";
 
 import { setTextSelection } from "ducks/ui";
 import { createLinks } from "ducks/links";
@@ -56,7 +50,6 @@ export default function ManualLinkControls(props) {
                 field = chartProperties?.axes.filter((axis) =>
                     ["ordinal", "band", "point"].includes(axis.type)
                 )[0];
-                console.log("Linked Axis", field);
                 if (p.hasOwnProperty("properties")) {
                     field = chartProperties?.features.filter(
                         (feature) => feature?.value != "Feature"
