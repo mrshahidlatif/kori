@@ -24,13 +24,7 @@ import PotentialLinkControls from "components/PotentialLinkControls";
 import { updateDoc, updateChartsInEditor } from "ducks/docs";
 import { createLinks, createLink, deleteLink } from "ducks/links";
 import { getChartsInEditor, getCharts } from "ducks/charts";
-import {
-    setSelectedLink,
-    setManualLinkId,
-    exitManualLinkMode,
-    setTextSelection,
-    setLinkActiveNoAutoTrigger,
-} from "ducks/ui";
+import { setSelectedLink, setManualLinkId, exitManualLinkMode, setTextSelection } from "ducks/ui";
 
 import editorDecorators from "utils/editorDecorators";
 import findSuggestions from "utils/findSuggestions";
@@ -43,6 +37,8 @@ import deHighlightTextSelection from "utils/deHighlightTextSelection";
 import getBlockText from "utils/getBlockText";
 import filterAlreadyConfirmedLinksInEditor from "utils/filterAlreadyConfirmedLinksInEditor";
 import nlp from "compromise";
+import Snackbar from "@material-ui/core/Snackbar";
+import Alert from "components/Alert";
 
 const AUTOMATIC_SUGGESTION_TIMEOUT = 5000;
 
@@ -74,6 +70,7 @@ export default function Editor(props) {
 
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
     const [blockText, setBlockText] = useState("");
+    const [infoMsg, setInfoMsg] = useState(null);
 
     let interval = useRef();
 
@@ -318,6 +315,9 @@ export default function Editor(props) {
         dispatch(exitManualLinkMode(false));
         setCurrentSelectionState(editorState.getSelection());
         setEditorState(highlightTextSelection(tempTextSelection, editorState));
+        setInfoMsg(
+            "Click on any chart. Use brushing or clicking to select visual marks. Multiple points can be selected holding the SHIFT key."
+        );
     }
 
     function handleLinkDiscard(link) {
@@ -383,6 +383,19 @@ export default function Editor(props) {
                 onDiscard={handleLinkDiscard}
                 onAccept={handleLinkAccept}
             />
+            <Snackbar
+                open={infoMsg !== null}
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                }}
+                autoHideDuration={5000}
+                onClose={() => {
+                    setInfoMsg(null);
+                }}
+            >
+                <Alert severity="info">{infoMsg}</Alert>
+            </Snackbar>
         </Fragment>
     );
 }

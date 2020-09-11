@@ -8,6 +8,7 @@ import Snackbar from "@material-ui/core/Snackbar";
 import { compile } from "vega-lite/build/vega-lite";
 import extractChartFeatures from "utils/extractChartFeatures";
 import createThumbnail from "utils/createThumbnail";
+import Alert from "components/Alert";
 
 export default function ChartGallery(props) {
     const dispatch = useDispatch();
@@ -89,8 +90,9 @@ export default function ChartGallery(props) {
                 onClose={() => {
                     setErrorMsg(null);
                 }}
-                message={errorMsg}
-            />
+            >
+                <Alert severity="error">{errorMsg}</Alert>
+            </Snackbar>
 
             <div className={css.draggingArea} style={{ opacity: dragging ? 0.5 : 0.0 }}>
                 Drop Vega-lite Spec
