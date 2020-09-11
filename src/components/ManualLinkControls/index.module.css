@@ -15,3 +15,10 @@
     font-size: small;
     color: gray;
 }
+.potentialLinkControls {
+    position: absolute;
+    /* min-width: 150px; */
+    /* opacity: 0.75; */
+    z-index: 10;
+    /* transform: translate(100%, 0); */
+}

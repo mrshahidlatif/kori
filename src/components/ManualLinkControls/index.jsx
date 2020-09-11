@@ -26,8 +26,6 @@ export default function ManualLinkControls(props) {
     const padding = 10;
 
     const chartProperties = props.selectedChart.properties;
-    const fields = chartProperties.features.map((f) => f.field);
-    const options = [...new Set(fields)];
 
     function handleResetClick(event) {
         dispatch(exitManualLinkMode(true));
@@ -43,33 +41,7 @@ export default function ManualLinkControls(props) {
         dispatch(exitManualLinkMode(true));
     }
 
-    const [open, setOpen] = React.useState(false);
-    const anchorRef = React.useRef(null);
-    const [selectedIndex, setSelectedIndex] = React.useState(0);
-
-    const handleClick = () => {
-        console.info(`You clicked ${options[selectedIndex]}`);
-    };
-
-    const handleMenuItemClick = (event, index) => {
-        setSelectedIndex(index);
-        setOpen(false);
-    };
-
-    const handleToggle = () => {
-        setOpen((prevOpen) => !prevOpen);
-    };
-
-    const handleClose = (event) => {
-        if (anchorRef.current && anchorRef.current.contains(event.target)) {
-            return;
-        }
-
-        setOpen(false);
-    };
-
     function makeManualLink(textSelection, multiPoint, brush, viewData) {
-        console.log("View Data", viewData);
         let link = null;
         if (multiPoint.length > 0) {
             let points = [];
@@ -79,19 +51,27 @@ export default function ManualLinkControls(props) {
                 }
             }
             let data = [];
+            let field;
             points.forEach(function (p) {
+                field = chartProperties?.axes.filter((axis) =>
+                    ["ordinal", "band", "point"].includes(axis.type)
+                )[0];
+                console.log("Linked Axis", field);
                 if (p.hasOwnProperty("properties")) {
+                    field = chartProperties?.features.filter(
+                        (feature) => feature?.value != "Feature"
+                    )[0];
                     //Special case: Maps
                     //Look for data in TopoJSON Properties or in the datafile!
-                    if (!p["properties"][options[selectedIndex]]) {
-                        data.push(p[options[selectedIndex]]);
-                    } else data.push(p["properties"][options[selectedIndex]]);
-                } else data.push(p[options[selectedIndex]]);
+                    if (!p["properties"][field?.field]) {
+                        data.push(p[field?.field]);
+                    } else data.push(p["properties"][field?.field]);
+                } else data.push(p[field?.field]);
             });
 
             link = {
                 text: textSelection.text,
-                feature: { field: options[selectedIndex] },
+                feature: { field: field?.field },
                 chartId: props.selectedChart.id,
                 active: false,
                 type: "multipoint",
@@ -108,6 +88,9 @@ export default function ManualLinkControls(props) {
             let fieldY;
             let rangeX;
             let rangeY;
+            let brushField;
+            let rangeMin;
+            let rangeMax;
 
             //Rectangular Brush
             if (
@@ -122,19 +105,20 @@ export default function ManualLinkControls(props) {
                 points = [];
             } else {
                 //Single Axis Brush
-                const brushFieldIndex = brush[0].fields.findIndex(
-                    (f) => f.field === options[selectedIndex] && f.type === "E"
-                );
-                //TODO: handle single axis brush of type "R" too
-
-                if (brushFieldIndex > -1) {
-                    points = brush[0].values[brushFieldIndex];
+                if (brush[0].fields[0].type === "E") {
+                    brushField = brush[0].fields[0].field;
+                    points = brush[0].values[0];
+                }
+                if (brush[0].fields[0].type === "R") {
+                    brushField = brush[0].fields[0].field;
+                    points = [];
+                    rangeMin = brush[0].values[0][0];
+                    rangeMax = brush[0].values[0][1];
                 }
             }
-
             link = {
                 text: textSelection.text,
-                feature: { field: options[selectedIndex] },
+                feature: { field: brushField },
                 chartId: props.selectedChart.id,
                 active: false,
                 type: "brush",
@@ -148,6 +132,8 @@ export default function ManualLinkControls(props) {
                 fieldY: fieldY,
                 rangeY: rangeY,
             };
+            if (brush[0]?.fields.length < 2 && brush[0]?.fields[0].type === "R")
+                link = { ...link, rangeField: brushField, rangeMin, rangeMax };
         }
         if (link !== null) {
             const action = createLinks(props.currentDoc.id, [link]);
@@ -156,61 +142,12 @@ export default function ManualLinkControls(props) {
         } else dispatch(setManualLinkId(null));
     }
     return pos && props.textSelection ? (
-        <Box zIndex="modal" right={0} top={0} className={css.panel}>
+        <Box right={0} top={0} className={css.potentialLinkControls}>
             <Paper elevation={1}>
-                <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
-                    <Button
-                        ref={anchorRef}
-                        aria-controls={open ? "split-button-menu" : undefined}
-                        aria-expanded={open ? "true" : undefined}
-                        aria-label="Select an axis"
-                        aria-haspopup="menu"
-                        onClick={handleToggle}
-                        endIcon={<ArrowDropDownIcon />}
-                    >
-                        {options[selectedIndex]}
-                    </Button>
-                </ButtonGroup>
                 <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
                     <Button onMouseDown={handleAcceptClick}>Accept</Button>
                     <Button onMouseDown={handleResetClick}>Cancel</Button>
                 </ButtonGroup>
-                <Popper
-                    open={open}
-                    anchorEl={anchorRef.current}
-                    role={undefined}
-                    transition
-                    disablePortal
-                >
-                    {({ TransitionProps, placement }) => (
-                        <Grow
-                            {...TransitionProps}
-                            style={{
-                                transformOrigin:
-                                    placement === "bottom" ? "center top" : "center bottom",
-                            }}
-                        >
-                            <Paper>
-                                <ClickAwayListener onClickAway={handleClose}>
-                                    <MenuList id="split-button-menu">
-                                        {options.map((option, index) => (
-                                            <MenuItem
-                                                key={option}
-                                                // disabled={index === 2}
-                                                selected={index === selectedIndex}
-                                                onClick={(event) =>
-                                                    handleMenuItemClick(event, index)
-                                                }
-                                            >
-                                                {option}
-                                            </MenuItem>
-                                        ))}
-                                    </MenuList>
-                                </ClickAwayListener>
-                            </Paper>
-                        </Grow>
-                    )}
-                </Popper>
             </Paper>
         </Box>
     ) : (

@@ -46,19 +46,23 @@ export default function ChartGallery(props) {
 
             // Closure to capture the file information.
             reader.onload = async (e) => {
-                const liteSpec = JSON.parse(e.target.result);
-                const spec = compile(liteSpec).spec; // vega spec
-                // support vega-lite sample datasets
+                try {
+                    const liteSpec = JSON.parse(e.target.result);
+                    const spec = compile(liteSpec).spec; // vega spec
+                    // support vega-lite sample datasets
 
-                spec.data.forEach((d) => {
-                    if (d.url && d.url.startsWith("data")) {
-                        d.url = process.env.PUBLIC_URL + "/" + d.url;
-                    }
-                });
-                const thumbnail = await createThumbnail(spec);
+                    spec.data.forEach((d) => {
+                        if (d.url && d.url.startsWith("data")) {
+                            d.url = process.env.PUBLIC_URL + "/" + d.url;
+                        }
+                    });
+                    const thumbnail = await createThumbnail(spec);
 
-                const properties = await extractChartFeatures(spec);
-                dispatch(createChart(docId, spec, liteSpec, { properties, thumbnail }));
+                    const properties = await extractChartFeatures(spec);
+                    dispatch(createChart(docId, spec, liteSpec, { properties, thumbnail }));
+                } catch (e) {
+                    setErrorMsg("Syntex error in specification file!");
+                }
             };
 
             reader.readAsText(file);

@@ -50,7 +50,7 @@ export function addSignalToMark(mark, highlight) {
         } && (datum[highlight.rangeField] > highlight.rangeMin && datum[highlight.rangeField]<highlight.rangeMax)) ||
         (datum[highlight.field] > highlight.rangeMin && datum[highlight.field]<highlight.rangeMax) ||
         (datum[highlight.fieldX] > highlight.rangeX[0] && datum[highlight.fieldX] < highlight.rangeX[1] &&
-            datum[highlight.fieldY] < highlight.rangeY[0] && datum[highlight.fieldY] > highlight.rangeY[1] )
+            datum[highlight.fieldY] < highlight.rangeY[0] && datum[highlight.fieldY] > highlight.rangeY[1] ) 
     )`;
     //TODO: reduce redundant checking
     const inactivePredicate = `highlight.enabled===true && !(

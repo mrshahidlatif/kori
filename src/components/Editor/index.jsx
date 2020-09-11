@@ -277,7 +277,6 @@ export default function Editor(props) {
     }
 
     function blockRendererFn(block) {
-        console.log("render function.....!!!");
         //TODO: is this necessary given the plugin is there
         // ChartBlock Removed
     }
