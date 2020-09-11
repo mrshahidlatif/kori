@@ -98,6 +98,9 @@ export default function Editor(props) {
             editorEl.current.focus();
             dispatch(exitManualLinkMode(false));
             setCurrentSelectionState(null);
+
+            //Quick and dirty fix! //Clearing Chart Selections
+            window.dispatchEvent(new KeyboardEvent("keypress", { key: "a" }));
         }
     }, [exitManualLink]);
 
@@ -113,16 +116,10 @@ export default function Editor(props) {
             );
             dispatch(setManualLinkId(null));
             setCurrentSelectionState(null);
+            //Quick and dirty fix! //Clearing Chart Selections
+            window.dispatchEvent(new KeyboardEvent("keypress", { key: "a" }));
         }
     }, [manualLinkId, exitManualLink]);
-
-    useEffect(() => {
-        if (exitManualLink && allLinks[manualLinkId] === undefined) {
-            //clear selection in case no brushing and pressing 'Accept'
-            setEditorState(deHighlightTextSelection(currentSelectionState, editorState));
-            setCurrentSelectionState(null);
-        }
-    }, [editorState, selectedLink]);
 
     useEffect(() => {
         const editorRawState = convertToRaw(editorState.getCurrentContent());
