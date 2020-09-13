@@ -21,7 +21,6 @@ export default function PotentialLinkControls(props) {
         event.preventDefault();
         event.stopPropagation();
         props.onDiscard(props.selectedLink);
-
         dispatch(setSelectedLink(null));
     }
     function handleAcceptClick(event) {
@@ -29,7 +28,7 @@ export default function PotentialLinkControls(props) {
         event.stopPropagation();
 
         dispatch(confirmLink(props.selectedLink.id));
-        props.onAccept(props.selectedLink.id);
+        props.onAccept(props.selectedLink);
         dispatch(setSelectedLink(null));
     }
     return pos && props.selectedLink && !props.selectedLink.isConfirmed && !props.textSelection ? (

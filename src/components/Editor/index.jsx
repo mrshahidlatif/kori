@@ -186,7 +186,6 @@ export default function Editor(props) {
                 searchedSentences: updatedSearchedSentences,
             })
         );
-
         //Enable SuggestionMenu on @
         if (lastTypedWord.text.startsWith("@")) {
             const suggestions = findSuggestions(
@@ -359,9 +358,9 @@ export default function Editor(props) {
 
         dispatch(deleteLink(link.id));
     }
-    function handleLinkAccept(linkId) {
+    function handleLinkAccept(link) {
         //Quick and dirty fix! //TODO: Check later
-        const confirmedLink = JSON.parse(JSON.stringify(allLinks[linkId]));
+        const confirmedLink = JSON.parse(JSON.stringify(link));
         confirmedLink.isConfirmed = true;
         setEditorState(insertLinks([confirmedLink], editorState, editorState.getSelection()));
     }

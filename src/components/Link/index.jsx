@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import css from "./index.module.css";
-import { activateLink, deactivateLink } from "ducks/links";
+import { activateLink, deactivateLink, updateLink } from "ducks/links";
 import { setSelectedLink, setLinkActiveNoAutoTrigger } from "ducks/ui";
 
 export default function Link(props) {
@@ -25,7 +25,12 @@ export default function Link(props) {
         dispatch(setLinkActiveNoAutoTrigger(false));
     }
     function handleClick() {
-        dispatch(setSelectedLink(link));
+        //Quick and dirty fix! //TODO: Check later
+        //TODO: only store ID of link in editor.
+        const updatedLink = JSON.parse(JSON.stringify(link));
+        updatedLink.startIndex = props.start;
+        updatedLink.endIndex = props.end;
+        dispatch(setSelectedLink(updatedLink));
     }
 
     return (
