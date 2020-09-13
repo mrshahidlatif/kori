@@ -50,7 +50,7 @@ const initialState = {
         timestamp: Date.now(),
         charts: ["testchart"],
         chartsInEditor: [],
-        sentences: [],
+        searchedSentences: [],
         editorRawState: {
             blocks: [
                 {

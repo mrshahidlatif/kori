@@ -137,7 +137,7 @@ export default function Editor(props) {
                 for (let i = 0; i < sentences.length; i++) {
                     const { text } = sentences[i];
                     if (!text.includes(".")) continue;
-                    if (alreadySearchedSentences.includes(text)) continue;
+                    if (alreadySearchedSentences?.includes(text)) continue;
                     searchedSentences.push(text);
 
                     const sentenceObject = {
@@ -150,7 +150,7 @@ export default function Editor(props) {
                 }
                 dispatch(
                     updateDoc(doc.id, {
-                        searchedSentences: alreadySearchedSentences.concat(searchedSentences),
+                        searchedSentences: alreadySearchedSentences?.concat(searchedSentences),
                     })
                 );
                 if (allLinksInCurrentBlockText.length > 0) {
@@ -178,7 +178,7 @@ export default function Editor(props) {
         const lastTypedWord = getLastTypedWord(editorState);
 
         const allText = editorState.getCurrentContent().getPlainText(" ").trim();
-        const updatedSearchedSentences = alreadySearchedSentences.filter(
+        const updatedSearchedSentences = alreadySearchedSentences?.filter(
             (alreadySearchedSentence) => allText.includes(alreadySearchedSentence)
         );
         dispatch(
