@@ -123,7 +123,7 @@ export async function findRangeLinks(chart, sentence) {
                         );
                     });
                     const closestMatch = match[distFromField.indexOf(Math.min(...distFromField))];
-
+                    if (!closestMatch) return;
                     const linkStartIndex = text.indexOf(closestMatch.userTyped);
 
                     let linkEndIndex =

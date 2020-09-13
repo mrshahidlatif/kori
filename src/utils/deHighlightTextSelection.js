@@ -1,12 +1,23 @@
-import { Modifier, EditorState, ContentState } from "draft-js";
+import { Modifier, EditorState } from "draft-js";
 
 export default (currentSelectionState, editorState) => {
-    var currentContentState = editorState.getCurrentContent();
+    if (!currentSelectionState) return;
+    const currentContentState = editorState.getCurrentContent();
 
-    var newContentState = Modifier.applyEntity(currentContentState, currentSelectionState, null);
-    var newEditorState = EditorState.push(editorState, newContentState, "apply-entity");
+    const newContentState = Modifier.applyEntity(currentContentState, currentSelectionState, null);
+    let newEditorState = EditorState.push(editorState, newContentState, "apply-entity");
 
+    const newCaretPosition = Math.max(
+        currentSelectionState.getAnchorOffset(),
+        currentSelectionState.getFocusOffset()
+    );
+
+    const newSelection = newEditorState.getSelection().merge({
+        focusOffset: newCaretPosition,
+        anchorOffset: newCaretPosition,
+    });
     newEditorState = EditorState.moveSelectionToEnd(newEditorState);
-    // newEditorState = EditorState.forceSelection(newEditorState, editorState.getSelection());
+    newEditorState = EditorState.forceSelection(newEditorState, newSelection);
+
     return newEditorState;
 };

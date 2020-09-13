@@ -96,7 +96,6 @@ export default function Editor(props) {
             editorEl.current.focus();
             dispatch(exitManualLinkMode(false));
             setCurrentSelectionState(null);
-
             //Quick and dirty fix! //Clearing Chart Selections
             window.dispatchEvent(new KeyboardEvent("keypress", { key: "a" }));
         }
@@ -226,7 +225,6 @@ export default function Editor(props) {
                 dispatch(setSelectedLink(null));
             }
         }
-
         let textSelection = getTextSelection(
             editorState.getCurrentContent(),
             currentSelection,
@@ -245,6 +243,17 @@ export default function Editor(props) {
             suggestions.length !== 0
                 ? setSuggestions(suggestions)
                 : setSuggestions([{ text: "NoLinkFound!" }]);
+        }
+
+        const block = editorState.getCurrentContent().getBlockForKey(activeBlockKey);
+        if (
+            block.getType() === "unstyled" &&
+            !exitManualLink &&
+            currentSelectionState &&
+            !tempTextSelection
+        ) {
+            dispatch(exitManualLinkMode(true));
+            dispatch(setTextSelection(null));
         }
     }
 
