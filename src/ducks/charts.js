@@ -27,10 +27,11 @@ export const updateChart = (chartId, attrs) => {
     return { type: UPDATE_CHART, chartId, attrs };
 };
 
-export const deleteChart = (chartId) => {
+export const deleteChart = (chartId, attrs) => {
     return {
         type: DELETE_CHART,
         chartId,
+        attrs,
     };
 };
 // selectors

@@ -72,6 +72,7 @@ export default function ChartGallery(props) {
         }
         setDragging(false);
     }
+
     return (
         <div
             className={css.container}
@@ -98,7 +99,7 @@ export default function ChartGallery(props) {
                 Drop Vega-lite Spec
             </div>
             {charts.map((chart) => (
-                <Chart key={chart.id} id={chart.id} spec={chart.spec} />
+                <Chart key={chart.id} docId={docId} id={chart.id} spec={chart.spec} />
             ))}
         </div>
     );
