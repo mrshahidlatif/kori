@@ -15,7 +15,7 @@ export const createDoc = (attrs = {}) => {
         title: "Untitled",
         editorRawState: null,
         timestamp: Date.now(),
-        sentences: [],
+        searchedSentences: [],
         charts: [],
         chartsInEditor: [],
         ...attrs,

@@ -53,21 +53,19 @@ export default function Editor(props) {
     const allLinks = useSelector((state) => state.links);
     const exitManualLink = useSelector((state) => state.ui.exitManualLink);
     const manualLinkId = useSelector((state) => state.ui.manualLinkId);
-
     const linkActiveNoAutoTrigger = useSelector((state) => state.ui.linkActiveNoAutoTrigger);
-
     const textSelectionInStore = useSelector((state) => state.ui.textSelection);
-    const [tempTextSelection, setTempTextSelection] = useState(textSelectionInStore);
 
+    const [tempTextSelection, setTempTextSelection] = useState(textSelectionInStore);
     const editorEl = useRef(null); //https://reactjs.org/docs/hooks-reference.html#useref
     const [suggestions, setSuggestions] = useState([]);
+    const alreadySearchedSentences = useSelector((state) => state.docs[docId].searchedSentences);
 
     const contentState =
         storedEditorState === null
             ? EditorState.createEmpty().getCurrentContent()
             : convertFromRaw(storedEditorState);
     const [editorState, setEditorState] = useState(EditorState.createWithContent(contentState));
-
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
     const [blockText, setBlockText] = useState("");
     const [infoMsg, setInfoMsg] = useState(null);
@@ -135,9 +133,13 @@ export default function Editor(props) {
                 const sentences = await nlp(blockText).sentences().json();
                 let sentenceOffset = 0;
                 let allLinksInCurrentBlockText = [];
+                let searchedSentences = [];
                 for (let i = 0; i < sentences.length; i++) {
                     const { text } = sentences[i];
                     if (!text.includes(".")) continue;
+                    if (alreadySearchedSentences.includes(text)) continue;
+                    searchedSentences.push(text);
+
                     const sentenceObject = {
                         text: text,
                         startIndex: blockText.indexOf(text),
@@ -146,6 +148,11 @@ export default function Editor(props) {
                     const links = await findLinks(chartsInEditor, sentenceObject);
                     allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
                 }
+                dispatch(
+                    updateDoc(doc.id, {
+                        searchedSentences: alreadySearchedSentences.concat(searchedSentences),
+                    })
+                );
                 if (allLinksInCurrentBlockText.length > 0) {
                     const rawEditorState = convertToRaw(editorState.getCurrentContent());
                     allLinksInCurrentBlockText = filterAlreadyConfirmedLinksInEditor(
@@ -169,6 +176,16 @@ export default function Editor(props) {
         setEditorState(editorState);
         const editorRawState = convertToRaw(editorState.getCurrentContent());
         const lastTypedWord = getLastTypedWord(editorState);
+
+        const allText = editorState.getCurrentContent().getPlainText(" ").trim();
+        const updatedSearchedSentences = alreadySearchedSentences.filter(
+            (alreadySearchedSentence) => allText.includes(alreadySearchedSentence)
+        );
+        dispatch(
+            updateDoc(doc.id, {
+                searchedSentences: updatedSearchedSentences,
+            })
+        );
 
         //Enable SuggestionMenu on @
         if (lastTypedWord.text.startsWith("@")) {
