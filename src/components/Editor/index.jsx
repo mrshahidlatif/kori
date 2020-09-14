@@ -142,7 +142,7 @@ export default function Editor(props) {
                     const sentenceObject = {
                         text: text,
                         startIndex: blockText.indexOf(text),
-                        endIndex: sentenceOffset + text.length,
+                        endIndex: blockText.indexOf(text) + text.length,
                     };
                     const links = await findLinks(chartsInEditor, sentenceObject);
                     allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);

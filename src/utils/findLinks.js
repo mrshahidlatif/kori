@@ -209,13 +209,13 @@ function createGroupLink(sentence, groupableLinks, links) {
     const linkEndIndex = lastIndividualLink.endIndex;
 
     const linkText = sentence.text.substring(
-        firstIndividualLink.startIndex,
-        lastIndividualLink.endIndex
+        linkStartIndex - sentence.startIndex,
+        linkEndIndex - sentence.startIndex
     );
     const groupLink = {
         text: linkText,
-        feature: pointLinks[0].feature, //information about how the link was found
-        chartId: pointLinks[0].chartId,
+        feature: pointLinks[0]?.feature, //information about how the link was found
+        chartId: pointLinks[0]?.chartId,
         active: false,
         type: "group",
         data: pointLinks.map((pointLink) => pointLink.data[0]),
