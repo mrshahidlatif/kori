@@ -75,8 +75,8 @@ export default function Editor(props) {
     const startTimer = () => {
         interval = setInterval(() => {
             console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
-            // if (editorEl?.current?.props?.editorState)
-            //     setBlockText(getBlockText(editorEl.current.props.editorState));
+            if (editorEl?.current?.props?.editorState)
+                setBlockText(getBlockText(editorEl.current.props.editorState));
         }, AUTOMATIC_SUGGESTION_TIMEOUT);
         return () => clearInterval(interval.current);
     };
