@@ -245,16 +245,16 @@ export default function Editor(props) {
                 : setSuggestions([{ text: "NoLinkFound!" }]);
         }
 
-        const block = editorState.getCurrentContent().getBlockForKey(activeBlockKey);
-        if (
-            block.getType() === "unstyled" &&
-            !exitManualLink &&
-            currentSelectionState &&
-            !tempTextSelection
-        ) {
-            dispatch(exitManualLinkMode(true));
-            dispatch(setTextSelection(null));
-        }
+        // const block = editorState.getCurrentContent().getBlockForKey(activeBlockKey);
+        // if (
+        //     block.getType() === "unstyled" &&
+        //     !exitManualLink &&
+        //     currentSelectionState &&
+        //     !tempTextSelection
+        // ) {
+        //     dispatch(exitManualLinkMode(true));
+        //     dispatch(setTextSelection(null));
+        // }
     }
 
     function handleKeyCommand(command) {
