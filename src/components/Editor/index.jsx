@@ -39,6 +39,7 @@ import filterAlreadyConfirmedLinksInEditor from "utils/filterAlreadyConfirmedLin
 import nlp from "compromise";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "components/Alert";
+import getEntities from "utils/getEntities";
 
 const AUTOMATIC_SUGGESTION_TIMEOUT = 5000;
 
@@ -72,23 +73,23 @@ export default function Editor(props) {
 
     let interval = useRef();
 
-    const startTimer = () => {
-        interval = setInterval(() => {
-            console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
-            if (editorEl?.current?.props?.editorState)
-                setBlockText(getBlockText(editorEl.current.props.editorState));
-        }, AUTOMATIC_SUGGESTION_TIMEOUT);
-        return () => clearInterval(interval.current);
-    };
+    // const startTimer = () => {
+    //     interval = setInterval(() => {
+    //         console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
+    //         if (editorEl?.current?.props?.editorState)
+    //             setBlockText(getBlockText(editorEl.current.props.editorState));
+    //     }, AUTOMATIC_SUGGESTION_TIMEOUT);
+    //     return () => clearInterval(interval.current);
+    // };
 
-    useEffect(() => {
-        dispatch(exitManualLinkMode(false));
-        setCurrentSelectionState(null);
-        dispatch(setTextSelection(null));
-        dispatch(setManualLinkId(null));
-        startTimer();
-        return () => clearInterval(interval.current);
-    }, []);
+    // useEffect(() => {
+    //     dispatch(exitManualLinkMode(false));
+    //     setCurrentSelectionState(null);
+    //     dispatch(setTextSelection(null));
+    //     dispatch(setManualLinkId(null));
+    //     startTimer();
+    //     return () => clearInterval(interval.current);
+    // }, []);
 
     useEffect(() => {
         if (exitManualLink) {
@@ -230,6 +231,7 @@ export default function Editor(props) {
             currentSelection,
             " " //delimiter
         );
+  
         //Hide the floating controls when no text is selected
         setTempTextSelection(textSelection);
 
@@ -245,16 +247,16 @@ export default function Editor(props) {
                 : setSuggestions([{ text: "NoLinkFound!" }]);
         }
 
-        // const block = editorState.getCurrentContent().getBlockForKey(activeBlockKey);
-        // if (
-        //     block.getType() === "unstyled" &&
-        //     !exitManualLink &&
-        //     currentSelectionState &&
-        //     !tempTextSelection
-        // ) {
-        //     dispatch(exitManualLinkMode(true));
-        //     dispatch(setTextSelection(null));
-        // }
+        const block = editorState.getCurrentContent().getBlockForKey(activeBlockKey);
+        if (
+            block.getType() === "unstyled" &&
+            !exitManualLink &&
+            currentSelectionState &&
+            !tempTextSelection
+        ) {
+            dispatch(exitManualLinkMode(true));
+            dispatch(setTextSelection(null));
+        }
     }
 
     function handleKeyCommand(command) {

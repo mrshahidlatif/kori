@@ -155,6 +155,7 @@ export default memo(function ChartBlock({
     }
 
     const showConfig = viewMode ? false : selection.getAnchorKey() === block.getKey(); // show only clicking this block
+    console.log('showcong', showConfig,block.getKey());
     const highlightStyle =
         chartsInEditor.indexOf(chart.id) > -1 && !showConfig && textSelection
             ? {
