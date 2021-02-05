@@ -29,6 +29,7 @@ import { setSelectedLink, setManualLinkId, exitManualLinkMode, setTextSelection 
 import editorDecorators from "utils/editorDecorators";
 import findSuggestions from "utils/findSuggestions";
 import findLinks from "utils/findLinks";
+import getLinks from "utils/getLinks";
 import insertLinks from "utils/insertLinks";
 import getLastTypedWord from "utils/getLastTypedWord";
 import getTextSelection from "utils/getTextSelection";
@@ -39,6 +40,10 @@ import filterAlreadyConfirmedLinksInEditor from "utils/filterAlreadyConfirmedLin
 import nlp from "compromise";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "components/Alert";
+
+import util from "util";
+
+const request = require("request");
 
 const AUTOMATIC_SUGGESTION_TIMEOUT = 5000;
 
@@ -144,7 +149,8 @@ export default function Editor(props) {
                         startIndex: blockText.indexOf(text),
                         endIndex: blockText.indexOf(text) + text.length,
                     };
-                    const links = await findLinks(chartsInEditor, sentenceObject);
+                    const links = await getLinks(sentenceObject.text, sentenceObject.startIndex, chartsInEditor);
+                    console.log('Links in Editor', links);
                     allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
                 }
                 dispatch(
@@ -161,6 +167,7 @@ export default function Editor(props) {
                     );
                     if (allLinksInCurrentBlockText.length > 0) {
                         const action = createLinks(doc.id, allLinksInCurrentBlockText);
+                        console.log('Action', action)
                         setEditorState(insertLinks(action.links, editorState));
                         dispatch(action);
                     }
@@ -173,6 +180,8 @@ export default function Editor(props) {
 
     async function handleEditorChange(editorState) {
         setEditorState(editorState);
+
+
         const editorRawState = convertToRaw(editorState.getCurrentContent());
         const lastTypedWord = getLastTypedWord(editorState);
 
@@ -185,6 +194,29 @@ export default function Editor(props) {
                 searchedSentences: updatedSearchedSentences,
             })
         );
+        /////////////////////////////////////////////////////////////////
+        // Separating auto triggering logic: Debugging / Testing End Point
+        /////////////////////////////////////////////////////////////////
+        // const payload = { text: allText, charts: chartsInEditor};
+
+        // const options = {
+        //     uri: "http://localhost:8885/testing",
+        //     method: "POST",
+        //     headers: {
+        //         Accept: "application/json",
+        //         "Accept-Charset": "utf-8",
+        //     },
+        //     json: true,
+        //     body: payload,
+        // };
+
+        // const requestPromise = util.promisify(request);
+        // const response = await requestPromise(options);
+        // console.log(response.body.data);
+
+
+        /////////////////////////////////////////////////////////////////
+
         //Enable SuggestionMenu on @
         if (lastTypedWord.text.startsWith("@")) {
             const suggestions = findSuggestions(
