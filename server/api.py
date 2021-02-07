@@ -35,8 +35,8 @@ def processjson():
 
 
 @app.route('/testing', methods=['POST'])
-def testing():
+async def testing():
     data = request.get_json()
-    # app.logger.info(data)
     links = find_links(data['charts'], data['text'], data['sentenceOffset'])
-    return jsonify(status=True, message='success', data=links)
+    app.logger.info(links)
+    return await jsonify(status=True, message='success', data=links)
