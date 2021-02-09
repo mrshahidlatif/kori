@@ -1,4 +1,5 @@
 import uniqueId from "utils/uniqueId";
+import { createSelector } from "reselect";
 
 // action types
 export const CREATE_LINK = "CREATE_LINK";
@@ -66,6 +67,11 @@ export const confirmLink = (linkId) => {
 };
 
 // selectors
+export const getLinks = createSelector(
+    (state) => state.links,
+    (_, docId) => docId,
+    (links, docId) => Object.fromEntries(Object.entries(links).filter(([k,v]) => v.docId === docId))
+);
 
 // reducers
 export default (state = {}, action) => {

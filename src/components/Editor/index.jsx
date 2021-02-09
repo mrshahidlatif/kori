@@ -22,7 +22,7 @@ import SuggestionPanel from "components/SuggestionPanel";
 import PotentialLinkControls from "components/PotentialLinkControls";
 
 import { updateDoc, updateChartsInEditor } from "ducks/docs";
-import { createLinks, createLink, deleteLink, updateLink } from "ducks/links";
+import { createLinks, createLink, deleteLink, updateLink, getLinks } from "ducks/links";
 import { getChartsInEditor, getCharts } from "ducks/charts";
 import { setSelectedLink, setManualLinkId, exitManualLinkMode, setTextSelection } from "ducks/ui";
 
@@ -39,7 +39,6 @@ import filterAlreadyConfirmedLinksInEditor from "utils/filterAlreadyConfirmedLin
 import nlp from "compromise";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "components/Alert";
-import getEntities from "utils/getEntities";
 
 const AUTOMATIC_SUGGESTION_TIMEOUT = 5000;
 
@@ -51,7 +50,7 @@ export default function Editor(props) {
     const storedEditorState = useSelector((state) => state.docs[docId].editorRawState);
     const chartsInEditor = useSelector((state) => getChartsInEditor(state, docId));
     const selectedLink = useSelector((state) => state.ui.selectedLink);
-    const allLinks = useSelector((state) => state.links);
+    const allLinks = useSelector((state) => getLinks(state,docId));
     const exitManualLink = useSelector((state) => state.ui.exitManualLink);
     const manualLinkId = useSelector((state) => state.ui.manualLinkId);
     const linkActiveNoAutoTrigger = useSelector((state) => state.ui.linkActiveNoAutoTrigger);
@@ -124,10 +123,10 @@ export default function Editor(props) {
         dispatch(updateDoc(doc.id, { editorRawState }));
     }, [editorState]);
 
-    // useEffect(()=> {
-    //     console.log('entitymap has changed!!!')
+    useEffect(()=> {
+        console.log('entitymap has changed!!!')
 
-    // },[Object.keys(convertToRaw(editorState.getCurrentContent()).entityMap).length]);
+    },[Object.keys(convertToRaw(editorState.getCurrentContent()).entityMap).length]);
 
     useEffect(() => {
         const asyncExec = async () => {
@@ -182,6 +181,7 @@ export default function Editor(props) {
         const editorRawState = convertToRaw(editorState.getCurrentContent());
         const lastTypedWord = getLastTypedWord(editorState);
 
+        console.log('all links in doc', allLinks);
         const allText = editorState.getCurrentContent().getPlainText(" ").trim();
         const updatedSearchedSentences = alreadySearchedSentences?.filter(
             (alreadySearchedSentence) => allText.includes(alreadySearchedSentence)
