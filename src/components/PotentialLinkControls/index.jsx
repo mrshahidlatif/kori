@@ -14,7 +14,6 @@ export default function PotentialLinkControls(props) {
     const dispatch = useDispatch();
     const selection = window.getSelection();
     const pos = selection.rangeCount > 0 ? selection.getRangeAt(0).getBoundingClientRect() : null;
-
     const padding = 10;
 
     function handleDiscardClick(event) {

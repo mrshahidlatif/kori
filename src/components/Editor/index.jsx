@@ -22,7 +22,7 @@ import SuggestionPanel from "components/SuggestionPanel";
 import PotentialLinkControls from "components/PotentialLinkControls";
 
 import { updateDoc, updateChartsInEditor } from "ducks/docs";
-import { createLinks, createLink, deleteLink } from "ducks/links";
+import { createLinks, createLink, deleteLink, updateLink } from "ducks/links";
 import { getChartsInEditor, getCharts } from "ducks/charts";
 import { setSelectedLink, setManualLinkId, exitManualLinkMode, setTextSelection } from "ducks/ui";
 
@@ -73,23 +73,23 @@ export default function Editor(props) {
 
     let interval = useRef();
 
-    // const startTimer = () => {
-    //     interval = setInterval(() => {
-    //         console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
-    //         if (editorEl?.current?.props?.editorState)
-    //             setBlockText(getBlockText(editorEl.current.props.editorState));
-    //     }, AUTOMATIC_SUGGESTION_TIMEOUT);
-    //     return () => clearInterval(interval.current);
-    // };
+    const startTimer = () => {
+        interval = setInterval(() => {
+            console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
+            if (editorEl?.current?.props?.editorState)
+                setBlockText(getBlockText(editorEl.current.props.editorState));
+        }, AUTOMATIC_SUGGESTION_TIMEOUT);
+        return () => clearInterval(interval.current);
+    };
 
-    // useEffect(() => {
-    //     dispatch(exitManualLinkMode(false));
-    //     setCurrentSelectionState(null);
-    //     dispatch(setTextSelection(null));
-    //     dispatch(setManualLinkId(null));
-    //     startTimer();
-    //     return () => clearInterval(interval.current);
-    // }, []);
+    useEffect(() => {
+        dispatch(exitManualLinkMode(false));
+        setCurrentSelectionState(null);
+        dispatch(setTextSelection(null));
+        dispatch(setManualLinkId(null));
+        startTimer();
+        return () => clearInterval(interval.current);
+    }, []);
 
     useEffect(() => {
         if (exitManualLink) {
@@ -123,6 +123,11 @@ export default function Editor(props) {
         const editorRawState = convertToRaw(editorState.getCurrentContent());
         dispatch(updateDoc(doc.id, { editorRawState }));
     }, [editorState]);
+
+    // useEffect(()=> {
+    //     console.log('entitymap has changed!!!')
+
+    // },[Object.keys(convertToRaw(editorState.getCurrentContent()).entityMap).length]);
 
     useEffect(() => {
         const asyncExec = async () => {
@@ -172,7 +177,7 @@ export default function Editor(props) {
         asyncExec();
     }, [blockText]);
 
-    async function handleEditorChange(editorState) {
+    function handleEditorChange(editorState) {
         setEditorState(editorState);
         const editorRawState = convertToRaw(editorState.getCurrentContent());
         const lastTypedWord = getLastTypedWord(editorState);
@@ -211,7 +216,7 @@ export default function Editor(props) {
             }, []);
             dispatch(updateChartsInEditor(doc.id, ids));
         }
-
+       
         const currentSelection = editorState.getSelection();
         const caretPosition = currentSelection.getAnchorOffset();
         const activeBlockKey = currentSelection.getAnchorKey();
@@ -348,9 +353,10 @@ export default function Editor(props) {
         //TODO: Some code is similar to insertLinks.js. Consider refactoring!
         const currentSelection = editorState.getSelection();
         let newContent = ContentState.createFromText("");
+        const updateLinkExtent = getUpdatedLinkExtent(editorState);
         const insertTextSelection = currentSelection.merge({
-            anchorOffset: link.startIndex,
-            focusOffset: link.endIndex,
+            anchorOffset: updateLinkExtent.offset,
+            focusOffset: updateLinkExtent.offset + updateLinkExtent.length,
         });
         newContent = Modifier.replaceText(
             editorState.getCurrentContent(),
@@ -369,9 +375,20 @@ export default function Editor(props) {
 
         dispatch(deleteLink(link.id));
     }
+    function getUpdatedLinkExtent(editorState){
+        const editorRawState = convertToRaw(editorState.getCurrentContent());
+        const currentSelection = editorState.getSelection();
+        const BlkKey = currentSelection.getAnchorKey();
+        const activeBlock = editorRawState.blocks.find(({key})=>key === BlkKey);
+        const caretPosition = currentSelection.getAnchorOffset();
+        const updateLinkExtent = activeBlock.entityRanges.find(er => (caretPosition >= er.offset && caretPosition <= er.offset + er.length));
+        return updateLinkExtent; 
+    }
     function handleLinkAccept(link) {
-        //Quick and dirty fix! //TODO: Check later
+        const updateLinkExtent = getUpdatedLinkExtent(editorState);
         const confirmedLink = JSON.parse(JSON.stringify(link));
+        confirmedLink.startIndex = updateLinkExtent.offset; 
+        confirmedLink.endIndex = updateLinkExtent.offset + updateLinkExtent.length;
         confirmedLink.isConfirmed = true;
         setEditorState(insertLinks([confirmedLink], editorState, editorState.getSelection()));
     }

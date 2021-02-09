@@ -23,7 +23,6 @@ export const insertLink = (link, editorState, currentSelection) => {
         ...link,
     });
     const entityKey = newContent.getLastCreatedEntityKey();
-
     const insertTextSelection = currentSelection.merge({
         anchorOffset: start,
         focusOffset: end,
