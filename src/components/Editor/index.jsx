@@ -124,7 +124,21 @@ export default function Editor(props) {
     }, [editorState]);
 
     useEffect(()=> {
-        console.log('entitymap has changed!!!')
+        console.log('entitymap has changed!!!');
+        const entityMap = convertToRaw(editorState.getCurrentContent()).entityMap;
+        let linkIdsToKeep = [];
+        Object.keys(entityMap).forEach(function(key) {
+            if(entityMap[key].type === "LINK"){
+                if(allLinks[entityMap[key].data.id]){
+                    linkIdsToKeep.push(entityMap[key].data.id);
+                }
+            }     
+        });
+        Object.keys(allLinks).forEach(function(key){
+            if (!linkIdsToKeep.includes(key)){
+                dispatch(deleteLink(key));
+            }
+        });
 
     },[Object.keys(convertToRaw(editorState.getCurrentContent()).entityMap).length]);
 
