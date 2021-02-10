@@ -69,6 +69,7 @@ export default function Editor(props) {
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
     const [blockText, setBlockText] = useState("");
     const [infoMsg, setInfoMsg] = useState(null);
+    const [autoLinksToInsert, setAutoLinksToInsert] = useState([]);
 
     let interval = useRef();
 
@@ -124,7 +125,6 @@ export default function Editor(props) {
     }, [editorState]);
 
     useEffect(()=> {
-        console.log('entitymap has changed!!!');
         const entityMap = convertToRaw(editorState.getCurrentContent()).entityMap;
         let linkIdsToKeep = [];
         Object.keys(entityMap).forEach(function(key) {
@@ -179,9 +179,7 @@ export default function Editor(props) {
                         blockText
                     );
                     if (allLinksInCurrentBlockText.length > 0) {
-                        const action = createLinks(doc.id, allLinksInCurrentBlockText);
-                        setEditorState(insertLinks(action.links, editorState));
-                        dispatch(action);
+                        setAutoLinksToInsert(allLinksInCurrentBlockText);
                     }
                 }
                 setBlockText("");
@@ -192,10 +190,17 @@ export default function Editor(props) {
 
     function handleEditorChange(editorState) {
         setEditorState(editorState);
+        if(autoLinksToInsert.length>0){
+            const action = createLinks(doc.id, autoLinksToInsert);
+            setEditorState(insertLinks(action.links, editorState));
+            dispatch(action);
+
+            setAutoLinksToInsert([]);
+        }
+
         const editorRawState = convertToRaw(editorState.getCurrentContent());
         const lastTypedWord = getLastTypedWord(editorState);
 
-        console.log('all links in doc', allLinks);
         const allText = editorState.getCurrentContent().getPlainText(" ").trim();
         const updatedSearchedSentences = alreadySearchedSentences?.filter(
             (alreadySearchedSentence) => allText.includes(alreadySearchedSentence)
