@@ -17,8 +17,8 @@ def pos():
 
 
 @app.route('/testing', methods=['POST'])
-async def testing():
+def testing():
     data = request.get_json()
     links = find_links(data['charts'], data['text'], data['sentenceOffset'])
     app.logger.info(links)
-    return await jsonify(status=True, message='success', data=links)
+    return jsonify(status=True, message='success', data=links)
