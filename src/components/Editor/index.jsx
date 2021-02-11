@@ -145,7 +145,6 @@ export default function Editor(props) {
                         endIndex: blockText.indexOf(text) + text.length,
                     };
                     const links = await getLinks(sentenceObject.text, sentenceObject.startIndex, chartsInEditor);
-                    console.log('Links in Editor', links);
                     allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
                 }
                 dispatch(
@@ -162,7 +161,6 @@ export default function Editor(props) {
                     );
                     if (allLinksInCurrentBlockText.length > 0) {
                         const action = createLinks(doc.id, allLinksInCurrentBlockText);
-                        console.log('Action', action)
                         setEditorState(insertLinks(action.links, editorState));
                         dispatch(action);
                     }
@@ -189,28 +187,6 @@ export default function Editor(props) {
                 searchedSentences: updatedSearchedSentences,
             })
         );
-        /////////////////////////////////////////////////////////////////
-        // Separating auto triggering logic: Debugging / Testing End Point
-        /////////////////////////////////////////////////////////////////
-        // const payload = { text: allText, charts: chartsInEditor};
-
-        // const options = {
-        //     uri: "http://localhost:8885/testing",
-        //     method: "POST",
-        //     headers: {
-        //         Accept: "application/json",
-        //         "Accept-Charset": "utf-8",
-        //     },
-        //     json: true,
-        //     body: payload,
-        // };
-
-        // const requestPromise = util.promisify(request);
-        // const response = await requestPromise(options);
-        // console.log(response.body.data);
-
-
-        /////////////////////////////////////////////////////////////////
 
         //Enable SuggestionMenu on @
         if (lastTypedWord.text.startsWith("@")) {

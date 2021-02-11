@@ -8,7 +8,6 @@ from wit import Wit
 import json
 import sys
 
-
 client = Wit('LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N')
 THRESHOLD = 0.70
 
@@ -44,7 +43,6 @@ def find_links(charts, sentence, sentence_offset):
                     max_offset = max(i for i in indices)
                     max_offset = max_offset + \
                         len(entities[indices.index(max_offset)])
-                    print('indices', indices)
                     range_link_text = sentence[min_offset:max_offset]
                     range_link = create_link(range_link_text, axis, chart.get('id'), axis.get(
                         'field'), min_offset, sentence, sentence_offset, range_link_props=wit_response)

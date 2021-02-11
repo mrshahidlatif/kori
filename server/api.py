@@ -16,9 +16,9 @@ def pos():
     return jsonify(status=True, message="success", data=doc.to_json())
 
 
-@app.route('/testing', methods=['POST'])
-def testing():
+@app.route('/discover-links', methods=['POST'])
+def discover_links():
     data = request.get_json()
     links = find_links(data['charts'], data['text'], data['sentenceOffset'])
-    app.logger.info(links)
+    # app.logger.info(links)
     return jsonify(status=True, message='success', data=links)

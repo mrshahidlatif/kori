@@ -2,11 +2,9 @@ import util from "util";
 const request = require("request");
 
 export default async (sentence, sentenceOffset, charts) => {
-
     const payload = { text: sentence, sentenceOffset, charts: charts};
-
     const options = {
-        uri: "http://localhost:8885/testing",
+        uri: "http://localhost:8885/discover-links",
         method: "POST",
         headers: {
             Accept: "application/json",
@@ -18,6 +16,5 @@ export default async (sentence, sentenceOffset, charts) => {
 
     const requestPromise = util.promisify(request);
     const response = await requestPromise(options);
-    console.log('Returned from backend', response.body.data);
     return response.body.data;
 }
