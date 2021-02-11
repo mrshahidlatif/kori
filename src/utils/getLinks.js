@@ -1,6 +1,4 @@
 import util from "util";
-
-
 const request = require("request");
 
 export default async (sentence, sentenceOffset, charts) => {
@@ -20,6 +18,6 @@ export default async (sentence, sentenceOffset, charts) => {
 
     const requestPromise = util.promisify(request);
     const response = await requestPromise(options);
-    console.log('REturned from backend', response.body.data);
+    console.log('Returned from backend', response.body.data);
     return response.body.data;
 }
