@@ -28,7 +28,6 @@ import { setSelectedLink, setManualLinkId, exitManualLinkMode, setTextSelection 
 
 import editorDecorators from "utils/editorDecorators";
 import findSuggestions from "utils/findSuggestions";
-import findLinks from "utils/findLinks";
 import getLinks from "utils/getLinks";
 import insertLinks from "utils/insertLinks";
 import getLastTypedWord from "utils/getLastTypedWord";
@@ -40,10 +39,6 @@ import filterAlreadyConfirmedLinksInEditor from "utils/filterAlreadyConfirmedLin
 import nlp from "compromise";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "components/Alert";
-
-import util from "util";
-
-const request = require("request");
 
 const AUTOMATIC_SUGGESTION_TIMEOUT = 5000;
 

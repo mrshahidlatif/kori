@@ -20,6 +20,6 @@ export default async (sentence, sentenceOffset, charts) => {
 
     const requestPromise = util.promisify(request);
     const response = await requestPromise(options);
-    console.log(response.body.data);
+    console.log('Returned from backend', response.body.data);
     return response.body.data;
 }
