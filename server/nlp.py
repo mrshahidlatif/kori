@@ -11,7 +11,7 @@ from gensim.models import KeyedVectors
 
 client = Wit('LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N')
 THRESHOLD = 0.70
-WORD2VEC_THRESHOLD = 0.75
+WORD2VEC_THRESHOLD = 0.45
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
 model = KeyedVectors.load_word2vec_format(
@@ -31,7 +31,7 @@ def find_links(charts, sentence, sentence_offset):
                 link = create_link(result.get(
                     'matching_str'), feature, chart.get('id'), feature.get('value'), result.get('offset'), sentence, sentence_offset, range_link_props=[])
                 links.append(link)
-            if result_w2v != "":
+            if result.get('similarity') < THRESHOLD and result_w2v != "":
                 if result_w2v.get('similarity') > THRESHOLD:
                     link = create_link(result_w2v.get(
                         'matching_str'), feature, chart.get('id'), feature.get('value'), result_w2v.get('offset'), sentence, sentence_offset, range_link_props=[])
@@ -121,8 +121,11 @@ def compute_word2vec_similarity(word, sentence):
         similar_words = model.most_similar(word)
         similar_words = [sm[0]
                          for sm in similar_words if sm[1] > WORD2VEC_THRESHOLD]
-        match_in_sentence = fuzzy_substr_search(
-            " ".join(similar_words[0].split("_")), sentence)
+        for word in similar_words:
+            match_in_sentence = fuzzy_substr_search(
+                " ".join(word.split("_")), sentence)
+            if match_in_sentence.get('similarity') > THRESHOLD:
+                return match_in_sentence
     except:
         pass
     return match_in_sentence

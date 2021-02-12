@@ -16,5 +16,6 @@ export default async (sentence, sentenceOffset, charts) => {
 
     const requestPromise = util.promisify(request);
     const response = await requestPromise(options);
+    console.log('LINKS', response.body.data);
     return response.body.data;
 }
