@@ -7,9 +7,15 @@ import math
 from wit import Wit
 import json
 import sys
+from gensim.models import KeyedVectors
 
 client = Wit('LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N')
 THRESHOLD = 0.70
+WORD2VEC_THRESHOLD = 0.75
+NO_OF_MOST_FREQUENT_WORDS = 100000
+
+model = KeyedVectors.load_word2vec_format(
+    './public/lang_models/GoogleNews-vectors-negative300.bin.gz', binary=True, limit=NO_OF_MOST_FREQUENT_WORDS)
 
 
 def find_links(charts, sentence, sentence_offset):
@@ -19,12 +25,18 @@ def find_links(charts, sentence, sentence_offset):
         features = chart.get('properties').get('features')
         for feature in features:
             result = fuzzy_substr_search(feature['value'], sentence)
-            if(result.get('similarity')) > THRESHOLD:
-                # print(feature)
-                #print(fuzzy_substr_search(feature['value'], sentence))
+            result_w2v = compute_word2vec_similarity(
+                feature['value'], sentence)
+            if result.get('similarity') > THRESHOLD:
                 link = create_link(result.get(
                     'matching_str'), feature, chart.get('id'), feature.get('value'), result.get('offset'), sentence, sentence_offset, range_link_props=[])
                 links.append(link)
+            if result_w2v != "":
+                if result_w2v.get('similarity') > THRESHOLD:
+                    link = create_link(result_w2v.get(
+                        'matching_str'), feature, chart.get('id'), feature.get('value'), result_w2v.get('offset'), sentence, sentence_offset, range_link_props=[])
+                    links.append(link)
+
     # range links
     for chart in charts:
         axes = chart.get('properties').get('axes')
@@ -32,7 +44,7 @@ def find_links(charts, sentence, sentence_offset):
             if axis.get('type') in ["ordinal", "band", "point"]:
                 continue
             result = fuzzy_substr_search(axis.get('title'), sentence)
-            if(result.get('similarity')) > THRESHOLD:
+            if result != None and result.get('similarity') > THRESHOLD:
                 wit_response = get_and_parse_wit_response(sentence)
                 if(wit_response[0].get('min_body') != "" or wit_response[1].get('max_body') != ""):
                     entities = [result.get('matching_str'), wit_response[0].get(
@@ -51,6 +63,8 @@ def find_links(charts, sentence, sentence_offset):
 
 
 def fuzzy_substr_search(needle, hay):
+    if needle == None or isinstance(needle, list):
+        return
     needle_length = len(needle.split())
     max_sim_val = 0
     max_sim_string = u""
@@ -97,3 +111,18 @@ def get_and_parse_wit_response(msg):
         min_val = - sys.float_info.max
         min_body = ''
     return [{'min_body': min_body, 'min_val': min_val}, {'max_body': max_body, 'max_val': max_val}]
+
+
+def compute_word2vec_similarity(word, sentence):
+    match_in_sentence = ''
+    # corpus expects spaces to be replaced with '_'
+    word = "_".join(word.split())
+    try:
+        similar_words = model.most_similar(word)
+        similar_words = [sm[0]
+                         for sm in similar_words if sm[1] > WORD2VEC_THRESHOLD]
+        match_in_sentence = fuzzy_substr_search(
+            " ".join(similar_words[0].split("_")), sentence)
+    except:
+        pass
+    return match_in_sentence
