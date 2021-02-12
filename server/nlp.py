@@ -1,11 +1,6 @@
-import codecs
 from nltk.util import ngrams
 from difflib import SequenceMatcher as SM
-import spacy
-import json
-import math
 from wit import Wit
-import json
 import sys
 from gensim.models import KeyedVectors
 
@@ -15,7 +10,7 @@ WORD2VEC_THRESHOLD = 0.45
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
 model = KeyedVectors.load_word2vec_format(
-    './public/lang_models/GoogleNews-vectors-negative300.bin.gz', binary=True, limit=NO_OF_MOST_FREQUENT_WORDS)
+    '../public/lang_models/GoogleNews-vectors-negative300.bin.gz', binary=True, limit=NO_OF_MOST_FREQUENT_WORDS)
 
 
 def find_links(charts, sentence, sentence_offset):
