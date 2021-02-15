@@ -28,7 +28,7 @@ import { setSelectedLink, setManualLinkId, exitManualLinkMode, setTextSelection 
 
 import editorDecorators from "utils/editorDecorators";
 import findSuggestions from "utils/findSuggestions";
-import findLinks from "utils/findLinks";
+import searchLinks from "utils/searchLinks";
 import insertLinks from "utils/insertLinks";
 import getLastTypedWord from "utils/getLastTypedWord";
 import getTextSelection from "utils/getTextSelection";
@@ -163,7 +163,7 @@ export default function Editor(props) {
                         startIndex: blockText.indexOf(text),
                         endIndex: blockText.indexOf(text) + text.length,
                     };
-                    const links = await findLinks(chartsInEditor, sentenceObject);
+                    const links = await searchLinks(sentenceObject.text, sentenceObject.startIndex, chartsInEditor);
                     allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
                 }
                 dispatch(
@@ -210,6 +210,7 @@ export default function Editor(props) {
                 searchedSentences: updatedSearchedSentences,
             })
         );
+
         //Enable SuggestionMenu on @
         if (lastTypedWord.text.startsWith("@")) {
             const suggestions = findSuggestions(
