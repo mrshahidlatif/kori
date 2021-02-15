@@ -6,7 +6,7 @@ from gensim.models import KeyedVectors
 
 client = Wit('LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N')
 THRESHOLD = 0.70
-WORD2VEC_THRESHOLD = 0.45
+WORD2VEC_THRESHOLD = 0.70
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
 model = KeyedVectors.load_word2vec_format(
@@ -38,13 +38,16 @@ def find_links(charts, sentence, sentence_offset):
         for axis in axes:
             if axis.get('type') in ["ordinal", "band", "point"]:
                 continue
+            if isinstance(axis.get('title'), list):
+                continue
             result_fuzzy = fuzzy_substr_search(axis.get('title'), sentence)
             result_w2v = compute_word2vec_similarity(
                 axis.get('title'), sentence)
-            if result != None and result_w2v.get('similarity') > result_fuzzy.get('similarity'):
-                result = result_w2v
-            else:
-                result = result_fuzzy
+            if result_fuzzy != None and result_w2v != "":
+                if result_w2v.get('similarity') > result_fuzzy.get('similarity'):
+                    result = result_w2v
+                else:
+                    result = result_fuzzy
             if result.get('similarity') > THRESHOLD:
                 wit_response = get_and_parse_wit_response(sentence)
                 if(wit_response[0].get('min_body') != "" or wit_response[1].get('max_body') != ""):
