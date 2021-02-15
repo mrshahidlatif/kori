@@ -19,6 +19,7 @@ def pos():
 @app.route('/discover-links', methods=['POST'])
 def discover_links():
     data = request.get_json()
-    links = find_links(data['charts'], data['text'], data['sentenceOffset'])
+    links = find_links(data['charts'], data['text'],
+                       data['sentenceOffset'], data['blockKey'])
     # app.logger.info(links)
     return jsonify(status=True, message='success', data=links)

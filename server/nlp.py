@@ -13,7 +13,7 @@ model = KeyedVectors.load_word2vec_format(
     './public/lang_models/GoogleNews-vectors-negative300.bin.gz', binary=True, limit=NO_OF_MOST_FREQUENT_WORDS)
 
 
-def find_links(charts, sentence, sentence_offset):
+def find_links(charts, sentence, sentence_offset, block_key):
     links = []
     # word or phrase links
     for chart in charts:
@@ -24,12 +24,12 @@ def find_links(charts, sentence, sentence_offset):
                 feature['value'], sentence)
             if result.get('similarity') > THRESHOLD:
                 link = create_link(result.get(
-                    'matching_str'), feature, chart.get('id'), feature.get('value'), result.get('offset'), sentence, sentence_offset, range_link_props=[])
+                    'matching_str'), feature, chart.get('id'), feature.get('value'), result.get('offset'), sentence, sentence_offset, block_key, range_link_props=[])
                 links.append(link)
             if result.get('similarity') < THRESHOLD and result_w2v != "":
                 if result_w2v.get('similarity') > THRESHOLD:
                     link = create_link(result_w2v.get(
-                        'matching_str'), feature, chart.get('id'), feature.get('value'), result_w2v.get('offset'), sentence, sentence_offset, range_link_props=[])
+                        'matching_str'), feature, chart.get('id'), feature.get('value'), result_w2v.get('offset'), sentence, sentence_offset, block_key, range_link_props=[])
                     links.append(link)
 
     # range links
@@ -61,7 +61,7 @@ def find_links(charts, sentence, sentence_offset):
                         len(entities[indices.index(max_offset)])
                     range_link_text = sentence[min_offset:max_offset]
                     range_link = create_link(range_link_text, axis, chart.get('id'), axis.get(
-                        'field'), min_offset, sentence, sentence_offset, range_link_props=wit_response)
+                        'field'), min_offset, sentence, sentence_offset, block_key, range_link_props=wit_response)
                     links.append(range_link)
     return links
 
@@ -81,7 +81,7 @@ def fuzzy_substr_search(needle, hay):
     return {"similarity": max_sim_val, "matching_str": max_sim_string, "offset": hay.find(max_sim_string)}
 
 
-def create_link(link_text, feature, chartId, val, offset, sentence, sentence_offset, range_link_props):
+def create_link(link_text, feature, chartId, val, offset, sentence, sentence_offset, block_key, range_link_props):
     link = {
         "text": link_text,
         "feature": feature,
@@ -93,6 +93,7 @@ def create_link(link_text, feature, chartId, val, offset, sentence, sentence_off
         "endIndex": sentence_offset + offset + len(link_text),
         "sentence": sentence,
         "isConfirmed": False,
+        "blockKey": block_key,
     }
     if(len(range_link_props) == 2):
         link["rangeMin"] = range_link_props[0].get('min_val')

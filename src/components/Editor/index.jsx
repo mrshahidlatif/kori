@@ -22,7 +22,7 @@ import SuggestionPanel from "components/SuggestionPanel";
 import PotentialLinkControls from "components/PotentialLinkControls";
 
 import { updateDoc, updateChartsInEditor } from "ducks/docs";
-import { createLinks, createLink, deleteLink, updateLink, getLinks } from "ducks/links";
+import { createLinks, createLink, deleteLink, getLinks } from "ducks/links";
 import { getChartsInEditor, getCharts } from "ducks/charts";
 import { setSelectedLink, setManualLinkId, exitManualLinkMode, setTextSelection } from "ducks/ui";
 
@@ -67,7 +67,7 @@ export default function Editor(props) {
             : convertFromRaw(storedEditorState);
     const [editorState, setEditorState] = useState(EditorState.createWithContent(contentState));
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
-    const [blockText, setBlockText] = useState("");
+    const [currentBlock, setCurrentBlock] = useState(null);
     const [infoMsg, setInfoMsg] = useState(null);
     const [autoLinksToInsert, setAutoLinksToInsert] = useState([]);
 
@@ -77,7 +77,7 @@ export default function Editor(props) {
         interval = setInterval(() => {
             console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
             if (editorEl?.current?.props?.editorState)
-                setBlockText(getBlockText(editorEl.current.props.editorState));
+                setCurrentBlock(getBlockText(editorEl.current.props.editorState));
         }, AUTOMATIC_SUGGESTION_TIMEOUT);
         return () => clearInterval(interval.current);
     };
@@ -144,12 +144,12 @@ export default function Editor(props) {
 
     useEffect(() => {
         const asyncExec = async () => {
-            if (blockText !== "") {
+            if (currentBlock !== null) {
+                const blockText = currentBlock.blockText;
                 if (linkActiveNoAutoTrigger) return;
                 if (selectedLink) return;
                 if (tempTextSelection || tempTextSelection == "INVALID") return;
                 const sentences = await nlp(blockText).sentences().json();
-                let sentenceOffset = 0;
                 let allLinksInCurrentBlockText = [];
                 let searchedSentences = [];
                 for (let i = 0; i < sentences.length; i++) {
@@ -163,7 +163,7 @@ export default function Editor(props) {
                         startIndex: blockText.indexOf(text),
                         endIndex: blockText.indexOf(text) + text.length,
                     };
-                    const links = await searchLinks(sentenceObject.text, sentenceObject.startIndex, chartsInEditor);
+                    const links = await searchLinks(sentenceObject.text, sentenceObject.startIndex, chartsInEditor, currentBlock.blockKey);
                     allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
                 }
                 dispatch(
@@ -182,11 +182,11 @@ export default function Editor(props) {
                         setAutoLinksToInsert(allLinksInCurrentBlockText);
                     }
                 }
-                setBlockText("");
+                setCurrentBlock(null);
             }
         };
         asyncExec();
-    }, [blockText]);
+    }, [currentBlock]);
 
     function handleEditorChange(editorState) {
         setEditorState(editorState);
@@ -296,7 +296,7 @@ export default function Editor(props) {
     function handleTab(e) {
         e.preventDefault();
         e.stopPropagation();
-        setBlockText(getBlockText(editorState));
+        setCurrentBlock(getBlockText(editorState));
         return "handled";
     }
 
@@ -353,6 +353,7 @@ export default function Editor(props) {
             startIndex: suggestion.startIndex,
             endIndex: suggestion.startIndex + suggestion.text.length,
             isConfirmed: true,
+            blockKey: editorState.getSelection().getAnchorKey(),
         }); // need ids
         const newEditorState = insertLinks([action.attrs], editorState);
         dispatch(action);
@@ -382,7 +383,7 @@ export default function Editor(props) {
             editorState.getCurrentContent(),
             insertTextSelection,
             link.text,
-            [] //inline styling
+            editorState.getCurrentInlineStyle(), //inline styling
         );
         let newEditorState = EditorState.push(editorState, newContent, "apply-entity");
         let newSelection = newEditorState.getSelection().merge({
@@ -410,7 +411,12 @@ export default function Editor(props) {
         confirmedLink.startIndex = updateLinkExtent.offset; 
         confirmedLink.endIndex = updateLinkExtent.offset + updateLinkExtent.length;
         confirmedLink.isConfirmed = true;
-        setEditorState(insertLinks([confirmedLink], editorState, editorState.getSelection()));
+        setEditorState(insertLinks([confirmedLink], editorState));
+    }
+    function handlePastedText(text){
+        //immediatly search for suggestions in pasted text
+        setCurrentBlock({blockText: text, blockKey:getBlockText(editorState).blockKey});
+        return "not-handled";
     }
 
     return (
@@ -423,6 +429,8 @@ export default function Editor(props) {
                     onChange={handleEditorChange}
                     onBlur={handleBlur}
                     handleKeyCommand={handleKeyCommand}
+                    handlePastedText={handlePastedText}
+                    stripPastedStyles={true}
                     blockRendererFn={blockRendererFn}
                     decorators={editorDecorators}
                     ref={editorEl}

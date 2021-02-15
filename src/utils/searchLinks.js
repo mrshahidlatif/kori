@@ -1,8 +1,8 @@
 import util from "util";
 const request = require("request");
 
-export default async (sentence, sentenceOffset, charts) => {
-    const payload = { text: sentence, sentenceOffset, charts: charts};
+export default async (sentence, sentenceOffset, charts, blockKey) => {
+    const payload = { text: sentence, sentenceOffset, charts: charts, blockKey};
     const options = {
         uri: "http://localhost:8885/discover-links",
         method: "POST",
