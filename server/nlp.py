@@ -10,7 +10,7 @@ WORD2VEC_THRESHOLD = 0.45
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
 model = KeyedVectors.load_word2vec_format(
-    '../public/lang_models/GoogleNews-vectors-negative300.bin.gz', binary=True, limit=NO_OF_MOST_FREQUENT_WORDS)
+    './public/lang_models/GoogleNews-vectors-negative300.bin.gz', binary=True, limit=NO_OF_MOST_FREQUENT_WORDS)
 
 
 def find_links(charts, sentence, sentence_offset):
@@ -38,8 +38,14 @@ def find_links(charts, sentence, sentence_offset):
         for axis in axes:
             if axis.get('type') in ["ordinal", "band", "point"]:
                 continue
-            result = fuzzy_substr_search(axis.get('title'), sentence)
-            if result != None and result.get('similarity') > THRESHOLD:
+            result_fuzzy = fuzzy_substr_search(axis.get('title'), sentence)
+            result_w2v = compute_word2vec_similarity(
+                axis.get('title'), sentence)
+            if result != None and result_w2v.get('similarity') > result_fuzzy.get('similarity'):
+                result = result_w2v
+            else:
+                result = result_fuzzy
+            if result.get('similarity') > THRESHOLD:
                 wit_response = get_and_parse_wit_response(sentence)
                 if(wit_response[0].get('min_body') != "" or wit_response[1].get('max_body') != ""):
                     entities = [result.get('matching_str'), wit_response[0].get(
