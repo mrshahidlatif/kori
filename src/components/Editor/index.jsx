@@ -347,13 +347,14 @@ export default function Editor(props) {
             feature: suggestion.feature,
             chartId: suggestion.chartId,
             active: false,
-            type: "point", //TODO: range selection
+            type: "point",
             sentence: suggestion.text,
             data: [isNaN(Number(suggestion.text)) ? suggestion.text : Number(suggestion.text)],
             startIndex: suggestion.startIndex,
             endIndex: suggestion.startIndex + suggestion.text.length,
             isConfirmed: true,
             blockKey: editorState.getSelection().getAnchorKey(),
+            trigger: "@" 
         }); // need ids
         const newEditorState = insertLinks([action.attrs], editorState);
         dispatch(action);

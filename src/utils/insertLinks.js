@@ -1,4 +1,5 @@
 import { Modifier, EditorState } from "draft-js";
+import getLastTypedWord from "./getLastTypedWord";
 export default (links, editorState) => {
     links.forEach((link) => {
         editorState = insertLink(link, editorState);
@@ -6,10 +7,11 @@ export default (links, editorState) => {
     return editorState;
 };
 export const insertLink = (link, editorState) => {
+
     const currentContent = editorState.getCurrentContent();
     const currentSelection = editorState.getSelection();
     const activeBlockKey = currentSelection.getAnchorKey();
-    const blockEndIndex = currentSelection.getAnchorOffset();
+    const activeBlockEndIndex = currentSelection.getAnchorOffset();
 
     let start = link.startIndex;
     let end = link.endIndex;
@@ -19,28 +21,34 @@ export const insertLink = (link, editorState) => {
         ...link,
     });
     const entityKey = newContent.getLastCreatedEntityKey();
-    const insertTextSelection = currentSelection.merge({
+
+    const insertLinkSelection = currentSelection.merge({
         anchorKey: link.blockKey,
         focusKey: link.blockKey,
         anchorOffset: start,
         focusOffset: end,
     });
+    
+    const insertSuggestionSelection =  editorState.getSelection().merge({
+        anchorOffset: getLastTypedWord(editorState).startIndex
+    });
+
     newContent = Modifier.replaceText(
         editorState.getCurrentContent(),
-        insertTextSelection,
+        link.trigger === "@" ? insertSuggestionSelection : insertLinkSelection,
         link.text,
         editorState.getCurrentInlineStyle(), //inline styling
         entityKey
     );
 
     //Stop cursor from jumping to beginning of a line
-    const caretNewIndex = end > blockEndIndex ? end : blockEndIndex;
-    let newEditorState = EditorState.push(editorState, newContent, "apply-entity");
+    const caretPosition = end > activeBlockEndIndex ? end : activeBlockEndIndex;
+    let newEditorState = EditorState.push(editorState, newContent, "insert-characters");
     let newSelection = newEditorState.getSelection().merge({
         anchorKey: activeBlockKey,
         focusKey: activeBlockKey,
-        focusOffset: caretNewIndex,
-        anchorOffset: caretNewIndex,
+        focusOffset: caretPosition,
+        anchorOffset: caretPosition,
     });
     newEditorState = EditorState.moveSelectionToEnd(newEditorState);
     newEditorState = EditorState.forceSelection(newEditorState, newSelection);
