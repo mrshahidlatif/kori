@@ -17,7 +17,7 @@ export default function Edit(props) {
 
     return (
         <Grid container spacing={2}>
-            <Grid item xs={4}>
+            <Grid item xs={2}>
                 <Typography variant="overline" display="block" gutterBottom>
                     Chart Gallery
                 </Typography>

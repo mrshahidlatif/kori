@@ -416,7 +416,8 @@ export default function Editor(props) {
     }
     function handlePastedText(text){
         //immediatly search for suggestions in pasted text
-        setCurrentBlock({blockText: text, blockKey:getBlockText(editorState).blockKey});
+        //TODO: for now it only searches for links in the first pargraph immediately
+        setCurrentBlock({blockText: text.split("\n")[0], blockKey:getBlockText(editorState).blockKey});
         return "not-handled";
     }
 

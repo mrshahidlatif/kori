@@ -1,9 +1,7 @@
-.container{
+.container {
     box-sizing: border-box;
-    padding:5px;
+    padding: 5px;
     width: 100%;
-    overflow: scroll;
     cursor: grab;
     margin-bottom: 10px;
 }
-

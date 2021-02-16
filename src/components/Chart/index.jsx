@@ -7,6 +7,7 @@ import Paper from "@material-ui/core/Paper";
 import { deleteChart } from "ducks/charts";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "components/Alert";
+import Avatar from "@material-ui/core/Avatar";
 
 // See ChartBlock for a chart in the editor
 export function Chart(props) {
@@ -18,13 +19,8 @@ export function Chart(props) {
     // const [view, setView] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
 
-    useEffect(() => {
-        vegaEmbed(chartEl.current, spec).then((result) => {
-            // setView(result.view);
-        });
-    }, [spec]); // will run only once
-
     function handleDragStart(e) {
+        console.log('props  in chart', props)
         e.dataTransfer.setData("chartId", props.id);
     }
 
@@ -55,7 +51,8 @@ export function Chart(props) {
                 onMouseEnter={handleEnter}
                 onMouseLeave={handleLeave}
             >
-                <div ref={chartEl} />
+                <Avatar src={props.thumbnail} variant='rounded' style={{ height: '150px', width: '150px' }}/>
+                {/* <div ref={chartEl}  /> */}
             </div>
             <Snackbar
                 open={errorMsg !== null}
