@@ -1,4 +1,4 @@
-import { Modifier, EditorState, ContentState } from "draft-js";
+import { Modifier, EditorState } from "draft-js";
 
 export default (textSelection, editorState) => {
     const currentContent = editorState.getCurrentContent();

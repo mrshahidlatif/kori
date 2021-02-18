@@ -1,12 +1,11 @@
-export default ({text, extent, blockKey, chartId}, {feature, values}, {fieldX, rangeX, fieldY, rangeY}) => {
-    console.log('extent', extent);
-    const link = {
-        //Arguments//
+//Arguments//
         //commonProps={text, extent, chartId}, 
         //dataProps={feature, values}, 
         //rangeProps={fieldX, rangeX, fieldY, rangeY}, 
         //suggestionProps={trigger}
-        
+
+export default ({text, extent, blockKey, chartId}, {feature, values}, {fieldX, rangeX, fieldY, rangeY}, trigger) => {
+    return { 
 
         // common props
         text: text,
@@ -28,8 +27,6 @@ export default ({text, extent, blockKey, chartId}, {feature, values}, {fieldX, r
 
         active: false,
         isConfirmed: true,
-        // trigger: suggestionProps.trigger
+        trigger: trigger
     };
-    console.log('createLink()', link);
-    return link;
 }

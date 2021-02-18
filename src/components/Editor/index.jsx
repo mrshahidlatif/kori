@@ -39,6 +39,7 @@ import filterAlreadyConfirmedLinksInEditor from "utils/filterAlreadyConfirmedLin
 import nlp from "compromise";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "components/Alert";
+import createLinkObject from "utils/createLink"
 
 const AUTOMATIC_SUGGESTION_TIMEOUT = 5000;
 
@@ -315,17 +316,12 @@ export default function Editor(props) {
         const chartId = e.dataTransfer.getData("chartId");
         const chart = charts.find((d) => d.id === chartId);
         const exists = chartsInEditor.find((d) => d.id === chartId);
-        // console.log(chartsInEditor, chartId, editorState.getCurrentContent().getEntityMap().mapEntries());
         if (chart && !exists) {
             insertChart(chart);
             e.dataTransfer.clearData();
         }
     }
 
-    function blockRendererFn(block) {
-        //TODO: is this necessary given the plugin is there
-        // ChartBlock Removed
-    }
     function insertChart(chart) {
         let contentState = editorState.getCurrentContent();
 
@@ -340,21 +336,9 @@ export default function Editor(props) {
         setSuggestions([]);
     }
     function handleSuggestionSelected(suggestion) {
-        //TODO: there should be a single place generating a link (see find links)
-        const action = createLink(doc.id, {
-            text: suggestion.text,
-            feature: suggestion.feature,
-            chartId: suggestion.chartId,
-            active: false,
-            type: "point",
-            sentence: suggestion.text,
-            data: [isNaN(Number(suggestion.text)) ? suggestion.text : Number(suggestion.text)],
-            startIndex: suggestion.startIndex,
-            endIndex: suggestion.startIndex + suggestion.text.length,
-            isConfirmed: true,
-            blockKey: editorState.getSelection().getAnchorKey(),
-            trigger: "@" 
-        }); // need ids
+        const commonProps = {text:suggestion.text, extent:[suggestion.startIndex, suggestion.startIndex + suggestion.text.length], blockKey:editorState.getSelection().getAnchorKey(), chartId: suggestion.chartId};
+        const link = createLinkObject(commonProps,{ feature: suggestion.feature, values: [isNaN(Number(suggestion.text)) ? suggestion.text : Number(suggestion.text)]},{},'@');
+        const action = createLink(doc.id, link); // need ids
         const newEditorState = insertLinks([action.attrs], editorState);
         dispatch(action);
 
@@ -432,7 +416,6 @@ export default function Editor(props) {
                     handleKeyCommand={handleKeyCommand}
                     handlePastedText={handlePastedText}
                     stripPastedStyles={true}
-                    blockRendererFn={blockRendererFn}
                     decorators={editorDecorators}
                     ref={editorEl}
                     onTab={handleTab}
