@@ -59,7 +59,7 @@ export default function ManualLinkControls(props) {
                 } else data.push(p[field?.field]);
             });
             const feature={ field: field?.field };
-            const commonProps = {text: textSelection.text, extent:[textSelection.startIndex, textSelection.endIndex], blockKey:textSelection.blockKey, chartId: props.selectedChart.id};
+            const commonProps = {text: textSelection.text, extent:[props.textSelection.startIndex, props.textSelection.endIndex], blockKey:props.textSelection.blockKey, chartId: props.selectedChart.id};
             link = createLink(commonProps, {feature,values:data}, {});
         }
         if (brush.length > 0) {

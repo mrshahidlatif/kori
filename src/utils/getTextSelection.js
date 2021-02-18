@@ -46,10 +46,10 @@ export default (contentState, selection, blockDelimiter) => {
     let sIndex = selection.getStartOffset();
     let eIndex = selection.getEndOffset();
     if (selection.isBackward) {
-        sIndex = selection.getEndOffset();
-        eIndex = selection.getStartOffset();
+        eIndex = selection.getEndOffset();
+        sIndex = selection.getStartOffset();
     }
     return selection.getStartOffset() !== selection.getEndOffset()
-        ? { text: text, startIndex: sIndex, endIndex: eIndex, blockKey }
+        ? { text: text, startIndex: sIndex, endIndex: eIndex, blockKey, isBackward:selection.isBackward}
         : null;
 };

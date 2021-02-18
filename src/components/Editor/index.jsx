@@ -327,7 +327,6 @@ export default function Editor(props) {
         // ChartBlock Removed
     }
     function insertChart(chart) {
-        // console.log(chartId, charts[chart.id])
         let contentState = editorState.getCurrentContent();
 
         contentState = contentState.createEntity("CHART", "IMMUTABLE", {

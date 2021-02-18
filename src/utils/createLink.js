@@ -1,10 +1,12 @@
 export default ({text, extent, blockKey, chartId}, {feature, values}, {fieldX, rangeX, fieldY, rangeY}) => {
+    console.log('extent', extent);
     const link = {
         //Arguments//
         //commonProps={text, extent, chartId}, 
         //dataProps={feature, values}, 
         //rangeProps={fieldX, rangeX, fieldY, rangeY}, 
         //suggestionProps={trigger}
+        
 
         // common props
         text: text,
