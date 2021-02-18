@@ -35,7 +35,7 @@ export const insertLink = (link, editorState) => {
 
     newContent = Modifier.replaceText(
         editorState.getCurrentContent(),
-        link.trigger === "@" ? insertSuggestionSelection : insertLinkSelection,
+        link?.trigger === "@" ? insertSuggestionSelection : insertLinkSelection,
         link.text,
         editorState.getCurrentInlineStyle(), //inline styling
         entityKey

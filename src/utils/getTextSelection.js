@@ -6,6 +6,7 @@ export default (contentState, selection, blockDelimiter) => {
     var startKey = selection.getStartKey();
     var endKey = selection.getEndKey();
     var blocks = contentState.getBlockMap();
+    let blockKey ='';
 
     var lastWasEnd = false;
     var selectedBlock = blocks
@@ -38,6 +39,7 @@ export default (contentState, selection, blockDelimiter) => {
                 end = selection.getEndOffset();
             }
             text = text.slice(start, end);
+            blockKey=key;
             return text;
         })
         .join(blockDelimiter);
@@ -48,6 +50,6 @@ export default (contentState, selection, blockDelimiter) => {
         eIndex = selection.getStartOffset();
     }
     return selection.getStartOffset() !== selection.getEndOffset()
-        ? { text: text, startIndex: sIndex, endIndex: eIndex }
+        ? { text: text, startIndex: sIndex, endIndex: eIndex, blockKey }
         : null;
 };
