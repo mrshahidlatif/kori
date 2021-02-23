@@ -10,6 +10,7 @@ export default (config = {}) => {
         blockRendererFn: (block, { getEditorState }) => {
             if (block.getType() === "atomic") {
                 const contentState = getEditorState().getCurrentContent();
+                if (!block.getEntityAt(0)) return;
                 const entity = contentState.getEntity(block.getEntityAt(0));
                 const data = entity.getData();
                 const type = entity.getType();
