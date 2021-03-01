@@ -8,6 +8,7 @@ import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import { setViewMode } from "ducks/ui";
 import { useEffect } from "react";
+import LinkSetting from "components/LinkSetting";
 
 export default function Edit(props) {
     const dispatch = useDispatch();
@@ -25,6 +26,12 @@ export default function Edit(props) {
             </Grid>
             <Grid item xs={8}>
                 <Editor />
+            </Grid>
+            <Grid item xs={2}>
+                <Typography variant="overline" display="block" gutterBottom>
+                    Link Setting
+                </Typography>
+                <LinkSetting />
             </Grid>
         </Grid>
     );
