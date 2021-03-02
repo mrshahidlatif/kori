@@ -10,7 +10,7 @@ WORD2VEC_THRESHOLD = 0.70
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
 model = KeyedVectors.load_word2vec_format(
-    './public/lang_models/GoogleNews-vectors-negative300.bin.gz', binary=True, limit=NO_OF_MOST_FREQUENT_WORDS)
+    'server/lang_models/GoogleNews-vectors-negative300.bin.gz', binary=True, limit=NO_OF_MOST_FREQUENT_WORDS)
 
 
 def find_links(charts, sentence, sentence_offset, block_key):
