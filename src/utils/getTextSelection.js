@@ -6,6 +6,7 @@ export default (contentState, selection, blockDelimiter) => {
     var startKey = selection.getStartKey();
     var endKey = selection.getEndKey();
     var blocks = contentState.getBlockMap();
+    let blockKey ='';
 
     var lastWasEnd = false;
     var selectedBlock = blocks
@@ -38,16 +39,17 @@ export default (contentState, selection, blockDelimiter) => {
                 end = selection.getEndOffset();
             }
             text = text.slice(start, end);
+            blockKey=key;
             return text;
         })
         .join(blockDelimiter);
     let sIndex = selection.getStartOffset();
     let eIndex = selection.getEndOffset();
     if (selection.isBackward) {
-        sIndex = selection.getEndOffset();
-        eIndex = selection.getStartOffset();
+        eIndex = selection.getEndOffset();
+        sIndex = selection.getStartOffset();
     }
     return selection.getStartOffset() !== selection.getEndOffset()
-        ? { text: text, startIndex: sIndex, endIndex: eIndex }
+        ? { text: text, startIndex: sIndex, endIndex: eIndex, blockKey, isBackward:selection.isBackward}
         : null;
 };

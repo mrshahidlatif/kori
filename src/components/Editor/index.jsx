@@ -22,13 +22,13 @@ import SuggestionPanel from "components/SuggestionPanel";
 import PotentialLinkControls from "components/PotentialLinkControls";
 
 import { updateDoc, updateChartsInEditor } from "ducks/docs";
-import { createLinks, createLink, deleteLink, updateLink, getLinks } from "ducks/links";
+import { createLinks, createLink, deleteLink, getLinks } from "ducks/links";
 import { getChartsInEditor, getCharts } from "ducks/charts";
 import { setSelectedLink, setManualLinkId, exitManualLinkMode, setTextSelection } from "ducks/ui";
 
 import editorDecorators from "utils/editorDecorators";
 import findSuggestions from "utils/findSuggestions";
-import findLinks from "utils/findLinks";
+import searchLinks from "utils/searchLinks";
 import insertLinks from "utils/insertLinks";
 import getLastTypedWord from "utils/getLastTypedWord";
 import getTextSelection from "utils/getTextSelection";
@@ -39,6 +39,7 @@ import filterAlreadyConfirmedLinksInEditor from "utils/filterAlreadyConfirmedLin
 import nlp from "compromise";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "components/Alert";
+import createLinkObject from "utils/createLink"
 
 const AUTOMATIC_SUGGESTION_TIMEOUT = 5000;
 
@@ -67,7 +68,7 @@ export default function Editor(props) {
             : convertFromRaw(storedEditorState);
     const [editorState, setEditorState] = useState(EditorState.createWithContent(contentState));
     const [currentSelectionState, setCurrentSelectionState] = useState(null);
-    const [blockText, setBlockText] = useState("");
+    const [currentBlock, setCurrentBlock] = useState(null);
     const [infoMsg, setInfoMsg] = useState(null);
     const [autoLinksToInsert, setAutoLinksToInsert] = useState([]);
 
@@ -77,7 +78,7 @@ export default function Editor(props) {
         interval = setInterval(() => {
             console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
             if (editorEl?.current?.props?.editorState)
-                setBlockText(getBlockText(editorEl.current.props.editorState));
+                setCurrentBlock(getBlockText(editorEl.current.props.editorState));
         }, AUTOMATIC_SUGGESTION_TIMEOUT);
         return () => clearInterval(interval.current);
     };
@@ -144,12 +145,12 @@ export default function Editor(props) {
 
     useEffect(() => {
         const asyncExec = async () => {
-            if (blockText !== "") {
+            if (currentBlock !== null) {
+                const blockText = currentBlock.blockText;
                 if (linkActiveNoAutoTrigger) return;
                 if (selectedLink) return;
                 if (tempTextSelection || tempTextSelection == "INVALID") return;
                 const sentences = await nlp(blockText).sentences().json();
-                let sentenceOffset = 0;
                 let allLinksInCurrentBlockText = [];
                 let searchedSentences = [];
                 for (let i = 0; i < sentences.length; i++) {
@@ -163,7 +164,7 @@ export default function Editor(props) {
                         startIndex: blockText.indexOf(text),
                         endIndex: blockText.indexOf(text) + text.length,
                     };
-                    const links = await findLinks(chartsInEditor, sentenceObject);
+                    const links = await searchLinks(sentenceObject.text, sentenceObject.startIndex, chartsInEditor, currentBlock.blockKey);
                     allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
                 }
                 dispatch(
@@ -182,11 +183,11 @@ export default function Editor(props) {
                         setAutoLinksToInsert(allLinksInCurrentBlockText);
                     }
                 }
-                setBlockText("");
+                setCurrentBlock(null);
             }
         };
         asyncExec();
-    }, [blockText]);
+    }, [currentBlock]);
 
     function handleEditorChange(editorState) {
         setEditorState(editorState);
@@ -210,6 +211,7 @@ export default function Editor(props) {
                 searchedSentences: updatedSearchedSentences,
             })
         );
+
         //Enable SuggestionMenu on @
         if (lastTypedWord.text.startsWith("@")) {
             const suggestions = findSuggestions(
@@ -295,7 +297,7 @@ export default function Editor(props) {
     function handleTab(e) {
         e.preventDefault();
         e.stopPropagation();
-        setBlockText(getBlockText(editorState));
+        setCurrentBlock(getBlockText(editorState));
         return "handled";
     }
 
@@ -314,19 +316,13 @@ export default function Editor(props) {
         const chartId = e.dataTransfer.getData("chartId");
         const chart = charts.find((d) => d.id === chartId);
         const exists = chartsInEditor.find((d) => d.id === chartId);
-        // console.log(chartsInEditor, chartId, editorState.getCurrentContent().getEntityMap().mapEntries());
         if (chart && !exists) {
             insertChart(chart);
             e.dataTransfer.clearData();
         }
     }
 
-    function blockRendererFn(block) {
-        //TODO: is this necessary given the plugin is there
-        // ChartBlock Removed
-    }
     function insertChart(chart) {
-        // console.log(chartId, charts[chart.id])
         let contentState = editorState.getCurrentContent();
 
         contentState = contentState.createEntity("CHART", "IMMUTABLE", {
@@ -340,19 +336,9 @@ export default function Editor(props) {
         setSuggestions([]);
     }
     function handleSuggestionSelected(suggestion) {
-        //TODO: there should be a single place generating a link (see find links)
-        const action = createLink(doc.id, {
-            text: suggestion.text,
-            feature: suggestion.feature,
-            chartId: suggestion.chartId,
-            active: false,
-            type: "point", //TODO: range selection
-            sentence: suggestion.text,
-            data: [isNaN(Number(suggestion.text)) ? suggestion.text : Number(suggestion.text)],
-            startIndex: suggestion.startIndex,
-            endIndex: suggestion.startIndex + suggestion.text.length,
-            isConfirmed: true,
-        }); // need ids
+        const commonProps = {text:suggestion.text, extent:[suggestion.startIndex, suggestion.startIndex + suggestion.text.length], blockKey:editorState.getSelection().getAnchorKey(), chartId: suggestion.chartId};
+        const link = createLinkObject(commonProps,{ feature: suggestion.feature, values: [isNaN(Number(suggestion.text)) ? suggestion.text : Number(suggestion.text)]},{},'@');
+        const action = createLink(doc.id, link); // need ids
         const newEditorState = insertLinks([action.attrs], editorState);
         dispatch(action);
 
@@ -381,7 +367,7 @@ export default function Editor(props) {
             editorState.getCurrentContent(),
             insertTextSelection,
             link.text,
-            [] //inline styling
+            editorState.getCurrentInlineStyle(), //inline styling
         );
         let newEditorState = EditorState.push(editorState, newContent, "apply-entity");
         let newSelection = newEditorState.getSelection().merge({
@@ -409,7 +395,13 @@ export default function Editor(props) {
         confirmedLink.startIndex = updateLinkExtent.offset; 
         confirmedLink.endIndex = updateLinkExtent.offset + updateLinkExtent.length;
         confirmedLink.isConfirmed = true;
-        setEditorState(insertLinks([confirmedLink], editorState, editorState.getSelection()));
+        setEditorState(insertLinks([confirmedLink], editorState));
+    }
+    function handlePastedText(text){
+        //immediatly search for suggestions in pasted text
+        //TODO: for now it only searches for links in the first pargraph immediately
+        setCurrentBlock({blockText: text.split("\n")[0], blockKey:getBlockText(editorState).blockKey});
+        return "not-handled";
     }
 
     return (
@@ -422,7 +414,8 @@ export default function Editor(props) {
                     onChange={handleEditorChange}
                     onBlur={handleBlur}
                     handleKeyCommand={handleKeyCommand}
-                    blockRendererFn={blockRendererFn}
+                    handlePastedText={handlePastedText}
+                    stripPastedStyles={true}
                     decorators={editorDecorators}
                     ref={editorEl}
                     onTab={handleTab}

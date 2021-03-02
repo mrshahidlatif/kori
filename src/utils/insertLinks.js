@@ -1,46 +1,54 @@
 import { Modifier, EditorState } from "draft-js";
-export default (links, editorState, currentSelection) => {
+import getLastTypedWord from "./getLastTypedWord";
+export default (links, editorState) => {
     links.forEach((link) => {
-        editorState = insertLink(link, editorState, currentSelection);
+        editorState = insertLink(link, editorState);
     });
     return editorState;
 };
-export const insertLink = (link, editorState, currentSelection) => {
-    //TODO: remove duplicates
+export const insertLink = (link, editorState) => {
+
     const currentContent = editorState.getCurrentContent();
-    currentSelection = currentSelection || editorState.getSelection();
-    const blockEndIndex = currentSelection.getAnchorOffset();
-    const blockKey = currentSelection.getAnchorKey();
+    const currentSelection = editorState.getSelection();
+    const activeBlockKey = currentSelection.getAnchorKey();
+    const activeBlockEndIndex = currentSelection.getAnchorOffset();
+
     let start = link.startIndex;
     let end = link.endIndex;
     if (start < 0) start = 0;
-
-    //TODO: properly fix this object not extensible problem!
-    link = JSON.parse(JSON.stringify(link));
-    link["blockKey"] = blockKey;
 
     let newContent = currentContent.createEntity(`LINK`, "MUTABLE", {
         ...link,
     });
     const entityKey = newContent.getLastCreatedEntityKey();
-    const insertTextSelection = currentSelection.merge({
+
+    const insertLinkSelection = currentSelection.merge({
+        anchorKey: link.blockKey,
+        focusKey: link.blockKey,
         anchorOffset: start,
         focusOffset: end,
     });
+    
+    const insertSuggestionSelection =  editorState.getSelection().merge({
+        anchorOffset: getLastTypedWord(editorState).startIndex
+    });
+
     newContent = Modifier.replaceText(
         editorState.getCurrentContent(),
-        insertTextSelection,
+        link?.trigger === "@" ? insertSuggestionSelection : insertLinkSelection,
         link.text,
-        [], //inline styling
+        editorState.getCurrentInlineStyle(), //inline styling
         entityKey
     );
-    const caretNewIndex = end > blockEndIndex ? end : blockEndIndex;
-    const caretOriginalIndex = currentSelection.getAnchorOffset();
-    const caretOffset = link.isConfirmed ? caretNewIndex : caretOriginalIndex;
-    let newEditorState = EditorState.push(editorState, newContent, "apply-entity");
+
+    //Stop cursor from jumping to beginning of a line
+    const caretPosition = end > activeBlockEndIndex ? end : activeBlockEndIndex;
+    let newEditorState = EditorState.push(editorState, newContent, "insert-characters");
     let newSelection = newEditorState.getSelection().merge({
-        focusOffset: caretOffset,
-        anchorOffset: caretOffset,
+        anchorKey: activeBlockKey,
+        focusKey: activeBlockKey,
+        focusOffset: caretPosition,
+        anchorOffset: caretPosition,
     });
     newEditorState = EditorState.moveSelectionToEnd(newEditorState);
     newEditorState = EditorState.forceSelection(newEditorState, newSelection);

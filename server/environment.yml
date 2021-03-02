@@ -24,8 +24,6 @@ dependencies:
   - itsdangerous=1.1.0
   - jinja2=2.11.2
   - jsonschema=3.0.2
-  - libcxx=10.0.0
-  - libedit=3.1.20191231
   - libffi=3.3
   - markupsafe=1.1.1
   - mkl=2019.4
@@ -33,7 +31,6 @@ dependencies:
   - mkl_fft=1.1.0
   - mkl_random=1.1.1
   - murmurhash=1.0.2
-  - ncurses=6.2
   - numpy=1.19.1
   - numpy-base=1.19.1
   - openssl=1.1.1g
@@ -45,7 +42,6 @@ dependencies:
   - pyrsistent=0.16.0
   - pysocks=1.7.1
   - python=3.7.9
-  - readline=8.0
   - requests=2.24.0
   - setuptools=49.6.0
   - six=1.15.0

@@ -1,7 +1,7 @@
 import { parse } from "vega-parser";
 import { View } from "vega-view";
 
-const THUMBNAIL_HEIGHT = 50;
+const THUMBNAIL_HEIGHT = 250;
 export default async (spec) => {
     // parse the spec and get the view
     const runtime = parse(spec);

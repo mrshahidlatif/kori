@@ -5,5 +5,5 @@ export default (editorState) => {
     const currentBlock = currentContent.getBlockForKey(blockKey);
     const blockText = currentBlock.getText();
 
-    return blockText;
+    return {blockText, blockKey};
 };

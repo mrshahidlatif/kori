@@ -1,23 +1,20 @@
 import React from "react";
 import css from "./index.module.css";
-
 import { useDispatch } from "react-redux";
-
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
-
 import Paper from "@material-ui/core/Paper";
 
 import { setTextSelection } from "ducks/ui";
 import { createLinks } from "ducks/links";
 import { setManualLinkId, exitManualLinkMode } from "ducks/ui";
+import createLink from "utils/createLink"
 
 export default function ManualLinkControls(props) {
     const dispatch = useDispatch();
     const selection = window.getSelection();
     const pos = selection.rangeCount > 0 ? selection.getRangeAt(0).getBoundingClientRect() : null;
-    const padding = 10;
 
     const chartProperties = props.selectedChart.properties;
 
@@ -61,19 +58,10 @@ export default function ManualLinkControls(props) {
                     } else data.push(p["properties"][field?.field]);
                 } else data.push(p[field?.field]);
             });
-
-            link = {
-                text: textSelection.text,
-                feature: { field: field?.field },
-                chartId: props.selectedChart.id,
-                active: false,
-                type: "multipoint",
-                data: data,
-                startIndex: props.textSelection.startIndex,
-                endIndex: props.textSelection.endIndex,
-                sentence: "",
-                isConfirmed: true,
-            };
+            const feature={ field: field?.field };
+            const commonProps = {text: textSelection.text, extent:[props.textSelection.startIndex, props.textSelection.endIndex], blockKey:props.textSelection.blockKey, chartId: props.selectedChart.id};
+            link = createLink(commonProps, {feature,values:data}, {});
+            console.log('MultiPoint Link', link);
         }
         if (brush.length > 0) {
             let points;
@@ -109,24 +97,15 @@ export default function ManualLinkControls(props) {
                     rangeMax = brush[0].values[0][1];
                 }
             }
-            link = {
-                text: textSelection.text,
-                feature: { field: brushField },
-                chartId: props.selectedChart.id,
-                active: false,
-                type: "brush",
-                data: points,
-                startIndex: props.textSelection.startIndex,
-                endIndex: props.textSelection.endIndex,
-                sentence: "",
-                isConfirmed: true,
-                fieldX: fieldX,
-                rangeX: rangeX,
-                fieldY: fieldY,
-                rangeY: rangeY,
-            };
+            const commonProps = {text:textSelection.text, extent:[props.textSelection.startIndex, props.textSelection.endIndex], blockKey:props.textSelection.blockKey, chartId:props.selectedChart.id};
+            const dataProps = {feature: { field: brushField }, values:points }
+            const rangeProps = {fieldX: fieldX, rangeX: rangeX, fieldY: fieldY, rangeY: rangeY}
+            link = createLink(commonProps, dataProps,rangeProps);
+            console.log('Single Axis Brush Link', link);
+
             if (brush[0]?.fields.length < 2 && brush[0]?.fields[0].type === "R")
                 link = { ...link, rangeField: brushField, rangeMin, rangeMax };
+            console.log('Rectangular Brush Link', link);
         }
         if (link !== null) {
             const action = createLinks(props.currentDoc.id, [link]);

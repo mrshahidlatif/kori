@@ -1,4 +1,4 @@
-import { Modifier, EditorState, ContentState } from "draft-js";
+import { Modifier, EditorState } from "draft-js";
 
 export default (textSelection, editorState) => {
     const currentContent = editorState.getCurrentContent();
@@ -8,17 +8,25 @@ export default (textSelection, editorState) => {
         ...textSelection,
     });
 
+    let start = textSelection.startIndex;
+    let end = textSelection.endIndex;
+
+    if(textSelection.isBackward){
+        start = textSelection.endIndex;
+        end = textSelection.startIndex
+    }
+
     const entityKey = newContent.getLastCreatedEntityKey();
 
     const insertTextSelection = currentSelection.merge({
-        anchorOffset: textSelection.startIndex,
-        focusOffset: textSelection.endIndex,
+        anchorOffset:start,
+        focusOffset: end,
     });
     newContent = Modifier.replaceText(
         editorState.getCurrentContent(),
         insertTextSelection,
         textSelection.text,
-        [], //inline styling
+        editorState.getCurrentInlineStyle(), //inline styling
         entityKey
     );
     let newEditorState = EditorState.push(editorState, newContent, "apply-entity");
