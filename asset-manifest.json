@@ -1,25 +1,25 @@
 {
   "files": {
-    "main.css": "/vis-text-editor/static/css/main.0d9cd58d.chunk.css",
-    "main.js": "/vis-text-editor/static/js/main.4b61333d.chunk.js",
-    "main.js.map": "/vis-text-editor/static/js/main.4b61333d.chunk.js.map",
+    "main.css": "/vis-text-editor/static/css/main.18161742.chunk.css",
+    "main.js": "/vis-text-editor/static/js/main.6248306c.chunk.js",
+    "main.js.map": "/vis-text-editor/static/js/main.6248306c.chunk.js.map",
     "runtime-main.js": "/vis-text-editor/static/js/runtime-main.73280aa9.js",
     "runtime-main.js.map": "/vis-text-editor/static/js/runtime-main.73280aa9.js.map",
-    "static/css/2.50d87dc5.chunk.css": "/vis-text-editor/static/css/2.50d87dc5.chunk.css",
-    "static/js/2.4a8ebbc6.chunk.js": "/vis-text-editor/static/js/2.4a8ebbc6.chunk.js",
-    "static/js/2.4a8ebbc6.chunk.js.map": "/vis-text-editor/static/js/2.4a8ebbc6.chunk.js.map",
+    "static/css/2.4c0ab1a8.chunk.css": "/vis-text-editor/static/css/2.4c0ab1a8.chunk.css",
+    "static/js/2.a555451b.chunk.js": "/vis-text-editor/static/js/2.a555451b.chunk.js",
+    "static/js/2.a555451b.chunk.js.map": "/vis-text-editor/static/js/2.a555451b.chunk.js.map",
     "index.html": "/vis-text-editor/index.html",
-    "precache-manifest.5763c6dc5a822db22b129e5081767e0d.js": "/vis-text-editor/precache-manifest.5763c6dc5a822db22b129e5081767e0d.js",
+    "precache-manifest.b4fb6ec2ced85417e9ba04059f755660.js": "/vis-text-editor/precache-manifest.b4fb6ec2ced85417e9ba04059f755660.js",
     "service-worker.js": "/vis-text-editor/service-worker.js",
-    "static/css/2.50d87dc5.chunk.css.map": "/vis-text-editor/static/css/2.50d87dc5.chunk.css.map",
-    "static/css/main.0d9cd58d.chunk.css.map": "/vis-text-editor/static/css/main.0d9cd58d.chunk.css.map",
-    "static/js/2.4a8ebbc6.chunk.js.LICENSE": "/vis-text-editor/static/js/2.4a8ebbc6.chunk.js.LICENSE"
+    "static/css/2.4c0ab1a8.chunk.css.map": "/vis-text-editor/static/css/2.4c0ab1a8.chunk.css.map",
+    "static/css/main.18161742.chunk.css.map": "/vis-text-editor/static/css/main.18161742.chunk.css.map",
+    "static/js/2.a555451b.chunk.js.LICENSE": "/vis-text-editor/static/js/2.a555451b.chunk.js.LICENSE"
   },
   "entrypoints": [
     "static/js/runtime-main.73280aa9.js",
-    "static/css/2.50d87dc5.chunk.css",
-    "static/js/2.4a8ebbc6.chunk.js",
-    "static/css/main.0d9cd58d.chunk.css",
-    "static/js/main.4b61333d.chunk.js"
+    "static/css/2.4c0ab1a8.chunk.css",
+    "static/js/2.a555451b.chunk.js",
+    "static/css/main.18161742.chunk.css",
+    "static/js/main.6248306c.chunk.js"
   ]
 }
