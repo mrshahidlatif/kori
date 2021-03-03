@@ -99,6 +99,7 @@ export default function ManualLinkControls(props) {
             const feature={ field: field?.field };
             const commonProps = {text: textSelection.text, extent:[props.textSelection.startIndex, props.textSelection.endIndex], blockKey:props.textSelection.blockKey, chartId: props.selectedChart.id};
             link = createLink(commonProps, {feature,values:data}, {});
+            console.log('MultiPoint Link', link);
         }
         if (brush.length > 0) {
             let points;
@@ -138,9 +139,11 @@ export default function ManualLinkControls(props) {
             const dataProps = {feature: { field: brushField }, values:points }
             const rangeProps = {fieldX: fieldX, rangeX: rangeX, fieldY: fieldY, rangeY: rangeY}
             link = createLink(commonProps, dataProps,rangeProps);
+            console.log('Single Axis Brush Link', link);
 
             if (brush[0]?.fields.length < 2 && brush[0]?.fields[0].type === "R")
                 link = { ...link, rangeField: brushField, rangeMin, rangeMax };
+            console.log('Rectangular Brush Link', link);
         }
         if (link !== null) {
             const action = createLinks(props.currentDoc.id, [link]);
