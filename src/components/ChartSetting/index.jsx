@@ -116,9 +116,7 @@ export function ChartSetting(props) {
                     )}
                 </div>
                 <div ref={chartEl} />
-                {/* {showConfig && !textSelection && <ChartConfigPanel chart={chart} />} */}
                 {showConfig && toggleSettings && <ChartConfigPanel chart={chart} />}
-                {/* {resizing && <AspectRatioIcon style={{color: grey[500], zIndex:2, marginLeft:"-30px"}}/>} */}
                 {showConfig && props.textSelection && (
                     <ManualLinkControls
                         currentDoc={doc}

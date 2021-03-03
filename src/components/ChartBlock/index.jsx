@@ -1,13 +1,11 @@
 import React, { useEffect, useMemo, memo, useState, useRef } from "react";
-import { useDispatch, useSelector, shallowEqual, connect } from "react-redux";
+import { useSelector, shallowEqual } from "react-redux";
 import addSignalToChartSpec from "utils/addSignalToChartSpec";
 import vegaEmbed from "vega-embed";
 import throttle from "utils/throttle";
 import { parse } from "vega-parser";
 import { View } from "vega-view";
 import ChartConfigPanel from "components/ChartConfigPanel";
-import { useParams } from "react-router-dom";
-import ManualLinkControls from "components/ManualLinkControls";
 import IconButton from "@material-ui/core/IconButton";
 import SettingsIcon from "@material-ui/icons/Settings";
 
@@ -27,21 +25,11 @@ export default memo(function ChartBlock({
     style,
     ...elementProps
 }) {
-    // const data = props.contentState.getEntity(props.block.getEntityAt(0)).getData();
-    // let view = null;
-    const dispatch = useDispatch();
     const [view, setView] = useState(null);
     const containerEl = useRef(null);
     const chartEl = useRef(null);
     const [ratio, setRatio] = useState(1);
     const chart = useSelector((state) => state.charts[blockProps.id]);
-    const textSelection = useSelector((state) => state.ui.textSelection);
-    let { docId } = useParams();
-    const doc = useSelector((state) => state.docs[docId]);
-    const chartsInEditor = useSelector((state) => state.docs[docId].chartsInEditor);
-    const [selectedMarks, setSelectedMarks] = useState([]);
-    const [viewData, setViewData] = useState([]);
-    const [brush, setBrush] = useState([]);
     const [toggleSettings, setToggleSettings] = useState(false);
     const viewMode = useSelector((state) => state.ui.viewMode);
 
@@ -53,7 +41,6 @@ export default memo(function ChartBlock({
     const spec = useMemo(
         () =>
             addSignalToChartSpec(
-                // JSON.parse(JSON.stringify(chart.spec)),
                 chart.highlight,
                 JSON.parse(JSON.stringify(chart.liteSpec))
             ),
@@ -72,7 +59,6 @@ export default memo(function ChartBlock({
             setRatio(ratio);
 
             // add autosize: has limitations: https://vega.github.io/vega-lite/docs/size.html#limitations
-            //TODO: brush interfere with autosize
 
             // spec.autosize = {
             //     type: "fit",
@@ -82,25 +68,6 @@ export default memo(function ChartBlock({
 
             const result = await vegaEmbed(chartEl.current, spec, { actions: false });
             const view = result.view;
-
-            // const viewData = view.data("source_0");
-            const viewData = !chart.liteSpec.data.hasOwnProperty("url")
-                ? view.data("data_0")
-                : view.data("source_0");
-            setViewData(viewData);
-            try {
-                view.addDataListener("paintbrush_store", function (name, value) {
-                    console.log(name, value);
-                    setSelectedMarks(selectedMarks.concat(value));
-                });
-
-                view.addDataListener("brush_store", function (name, value) {
-                    console.log(name, value);
-                    setBrush(brush.concat(value));
-                });
-            } catch (error) {
-                //No brush_store if no brush added
-            }
             setView(view);
         };
         asyncExec();
@@ -155,24 +122,10 @@ export default memo(function ChartBlock({
     }
 
     const showConfig = viewMode ? false : selection.getAnchorKey() === block.getKey(); // show only clicking this block
-    const highlightStyle =
-        chartsInEditor.indexOf(chart.id) > -1 && !showConfig && textSelection
-            ? {
-                  ...style,
-                  position: "relative",
-                  borderStyle: "solid",
-                  borderColor: "gray",
-                  width: "fit-content",
-              }
-            : {
-                  ...style,
-                  position: "relative",
-                  width: "fit-content",
-              };
 
     return (
         <React.Fragment>
-            <div ref={containerEl} {...elementProps} style={highlightStyle}>
+            <div ref={containerEl} {...elementProps} style={{...style, position: "relative", width: "fit-content"}}>
                 <div>
                     {showConfig && (
                         <IconButton
@@ -185,19 +138,7 @@ export default memo(function ChartBlock({
                     )}
                 </div>
                 <div ref={chartEl} />
-                {/* {showConfig && !textSelection && <ChartConfigPanel chart={chart} />} */}
                 {showConfig && toggleSettings && <ChartConfigPanel chart={chart} />}
-                {/* {resizing && <AspectRatioIcon style={{color: grey[500], zIndex:2, marginLeft:"-30px"}}/>} */}
-                {showConfig && textSelection && (
-                    <ManualLinkControls
-                        currentDoc={doc}
-                        selectedChart={chart}
-                        textSelection={textSelection}
-                        selectedMarks={selectedMarks}
-                        brush={brush}
-                        viewData={viewData}
-                    />
-                )}
             </div>
         </React.Fragment>
     );

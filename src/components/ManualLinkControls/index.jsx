@@ -153,14 +153,6 @@ export default function ManualLinkControls(props) {
     }
     return pos && props.textSelection ? (
         <React.Fragment>
-        <Box right={0} top={0} className={css.potentialLinkControls}>
-            <Paper elevation={1}>
-                <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
-                    <Button onMouseDown={handleAcceptClick}>Accept</Button>
-                    <Button onMouseDown={handleResetClick}>Cancel</Button>
-                </ButtonGroup>
-            </Paper>
-        </Box>
         <div className={classes.root}>
             <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="age-native-simple">Axis</InputLabel>
@@ -186,8 +178,8 @@ export default function ManualLinkControls(props) {
             />
             <Paper elevation={1}>
                 <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
-                    <Button onMouseDown={()=> {}}>Save</Button>
-                    <Button onMouseDown={()=>{}}>Cancel</Button>
+                    <Button onMouseDown={handleAcceptClick}>Save</Button>
+                    <Button onMouseDown={handleResetClick}>Cancel</Button>
                 </ButtonGroup>
             </Paper>
         </div>

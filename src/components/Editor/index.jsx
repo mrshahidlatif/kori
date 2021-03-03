@@ -74,22 +74,22 @@ export default function Editor(props) {
 
     let interval = useRef();
 
-    const startTimer = () => {
-        interval = setInterval(() => {
-            console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
-            if (editorEl?.current?.props?.editorState)
-                setCurrentBlock(getBlockText(editorEl.current.props.editorState));
-        }, AUTOMATIC_SUGGESTION_TIMEOUT);
-        return () => clearInterval(interval.current);
-    };
+    // const startTimer = () => {
+    //     interval = setInterval(() => {
+    //         console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
+    //         if (editorEl?.current?.props?.editorState)
+    //             setCurrentBlock(getBlockText(editorEl.current.props.editorState));
+    //     }, AUTOMATIC_SUGGESTION_TIMEOUT);
+    //     return () => clearInterval(interval.current);
+    // };
 
     useEffect(() => {
         dispatch(exitManualLinkMode(false));
         setCurrentSelectionState(null);
         dispatch(setTextSelection(null));
         dispatch(setManualLinkId(null));
-        startTimer();
-        return () => clearInterval(interval.current);
+        // startTimer();
+        // return () => clearInterval(interval.current);
     }, []);
 
     useEffect(() => {
