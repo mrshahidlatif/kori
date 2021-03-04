@@ -34,6 +34,7 @@ export default function ManualLinkControls(props) {
     const [showField, setShowField] = useState(false);
     const [link, setLink]=useState(null);
     const [selectedPoints, setSelectedPoints] = useState([]);
+    const [showSlider, setShowSlider]=useState(false);
 
     const chartProperties = props.selectedChart.properties;
     let axisOptions = chartProperties.axes.map(axis => axis?.field);
@@ -44,18 +45,63 @@ export default function ManualLinkControls(props) {
     const handleAxisChange = (event) => {
         const selectedAxis = event.target.value;
         setAxis(selectedAxis);
-        console.log('Change Data and Field now!', props.viewData);
         link['data'] = selectedPoints.map(sp => sp[selectedAxis]);
         setLink(link);
-        const min = props.viewData.reduce((prev, curr) => prev[selectedAxis] < curr[selectedAxis] ? prev : curr);
-        const max = props.viewData.reduce((prev, curr) => prev[selectedAxis] > curr[selectedAxis] ? prev : curr);
-        console.log('min/max', typeof min[selectedAxis], max[selectedAxis].getFullYear());
-        setMarks([{value:1900, label:1900}, {value:2000, label:2000}])
-        setValue([min[selectedAxis].getFullYear(), max[selectedAxis].getFullYear()])
+
+        const axisObj = getAxisObjectByName(chartProperties.axes ,selectedAxis)
+        console.log(axisObj);
+
+        if(!["ordinal", "band", "point"].includes(axisObj.type)){
+
+            console.log('view data', props.viewData[0][selectedAxis]);
+            const min = getMin(props.viewData, selectedAxis);
+            const max = getMax(props.viewData, selectedAxis);
+            if (min instanceof Date){
+                setMarks([{value:min.getTime(), label:min.toLocaleString()}, {value:max.getTime(), label:max.toLocaleString()}]);
+            }
+            else{
+                setMarks([{value:min, label:min.toLocaleString()}, {value:max, label:max.toLocaleString()}]);
+            }
+            setShowSlider(true);
+
+            console.log('numerical axis', min, max);
+
+        }
+        // setValue([min[selectedAxis], max[selectedAxis]]);
+    }
+    function getMin(data, axisName){
+        const min = data.reduce((prev, curr) => {
+            if (typeof curr === 'string') {
+                return Number.parseFloat(prev[axisName]) < Number.parseFloat(curr[axisName]) ? prev : curr
+            }
+            else {
+                return prev[axisName] < curr[axisName] ? prev : curr
+            }
+        });
+        return typeof min[axisName] === 'string' ? parseFloat(min[axisName]): min[axisName];
+    }
+
+    function getMax(data, axisName){
+        const max = data.reduce((prev, curr) => {
+            if (typeof curr === 'string'){
+                return Number.parseFloat(prev[axisName]) > Number.parseFloat(curr[axisName]) ? prev : curr
+            }
+            else{
+                return prev[axisName] > curr[axisName] ? prev : curr
+            }
+        });
+        return typeof max[axisName] === 'string' ? parseFloat(max[axisName]): max[axisName];
+    }
+
+    function getAxisObjectByName(axes, name){
+        //TODO: handle if matches to title or field
+        const axisObj = axes.find(a => a.field === name);
+        return axisObj;
     }
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
+        console.log('slider val', newValue);
       };
   
     function handleResetClick(event) {
@@ -149,11 +195,15 @@ export default function ManualLinkControls(props) {
                 setAxis(fieldX);
             } else {
                 //Single Axis Brush
-                if (brush[0].fields[0].type === "E") {
+                if (brush[0]?.fields[0]?.type === "E" && brush[0]?.fields[1]?.type === "R" ) {
                     brushField = brush[0].fields[0].field;
                     points = brush[0].values[0];
                 }
-                if (brush[0].fields[0].type === "R") {
+                if (brush[0]?.fields[0]?.type === "R" && brush[0]?.fields[1]?.type === "E" ) {
+                    brushField = brush[0].fields[1].field;
+                    points = brush[0].values[1];
+                }
+                if (brush[0].fields.length === 1 && brush[0]?.fields[0]?.type === "R") {
                     brushField = brush[0].fields[0].field;
                     points = [];
                     rangeMin = brush[0].values[0][0];
@@ -185,10 +235,10 @@ export default function ManualLinkControls(props) {
                 </Select>
                 <FormHelperText>Some important helper text</FormHelperText>
             </FormControl>
-            <Typography id="range-slider" gutterBottom>
+            {showSlider && <div><Typography id="range-slider" gutterBottom>
                 Interval range
             </Typography>
-           <Slider
+            <Slider
                 value={value}
                 onChange={handleChange}
                 valueLabelDisplay="auto"
@@ -197,7 +247,7 @@ export default function ManualLinkControls(props) {
                 marks={marks}
                 min={marks[0].value}
                 max={marks[1].value}
-            />
+            /> </div>}
             <Paper elevation={1}>
                 <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
                     <Button onMouseDown={handleAcceptClick}>Save</Button>

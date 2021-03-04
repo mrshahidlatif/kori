@@ -1,6 +1,6 @@
 export default (liteSpec) => {
     // No rectangular brush for bar, area, pie charts and maps
-    const noBrush = ["bar", "area", "geoshape"].includes(liteSpec.mark) || liteSpec.mark.type === "arc";
+    const noBrush = ["geoshape"].includes(liteSpec.mark) || liteSpec.mark.type === "arc";
     const selections = noBrush
         ? {
               paintbrush: { type: "multi", toggle: true, clear: "window:keypress", },
