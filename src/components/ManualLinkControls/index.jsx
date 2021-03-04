@@ -18,6 +18,8 @@ import { createLinks } from "ducks/links";
 import { setManualLinkId, exitManualLinkMode } from "ducks/ui";
 import createLink from "utils/createLink"
 
+//TODO: needs cleaning & refactoring
+
 const useStyles = makeStyles((theme) => ({
     root: {
       width: 300,
@@ -53,7 +55,7 @@ export default function ManualLinkControls(props) {
 
         if(!["ordinal", "band", "point"].includes(axisObj.type)){
 
-            console.log('view data', props.viewData[0][selectedAxis]);
+            console.log('view data', props);
             const min = getMin(props.viewData, selectedAxis);
             const max = getMax(props.viewData, selectedAxis);
             if (min instanceof Date){
@@ -101,7 +103,10 @@ export default function ManualLinkControls(props) {
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
-        console.log('slider val', newValue);
+        link['rangeField'] = {field:axis}
+        link['rangeMin'] = newValue[0];
+        link['rangeMax'] = newValue[1];
+        setLink(link);
       };
   
     function handleResetClick(event) {
