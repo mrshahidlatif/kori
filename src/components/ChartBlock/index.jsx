@@ -65,7 +65,6 @@ export default memo(function ChartBlock({
             //     contains: "padding",
             //     resize: true,
             // };
-
             const result = await vegaEmbed(chartEl.current, spec, { actions: false });
             const view = result.view;
             setView(view);

@@ -28,9 +28,6 @@ export default function Edit(props) {
                 <Editor />
             </Grid>
             <Grid item xs={2}>
-                <Typography variant="overline" display="block" gutterBottom>
-                    Link Setting
-                </Typography>
                 <LinkSetting />
             </Grid>
         </Grid>

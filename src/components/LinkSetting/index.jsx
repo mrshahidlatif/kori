@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
 import { makeStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
-
-import { getChartsInEditor, getCharts } from "ducks/charts";
+import Typography from "@material-ui/core/Typography";
+import { getChartsInEditor } from "ducks/charts";
 import { ChartSetting } from "components/ChartSetting";
 
 const useStyles = makeStyles((theme) => ({
@@ -21,6 +21,11 @@ const useStyles = makeStyles((theme) => ({
     largeAvatar: {
         width: theme.spacing(7),
         height: theme.spacing(7),
+      },
+      largeAvatarActive: {
+        width: theme.spacing(7),
+        height: theme.spacing(7),
+        border: '1px solid #5e5d5d'
       },
   }));
 
@@ -46,17 +51,22 @@ export default function LinkSetting() {
     }
 
     function handleChartAvatarClick(chart){
-        setSelectedChart(chart);   
+        if(selectedChart != chart)
+          setSelectedChart(chart);
+        else setSelectedChart(null);
     }
   
     return createNewLink ? (
         <div className={classes.root}>
-            <div className={classes.chartAvatars}>
-                {chartsInEditor.map((chart) => (
-                    <Avatar key={chart.id} src={chart.thumbnail} variant='rounded' className={classes.largeAvatar} onClick={() => handleChartAvatarClick(chart)} />
-                ))}
-            </div>
-            {selectedChart && <ChartSetting textSelection={textSelection} chart={selectedChart} />}
+          <Typography variant="overline" display="block" gutterBottom>
+              Link Setting
+          </Typography>
+          <div className={classes.chartAvatars}>
+              {chartsInEditor.map((chart) => (
+                  <Avatar key={chart.id} src={chart.thumbnail} variant='rounded' className={chart.id === selectedChart?.id ? classes.largeAvatarActive: classes.largeAvatar} onClick={() => handleChartAvatarClick(chart)} />
+              ))}
+          </div>
+          {selectedChart && <ChartSetting textSelection={textSelection} chart={selectedChart} />}
       </div>
     ): "";
 }
