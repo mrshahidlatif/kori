@@ -1,5 +1,5 @@
 export default (liteSpec) => {
-    // No rectangular brush for bar, area, pie charts and maps
+    // No rectangular brush for maps
     const noBrush = ["geoshape"].includes(liteSpec.mark) || liteSpec.mark.type === "arc";
     const selections = noBrush
         ? {

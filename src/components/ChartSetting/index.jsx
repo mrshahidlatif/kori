@@ -27,7 +27,8 @@ export function ChartSetting(props) {
         () =>
             addSignalToChartSpec(
                 chart.highlight,
-                JSON.parse(JSON.stringify(chart.liteSpec))
+                JSON.parse(JSON.stringify(chart.liteSpec)),
+                true
             ),
         [chart.spec, chart.highlight]
     );

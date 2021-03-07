@@ -42,7 +42,8 @@ export default memo(function ChartBlock({
         () =>
             addSignalToChartSpec(
                 chart.highlight,
-                JSON.parse(JSON.stringify(chart.liteSpec))
+                JSON.parse(JSON.stringify(chart.liteSpec)),
+                false
             ),
         [chart.spec, chart.highlight]
     );

@@ -3,9 +3,10 @@ import { isArray, isObject } from "vega-util";
 import addBrushToVegaLiteSpec from "utils/addBrushToVegaLiteSpec";
 import { compile } from "vega-lite/build/vega-lite";
 
-export default (highlight, liteSpec) => {
+export default (highlight, liteSpec, addBrush) => {
     try {
-        addBrushToVegaLiteSpec(liteSpec);
+        if(addBrush) addBrushToVegaLiteSpec(liteSpec);
+        
     } catch (e) {}
 
     const spec = compile(liteSpec).spec; // vega spec
