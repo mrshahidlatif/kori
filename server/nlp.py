@@ -10,7 +10,7 @@ WORD2VEC_THRESHOLD = 0.70
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
 model = KeyedVectors.load_word2vec_format(
-    'server/lang_models/GoogleNews-vectors-negative300.bin.gz', binary=True, limit=NO_OF_MOST_FREQUENT_WORDS)
+    'lang_models/GoogleNews-vectors-negative300.bin.gz', binary=True, limit=NO_OF_MOST_FREQUENT_WORDS)
 
 
 def find_links(charts, sentence, sentence_offset, block_key):
@@ -50,6 +50,7 @@ def find_links(charts, sentence, sentence_offset, block_key):
                     result = result_fuzzy
             if result.get('similarity') > THRESHOLD:
                 wit_response = get_and_parse_wit_response(sentence)
+                interval = get_interval(sentence)
                 if(wit_response[0].get('min_body') != "" or wit_response[1].get('max_body') != ""):
                     entities = [result.get('matching_str'), wit_response[0].get(
                         'min_body'), wit_response[1].get('max_body')]
@@ -63,12 +64,14 @@ def find_links(charts, sentence, sentence_offset, block_key):
                     range_link = create_link(range_link_text, axis, chart.get('id'), axis.get(
                         'field'), min_offset, sentence, sentence_offset, block_key, range_link_props=wit_response)
                     links.append(range_link)
+    individual_matches = get_matches(links)
+    g_links = group_links(sentence, individual_matches)
     return links
 
 
 def fuzzy_substr_search(needle, hay):
     if needle == None or isinstance(needle, list):
-        return
+        return {"similarity": 0, "matching_str": '', "offset": 0}
     needle_length = len(needle.split())
     max_sim_val = 0
     max_sim_string = u""
@@ -121,6 +124,8 @@ def get_and_parse_wit_response(msg):
 def compute_word2vec_similarity(word, sentence):
     match_in_sentence = ''
     # corpus expects spaces to be replaced with '_'
+    if(word is None):
+        return match_in_sentence
     word = "_".join(word.split())
     try:
         similar_words = model.most_similar(word)
@@ -134,3 +139,20 @@ def compute_word2vec_similarity(word, sentence):
     except:
         pass
     return match_in_sentence
+
+
+def group_links(sentence, matches):
+    # TODO
+    # print('Group Links', matches)
+    return ''
+
+
+def get_matches(links):
+    matches = []
+    for link in links:
+        matches.append(link.get('text'))
+    return matches
+
+
+def get_interval(sentence):
+    return ''

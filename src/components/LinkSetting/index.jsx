@@ -33,21 +33,15 @@ export default function LinkSetting() {
     const classes = useStyles();
     const { docId } = useParams();
     const chartsInEditor = useSelector((state) => getChartsInEditor(state, docId));
-
-    const selectedLink = useSelector((state) => state.ui.selectedLink);
     const textSelection = useSelector((state) => state.ui.textSelection);
+    const showLinkSettingFor = useSelector((state) => state.ui.showLinkSettingFor);
 
     const [selectedChart, setSelectedChart] = useState(null);
 
-    let isRangeLink = false;
     let createNewLink = false;
 
     if(textSelection) {
         createNewLink = true; 
-    }
-
-    if (selectedLink){
-        isRangeLink = selectedLink.hasOwnProperty('rangeMin') || selectedLink.hasOwnProperty('rangeMax');
     }
 
     function handleChartAvatarClick(chart){
@@ -55,9 +49,14 @@ export default function LinkSetting() {
           setSelectedChart(chart);
         else setSelectedChart(null);
     }
+
+    useEffect(()=>{
+      setSelectedChart(chartsInEditor.filter(c => c.id === showLinkSettingFor?.chartId).pop());
+    },[showLinkSettingFor])
   
-    return createNewLink ? (
-        <div className={classes.root}>
+    return (
+      <React.Fragment>
+        {createNewLink && <div className={classes.root}>
           <Typography variant="overline" display="block" gutterBottom>
               Link Setting
           </Typography>
@@ -67,6 +66,18 @@ export default function LinkSetting() {
               ))}
           </div>
           {selectedChart && <ChartSetting textSelection={textSelection} chart={selectedChart} />}
-      </div>
-    ): "";
+      </div>}
+      {showLinkSettingFor && <div className={classes.root}>
+          <Typography variant="overline" display="block" gutterBottom>
+              Link Setting
+          </Typography>
+          <div className={classes.chartAvatars}>
+              {chartsInEditor.map((chart) => (
+                  <Avatar key={chart.id} src={chart.thumbnail} variant='rounded' className={chart.id === showLinkSettingFor?.chartId ? classes.largeAvatarActive: classes.largeAvatar} />
+              ))}
+          </div>
+          {selectedChart && <ChartSetting textSelection={textSelection} chart={selectedChart} showLinkSettingFor={showLinkSettingFor} />}
+      </div>}
+      </React.Fragment>
+    );
 }

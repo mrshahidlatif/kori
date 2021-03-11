@@ -6,7 +6,6 @@
 
 export default ({text, extent, blockKey, chartId}, {feature, values}, {fieldX, rangeX, fieldY, rangeY}, trigger) => {
     return { 
-
         // common props
         text: text,
         startIndex: extent[0],
@@ -18,7 +17,12 @@ export default ({text, extent, blockKey, chartId}, {feature, values}, {fieldX, r
         feature: feature,
         data: values,
 
-        //range link props
+        //single axis brush props
+        // rangeField =
+        // rangeMin = 
+        // rangeMax =
+
+        //rectangular range link props
         fieldX: fieldX,
         rangeX: rangeX,
         fieldY: fieldY,

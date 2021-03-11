@@ -9,6 +9,8 @@ import { useParams } from "react-router-dom";
 import ManualLinkControls from "components/ManualLinkControls";
 import IconButton from "@material-ui/core/IconButton";
 import SettingsIcon from "@material-ui/icons/Settings";
+import EditLinkSetting from "components/EditLinkSetting"
+import { showSelectedLinkSetting } from "ducks/ui";
 
 export function ChartSetting(props) {
     const [view, setView] = useState(null);
@@ -21,6 +23,7 @@ export function ChartSetting(props) {
     const [viewData, setViewData] = useState([]);
     const [brush, setBrush] = useState([]);
     const [toggleSettings, setToggleSettings] = useState(false);
+    const selectedLink = useSelector((state)=> state.ui.selectedLink);
 
     const {chart} = props;
     const spec = useMemo(
@@ -126,6 +129,18 @@ export function ChartSetting(props) {
                         selectedMarks={selectedMarks}
                         brush={brush}
                         viewData={viewData}
+                    />
+                )}
+                
+                {props.showLinkSettingFor && (
+                    <EditLinkSetting
+                        currentDoc={doc}
+                        selectedChart={chart}
+                        selectedMarks={selectedMarks}
+                        brush={brush}
+                        viewData={viewData}
+                        showLinkSettingFor={props.showLinkSettingFor}
+                        selectedLink={selectedLink}
                     />
                 )}
             </div>
