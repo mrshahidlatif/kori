@@ -6,7 +6,7 @@ import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import PropTypes from "prop-types";
-import { setSelectedLink } from "ducks/ui";
+import { setSelectedLink, showLinkSettingFor, showSelectedLinkSetting } from "ducks/ui";
 import { confirmLink, deleteLink } from "ducks/links";
 import Paper from "@material-ui/core/Paper";
 
@@ -30,6 +30,13 @@ export default function PotentialLinkControls(props) {
         props.onAccept(props.selectedLink);
         dispatch(setSelectedLink(null));
     }
+    function handleSettingClick(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        dispatch(showLinkSettingFor(props.selectedLink));
+        dispatch(setSelectedLink(null));
+        
+    }
     return pos && props.selectedLink && !props.selectedLink.isConfirmed && !props.textSelection ? (
         <Box
             zIndex="modal"
@@ -41,6 +48,7 @@ export default function PotentialLinkControls(props) {
                 <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
                     <Button onMouseDown={handleAcceptClick}>Accept</Button>
                     <Button onMouseDown={handleDiscardClick}>Discard</Button>
+                    <Button onMouseDown={handleSettingClick}>Setting</Button>
                 </ButtonGroup>
             </Paper>
         </Box>

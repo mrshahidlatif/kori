@@ -1,5 +1,5 @@
 import React,  { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import Paper from "@material-ui/core/Paper";
@@ -54,8 +54,6 @@ export default function ManualLinkControls(props) {
         console.log(axisObj);
 
         if(!["ordinal", "band", "point"].includes(axisObj.type)){
-
-            console.log('view data', props);
             const min = getMin(props.viewData, selectedAxis);
             const max = getMax(props.viewData, selectedAxis);
             if (min instanceof Date){
@@ -65,11 +63,8 @@ export default function ManualLinkControls(props) {
                 setMarks([{value:min, label:min.toLocaleString()}, {value:max, label:max.toLocaleString()}]);
             }
             setShowSlider(true);
-
             console.log('numerical axis', min, max);
-
         }
-        // setValue([min[selectedAxis], max[selectedAxis]]);
     }
     function getMin(data, axisName){
         const min = data.reduce((prev, curr) => {
@@ -103,6 +98,7 @@ export default function ManualLinkControls(props) {
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
+        //TODO: send to createLink() for updating link
         link['rangeField'] = {field:axis}
         link['rangeMin'] = newValue[0];
         link['rangeMax'] = newValue[1];
@@ -121,7 +117,6 @@ export default function ManualLinkControls(props) {
         // makeManualLink(props.textSelection, props.selectedMarks, props.brush, props.viewData);
         if (link !== null) {
             link['feature']={field:axis};
-            console.log('link', link);
             const action = createLinks(props.currentDoc.id, [link]);
             dispatch(action);
             dispatch(setManualLinkId(action.links[0].id));
@@ -225,43 +220,42 @@ export default function ManualLinkControls(props) {
         }
         return link;
     }
+        
 
-    return props.textSelection && showField ? (
+    return (
         <React.Fragment>
-        <div className={classes.root}>
-            <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="age-native-simple">Axis</InputLabel>
-                <Select
-                    native
-                    value={axis}
-                    onChange={handleAxisChange}
-                >
-                    {axisOptions.map(ao => <option key={uniqueId(ao)} value={ao}>{ao}</option>)}
-                </Select>
-                <FormHelperText>Some important helper text</FormHelperText>
-            </FormControl>
-            {showSlider && <div><Typography id="range-slider" gutterBottom>
-                Interval range
-            </Typography>
-            <Slider
-                value={value}
-                onChange={handleChange}
-                valueLabelDisplay="auto"
-                aria-labelledby="range-slider"
-                // getAriaValueText={valuetext}
-                marks={marks}
-                min={marks[0].value}
-                max={marks[1].value}
-            /> </div>}
-            <Paper elevation={1}>
-                <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
-                    <Button onMouseDown={handleAcceptClick}>Save</Button>
-                    <Button onMouseDown={handleResetClick}>Cancel</Button>
-                </ButtonGroup>
-            </Paper>
-        </div>
+            {(props.textSelection && showField || props.showSelectedLinkSetting)  && <div className={classes.root}>
+                <FormControl className={classes.formControl}>
+                    <InputLabel htmlFor="age-native-simple">Axis</InputLabel>
+                    <Select
+                        native
+                        value={axis}
+                        onChange={handleAxisChange}
+                    >
+                        {axisOptions.map(ao => <option key={uniqueId(ao)} value={ao}>{ao}</option>)}
+                    </Select>
+                    <FormHelperText>Some important helper text</FormHelperText>
+                </FormControl>
+                {showSlider && <div><Typography id="range-slider" gutterBottom>
+                    Interval range
+                </Typography>
+                <Slider
+                    value={value}
+                    onChange={handleChange}
+                    valueLabelDisplay="auto"
+                    aria-labelledby="range-slider"
+                    // getAriaValueText={valuetext}
+                    marks={marks}
+                    min={marks[0].value}
+                    max={marks[1].value}
+                /> </div>}
+                <Paper elevation={1}>
+                    <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
+                        <Button onMouseDown={handleAcceptClick}>Save</Button>
+                        <Button onMouseDown={handleResetClick}>Cancel</Button>
+                    </ButtonGroup>
+                </Paper>
+            </div>}
         </React.Fragment>
-    ) : (
-        ""
     );
 }
