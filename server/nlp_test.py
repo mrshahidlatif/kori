@@ -26,6 +26,7 @@ def main():
             # sentence_offset and block_key are only relevant for creating links in Draft.js!
             links = find_links(chart_properties, sentence, 0, 'block_key')
             matches = get_matches(links)
+            print('matches', matches)
             true_matches = get_true_matches(
                 row['Match Point Phrase'], row['Matched Range Phrase'], row['Matched Aggregated Phrase'])
             performance = compute_performance(matches, true_matches)

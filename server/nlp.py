@@ -10,8 +10,8 @@ import re
 import networkx as nx
 
 client = Wit('LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N')
-THRESHOLD = 0.50
-WORD2VEC_THRESHOLD = 0.70
+THRESHOLD = 0.70
+WORD2VEC_THRESHOLD = 0.50
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
 model = KeyedVectors.load_word2vec_format(
@@ -41,6 +41,7 @@ def find_links(charts, sentence, sentence_offset, block_key):
 
     # range links
     for chart in charts:
+        matched_axes = []
         axes = chart.get('properties').get('axes')
         for axis in axes:
             if axis.get('type') in ["ordinal", "band", "point"]:
@@ -48,55 +49,67 @@ def find_links(charts, sentence, sentence_offset, block_key):
             if isinstance(axis.get('title'), list):
                 continue
             result_fuzzy = fuzzy_substr_search(axis.get('title'), sentence)
-            # result_w2v = compute_word2vec_similarity(
-            #     axis.get('title'), sentence)
-            # if result_fuzzy != None and result_w2v != "":
-            #     if result_w2v.get('similarity') > result_fuzzy.get('similarity'):
-            #         result = result_w2v
-            #     else:
-            #         result = result_fuzzy
-            # get_exact_matches(axis.get('title'), sentence)
-            if result_fuzzy.get('similarity') > THRESHOLD:
-                print('axis', result_fuzzy)
-                interval_matches = get_intervals(sentence)
-                print('Individual Intervals', interval_matches)
-                interval_links = combine_axis_interval(
-                    sentence, result_fuzzy, interval_matches)
-                print('Axis-Interval Links', interval_links)
-                for link in interval_links:
-                    interval_props = [{'min_val': link.get('min')}, {
-                        'max_val': link.get('max')}]
-                    range_link = create_link(link.get('text'), axis, chart.get('id'), axis.get(
-                        'field'), link.get('offset'), sentence, sentence_offset, block_key, range_link_props=interval_props)
-                    print('Final Links', link.get('text'))
-                    links.append(range_link)
+            result_w2v = compute_word2vec_similarity(
+                axis.get('title'), sentence)
+            if result_fuzzy != None and result_w2v != "":
+                if result_w2v.get('similarity') > result_fuzzy.get('similarity'):
+                    result = result_w2v
+            else:
+                result = result_fuzzy
+            if result.get('similarity') > THRESHOLD:
+                axis['match_props'] = result
+                matched_axes.append(axis)
+        interval_matches = get_intervals(sentence)
+        interval_links = combine_axis_interval(
+            sentence, matched_axes, interval_matches)
+        for link in interval_links:
+            interval_props = [{'min_val': link.get('min')}, {
+                'max_val': link.get('max')}]
+            range_link = create_link(link.get('text'), axis, chart.get('id'), axis.get(
+                'field'), link.get('offset'), sentence, sentence_offset, block_key, range_link_props=interval_props)
+            links.append(range_link)
     return links
 
 
-def combine_axis_interval(sentence, axis_matches, interval_matches):
-    # print('combine', axis_matches, interval_matches)
-    distances = []
+def combine_axis_interval(sentence, matched_axes, interval_matches):
+    # one axis can appear multiple times
+    if len(interval_matches) < 1:
+        return []
+    all_matched_axes_instances = []
+    for axis in matched_axes:
+        axis_instances = [m.start()
+                          for m in re.finditer(axis.get('match_props').get('matching_str'), sentence)]
+        for instance in axis_instances:
+            new_axis = axis.copy()
+            updated_match_props = new_axis.get('match_props').copy()
+            updated_match_props['offset'] = instance
+            new_axis['match_props'] = updated_match_props
+            all_matched_axes_instances.append(new_axis)
+
     links = []
-    for axis in [axis_matches]:
+    for axis in all_matched_axes_instances:
+        distances = []
         for interval in interval_matches:
             # Sometimes range is defined with a hypen
             # TODO See if we can combine two tokens (words) for computing shortest distance
             # at the moment, first token of the interval is used.
             term = re.split(' |-', interval.get('text'))[0]
-            dist = compute_shortest_path(sentence, axis.get(
+            dist = compute_shortest_path(sentence, axis.get('match_props').get(
                 'matching_str'), term)
             distances.append(dist)
         # TODO how to handle if distances are equal?
         min_index = distances.index(min(distances))
         interval_end_offset = interval_matches[min_index].get(
             'offset') + len(interval_matches[min_index].get('text'))
-        axis_offset = axis.get('offset')
+        axis_offset = axis.get('match_props').get('offset')
         link_text = sentence[min(axis_offset, interval_end_offset): max(
             axis_offset, interval_end_offset)]
         link = interval_matches[min_index]
         link['text'] = link_text
         link['offset'] = sentence.find(link_text)
         links.append(link)
+        # don't allow axis to many intervals linking!
+        del interval_matches[min_index]
     return links
 
 
@@ -235,9 +248,9 @@ def get_interval_extent(interval):
         numbers.append(float(span.text))
     # TODO handle other cases with 1 value
     if len(numbers) == 1:
-        if interval.find('more'):
+        if interval.find('more') > -1:
             return [min(numbers), sys.float_info.max]
-        if interval.find('less'):
+        if interval.find('less') > -1:
             return [- sys.float_info.max, max(numbers)]
     if len(numbers) == 2:
         return [min(numbers), max(numbers)]
