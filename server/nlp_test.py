@@ -3,7 +3,6 @@ import pandas as pd
 from nlp import *
 import math
 import spacy
-from spacy.matcher import Matcher
 
 THRESHOLD = 0.6
 nlp = spacy.load("en_core_web_md")
@@ -14,7 +13,7 @@ def main():
     overall_performance = [0, 0, 0]  # accurate, false_positives, missed
     df = pd.read_excel('training_data/Training Dataset.xlsx')
     for index, row in df.iterrows():
-        if(index > 5):
+        if(index > 9):
             continue
         sentence = row['Sentence']
         chart_id = int(row['Chart ID'])
@@ -44,7 +43,8 @@ def main():
     print('Recall:', round(tp/(tp + fn)*100, 2))
 
     print('-----End Testing NLP Module------')
-    test_interval_extraction()
+    # test_interval_extraction()
+    # print(fuzzy_substr_search('year_Year', 'American cars that were produced in the years 1970 and 1975 had a huge horsepower between 150 and 200, but the latest models seems to have lower values of horsepower, for instance, less than 100.'))
 
 
 def test_interval_extraction():
@@ -92,8 +92,8 @@ def compute_performance(matches, true_matches):
             false_positive += 1
 
     for true_match in true_matches:
+        not_found = False
         for match in matches:
-            not_found = False
             if(not is_partial_match(match, true_match)):
                 not_found = True
         if(not_found):
@@ -106,33 +106,6 @@ def is_partial_match(a, b):
     doc2 = nlp(b)
     similarity = doc1.similarity(doc2)
     return similarity > THRESHOLD
-
-
-def get_intervals(sentence):
-    matcher = Matcher(nlp.vocab)
-    pattern = [[{'POS': 'NUM'},
-                {'DEP': 'prep'},
-                {'POS': 'NUM'}],
-               [{'POS': 'NUM'},
-                {'POS': 'CCONJ'},
-                {'POS': 'NUM'}],
-               [{'POS': 'NUM'},
-                {'IS_PUNCT': True},
-                {'POS': 'NUM'}],
-               [{'ORTH': 'more'},
-                {'ORTH': 'than'},
-                {'POS': 'NUM'}],
-               [{'ORTH': 'less'},
-                {'ORTH': 'than'},
-                {'POS': 'NUM'}]]
-    matcher.add("Interval", pattern)
-    doc = nlp(sentence)
-    matches = matcher(doc)
-    # for match_id, start, end in matches:
-    #     string_id = nlp.vocab.strings[match_id]  # Get string representation
-    #     span = doc[start:end]  # The matched span
-    # print(match_id, string_id, start, end, span.text)
-    return matches
 
 
 if __name__ == "__main__":
