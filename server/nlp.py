@@ -10,7 +10,7 @@ import re
 import networkx as nx
 
 client = Wit('LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N')
-THRESHOLD = 0.70
+THRESHOLD = 0.90
 WORD2VEC_THRESHOLD = 0.50
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
@@ -29,12 +29,13 @@ def find_links(charts, sentence, sentence_offset, block_key):
             result = fuzzy_substr_search(feature['value'], sentence)
             result_w2v = compute_word2vec_similarity(
                 feature['value'], sentence)
-            if result.get('similarity') > THRESHOLD:
+            # don't match strings that are single character long
+            if result.get('similarity') > THRESHOLD and len(result.get('matching_str')) > 1:
                 link = create_link(result.get(
                     'matching_str'), feature, chart.get('id'), feature.get('value'), result.get('offset'), sentence, sentence_offset, block_key, range_link_props=[])
                 links.append(link)
             if result.get('similarity') < THRESHOLD and result_w2v != "":
-                if result_w2v.get('similarity') > THRESHOLD:
+                if result_w2v.get('similarity') > THRESHOLD and len(result_w2v.get('matching_str')) > 1:
                     link = create_link(result_w2v.get(
                         'matching_str'), feature, chart.get('id'), feature.get('value'), result_w2v.get('offset'), sentence, sentence_offset, block_key, range_link_props=[])
                     links.append(link)
@@ -108,7 +109,7 @@ def combine_axis_interval(sentence, matched_axes, interval_matches):
         link['text'] = link_text
         link['offset'] = sentence.find(link_text)
         links.append(link)
-        # don't allow axis to many intervals linking!
+        # don't allow axis <-> many intervals linking!
         del interval_matches[min_index]
     return links
 
