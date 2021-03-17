@@ -111,9 +111,10 @@ export default function ManualLinkControls(props) {
     const handleChange = (event, newValue) => {
         setValue(newValue);
         //TODO: send to createLink() for updating link
-        link['rangeField'] = {field:axis}
-        link['rangeMin'] = newValue[0];
-        link['rangeMax'] = newValue[1];
+        link['rangeField'] = [axis]
+        link['range'] = newValue
+        // link['rangeMin'] = newValue[0];
+        // link['rangeMax'] = newValue[1];
         setLink(link);
       };
   
@@ -187,13 +188,9 @@ export default function ManualLinkControls(props) {
         }
         if (brush.length > 0) {
             let points;
-            let fieldX;
-            let fieldY;
-            let rangeX;
-            let rangeY;
-            let brushField;
-            let rangeMin;
-            let rangeMax;
+            let brushField;          
+            let rangeField = [];
+            let range = [];
 
             //Rectangular Brush
             if (
@@ -201,12 +198,11 @@ export default function ManualLinkControls(props) {
                 brush[0].fields[0].type === "R" &&
                 brush[0].fields[1].type === "R"
             ) {
-                fieldX = brush[0].fields[0].field;
-                fieldY = brush[0].fields[1].field;
-                rangeX = brush[0].values[0];
-                rangeY = brush[0].values[1];
+                rangeField.push(brush[0].fields[0].field);
+                rangeField.push(brush[0].fields[1].field);
+                range.push(...brush[0].values[0], ...brush[0].values[1] )
                 points = [];
-                setAxis(fieldX);
+                setAxis(brush[0].fields[0].field);
             } else {
                 //Single Axis Brush
                 if (brush[0]?.fields[0]?.type === "E" && brush[0]?.fields[1]?.type === "R" ) {
@@ -220,17 +216,15 @@ export default function ManualLinkControls(props) {
                 if (brush[0].fields.length === 1 && brush[0]?.fields[0]?.type === "R") {
                     brushField = brush[0].fields[0].field;
                     points = [];
-                    rangeMin = brush[0].values[0][0];
-                    rangeMax = brush[0].values[0][1];
+                    rangeField.push(brushField);
+                    range.push(...brush[0].values[0])
                 }
                 setAxis(brushField);
             }
             const commonProps = {text:textSelection.text, extent:[props.textSelection.startIndex, props.textSelection.endIndex], blockKey:props.textSelection.blockKey, chartId:props.selectedChart.id};
             const dataProps = {feature: { field: brushField }, values:points }
-            const rangeProps = {fieldX: fieldX, rangeX: rangeX, fieldY: fieldY, rangeY: rangeY}
-            link = createLink(commonProps, dataProps,rangeProps);
-            if (brush[0]?.fields.length < 2 && brush[0]?.fields[0].type === "R")
-                link = { ...link, rangeField: brushField, rangeMin, rangeMax };
+            const rangeProps = {rangeField,range}
+            link = createLink(commonProps, dataProps, rangeProps);
         }
         return link;
     }
@@ -254,7 +248,6 @@ export default function ManualLinkControls(props) {
     
         const commonProps = {text: props.textSelection.text, extent:[props.textSelection.startIndex, props.textSelection.endIndex], blockKey:props.textSelection.blockKey, chartId: props.selectedChart.id};
         let dataProps={};
-        let brushProps={};
         let rangeField = [];
         let range = [];
         filters.forEach(filter => {
@@ -266,19 +259,13 @@ export default function ManualLinkControls(props) {
                 range.push(...filter.props.intervalValues)
             }
         })
-        let link = createLink(commonProps, dataProps, brushProps, {rangeField, range});
-        //TODO: why we must have a valid field in every selection!
-        // if (!link['feature']) link['feature'] = {field: filters[0].props.field}
-
+        let link = createLink(commonProps, dataProps, {rangeField, range});
         const action = createLinks(props.currentDoc.id, [link]);
-        console.log('Action', action)
         dispatch(setManualLinkId(action.links[0].id));
         dispatch(setTextSelection(null));
         dispatch(exitManualLinkMode(true));
         dispatch(action);
     }
-
-    console.log('Filters in current state', filters)
     return (
         <React.Fragment>
             <Button onMouseDown={handleAddSelectionBtn}>+ Add Selection</Button>

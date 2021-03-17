@@ -192,6 +192,7 @@ def fuzzy_substr_search(needle, hay):
     return {"similarity": max_sim_val, "matching_str": max_sim_string, "offset": hay.find(max_sim_string)}
 
 
+# TODO: refactor this function to match createLinks() in \util
 def create_link(link_text, feature, chartId, val, offset, sentence, sentence_offset, block_key, range_link_props):
     link = {
         "text": link_text,

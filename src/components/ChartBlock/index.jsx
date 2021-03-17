@@ -86,7 +86,6 @@ export default memo(function ChartBlock({
             // view.resize().height(height).width(width).runAsync();
         }
     }
-
     useEffect(() => {
         if (!view) {
             return;
@@ -101,15 +100,8 @@ export default memo(function ChartBlock({
                         data: link.data || [],
                         field: link.feature?.field || '',
                         enabled: true,
-                        //Next 2 fields refer to range selection links
                         rangeField: link.rangeField || [],
                         range: link.range || [],
-                        rangeMax: link.rangeMax || 0,
-                        //Rectangular Brushes
-                        fieldX: link.fieldX || "",
-                        fieldY: link.fieldY || "",
-                        rangeX: link.rangeX || [0, 0],
-                        rangeY: link.rangeY || [0, 0],
                     }).runAsync();
                 });
         } else {
