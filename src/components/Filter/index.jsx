@@ -38,29 +38,34 @@ export default function Filter(props) {
     
     function handleFilterChange(event){
         const filterField = event.target.value;
-        setAxis(filterField);
-        const axisObj = getFilterFieldByName(chartProperties.axes ,filterField)
+        showRightControlsForFilter(filterField);
+    }
 
-        if(!["ordinal", "band", "point"].includes(axisObj?.type)){
+    function showRightControlsForFilter(filterField) {
+        setAxis(filterField);
+        const axisObj = getFilterFieldByName(chartProperties.axes, filterField);
+
+        if (!["ordinal", "band", "point"].includes(axisObj?.type)) {
             const min = getMin(props.viewData, filterField);
             const max = getMax(props.viewData, filterField);
-            if (min instanceof Date){
-                const newMarks = [{value:min.getTime(), label:min.toLocaleString()}, {value:max.getTime(), label:max.toLocaleString()}]
+            if (min instanceof Date) {
+                const newMarks = [{ value: min.getTime(), label: min.toLocaleString() }, { value: max.getTime(), label: max.toLocaleString() }];
                 setMarks(newMarks);
-                setValue([newMarks[0].value, newMarks[1].value])
+                setValue([newMarks[0].value, newMarks[1].value]);
             }
-            else{
-                const newMarks = [{value:min, label:min.toLocaleString()}, {value:max, label:max.toLocaleString()}]
+            else {
+                const newMarks = [{ value: min, label: min.toLocaleString() }, { value: max, label: max.toLocaleString() }];
                 setMarks(newMarks);
-                setValue([newMarks[0].value, newMarks[1].value])
+                setValue([newMarks[0].value, newMarks[1].value]);
             }
-            console.log('Marks', marks)
+            setTextValue(null);
             setShowSlider(true);
         }
-        if (!axisObj || ["ordinal", "band", "point"].includes(axisObj?.type) ) {
+        if (!axisObj || ["ordinal", "band", "point"].includes(axisObj?.type)) {
             let axisFeatures = chartProperties?.features.filter(f => f?.field === filterField);
             setPointFeatures(axisFeatures);
-            setShowSlider(false)
+            setValue(null);
+            setShowSlider(false);
         }
     }
 
@@ -106,6 +111,11 @@ export default function Filter(props) {
         //Send data back to ManualLinkControl component
         props.onFilterUpdate(props.id, {field: axis, intervalValues:value, features:textValue});
     }, [value, textValue])
+
+    useEffect(()=>{
+        console.log('Just once, the chart is loaded or chaned.', axis)
+        showRightControlsForFilter(filterOptions[0])
+    },[])
   
     return (
       <React.Fragment>
