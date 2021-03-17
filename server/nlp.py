@@ -8,9 +8,10 @@ from spacy.matcher import Matcher
 from spacy.matcher import PhraseMatcher
 import re
 import networkx as nx
+import numpy as np
 
 client = Wit('LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N')
-THRESHOLD = 0.90
+THRESHOLD = 0.53
 WORD2VEC_THRESHOLD = 0.50
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
@@ -61,6 +62,13 @@ def find_links(charts, sentence, sentence_offset, block_key):
                 axis['match_props'] = result
                 matched_axes.append(axis)
         interval_matches = get_intervals(sentence)
+        print('interval matches', interval_matches)
+        # TODO: Handle this in a better way
+        # Only uncomment (the following *67-70* lines) for quantitative eval
+        for interval in interval_matches:
+            interval_link = create_link(interval.get('text'), axis, chart.get('id'), axis.get(
+                'field'), interval.get('offset'), sentence, sentence_offset, block_key, range_link_props=[])
+            links.append(interval_link)
         interval_links = combine_axis_interval(
             sentence, matched_axes, interval_matches)
         for link in interval_links:
@@ -88,29 +96,46 @@ def combine_axis_interval(sentence, matched_axes, interval_matches):
             all_matched_axes_instances.append(new_axis)
 
     links = []
+    distance_matrix = []
     for axis in all_matched_axes_instances:
         distances = []
+        print('Axis', axis.get('match_props').get(
+            'matching_str'))
         for interval in interval_matches:
             # Sometimes range is defined with a hypen
             # TODO See if we can combine two tokens (words) for computing shortest distance
             # at the moment, first token of the interval is used.
             term = re.split(' |-', interval.get('text'))[0]
-            dist = compute_shortest_path(sentence, axis.get('match_props').get(
-                'matching_str'), term)
+            dist = compute_shortest_path(
+                sentence, axis.get('match_props'), term)
             distances.append(dist)
+        distance_matrix.append(distances)
         # TODO how to handle if distances are equal?
-        min_index = distances.index(min(distances))
-        interval_end_offset = interval_matches[min_index].get(
-            'offset') + len(interval_matches[min_index].get('text'))
-        axis_offset = axis.get('match_props').get('offset')
-        link_text = sentence[min(axis_offset, interval_end_offset): max(
-            axis_offset, interval_end_offset)]
-        link = interval_matches[min_index]
-        link['text'] = link_text
-        link['offset'] = sentence.find(link_text)
-        links.append(link)
+        # min_index = distances.index(min(distances))
+        # interval_end_offset = interval_matches[min_index].get(
+        #     'offset') + len(interval_matches[min_index].get('text'))
+        # axis_offset = axis.get('match_props').get('offset')
+        # link_text = sentence[min(axis_offset, interval_end_offset): max(
+        #     axis_offset, interval_end_offset)]
+        # link = interval_matches[min_index]
+        # link['text'] = link_text
+        # link['offset'] = sentence.find(link_text)
+        # links.append(link)
         # don't allow axis <-> many intervals linking!
-        del interval_matches[min_index]
+        # del interval_matches[min_index]
+    distance_matrix = np.array(distance_matrix)
+    print('Distance Matrix', distance_matrix)
+    # Case: 1 range, many axes
+    if len(distance_matrix) > 1 and len(distance_matrix[0]) == 1:
+        print('Edge Case 1', all_matched_axes_instances, interval_matches)
+        result = np.argwhere(distance_matrix == np.min(distance_matrix))[0]
+        print('min position', result)
+        print(
+            'min pos', all_matched_axes_instances[result[0]], interval_matches[result[1]])
+        # winner_axis =
+        # for distances in distance_matrix:
+        #     print('row', distances)
+        #     print('row min', min(distances))
     return links
 
 
@@ -127,15 +152,20 @@ def compute_shortest_path(sentence, phrase_a, phrase_b):
                           '{0}-{1}'.format(child.lower_, child.i)))
     graph = nx.Graph(edges)
     # convert both phrases in node format
+    phrase_a_offset = phrase_a.get('offset')
+    phrase_a = phrase_a.get('matching_str')
     for a, b in edges:
-        if a.find(phrase_a) > -1:
+        if a.find(phrase_a) > -1 and sentence[phrase_a_offset: len(sentence)].find(a.split('-')[0]) > -1:
             phrase_a = a
-        if b.find(phrase_a) > -1:
+        if b.find(phrase_a) > -1 and sentence[phrase_a_offset: len(sentence)].find(b.split('-')[0]) > -1:
+            print('Offset of b/off', b,
+                  sentence.find(b.split('-')[0]), phrase_a_offset)
             phrase_a = b
         if a.find(phrase_b) > -1:
             phrase_b = a
         if b.find(phrase_b) > -1:
             phrase_b = b
+    print('a/b', a, b)
     # https://networkx.github.io/documentation/networkx-1.10/reference/algorithms.shortest_paths.html
     dist = nx.shortest_path_length(graph, source=phrase_a, target=phrase_b)
     return dist

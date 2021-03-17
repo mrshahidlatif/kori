@@ -7,6 +7,9 @@ import Avatar from '@material-ui/core/Avatar';
 import Typography from "@material-ui/core/Typography";
 import { getChartsInEditor } from "ducks/charts";
 import { ChartSetting } from "components/ChartSetting";
+import HelpIcon from '@material-ui/icons/Help';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles((theme) => ({
     chartAvatars: {
@@ -57,9 +60,16 @@ export default function LinkSetting() {
     return (
       <React.Fragment>
         {createNewLink && <div className={classes.root}>
+        <div style={{display:'flex'}}>
           <Typography variant="overline" display="block" gutterBottom>
               Link Setting
           </Typography>
+          <Tooltip placement='right-start' title="Click on any chart to begin creating references!">
+              <IconButton style={{marginTop:'-8px'}} size="small" aria-label="help">
+                  <HelpIcon />
+              </IconButton>
+          </Tooltip>
+        </div>
           <div className={classes.chartAvatars}>
               {chartsInEditor.map((chart) => (
                   <Avatar key={chart.id} src={chart.thumbnail} variant='rounded' className={chart.id === selectedChart?.id ? classes.largeAvatarActive: classes.largeAvatar} onClick={() => handleChartAvatarClick(chart)} />

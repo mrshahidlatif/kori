@@ -98,12 +98,12 @@ export default memo(function ChartBlock({
                 .forEach((link) => {
                     view.signal("highlight", {
                         type: link.type,
-                        data: link.data,
-                        field: link.feature.field,
+                        data: link.data || [],
+                        field: link.feature?.field || '',
                         enabled: true,
                         //Next 2 fields refer to range selection links
-                        rangeField: link.rangeField || "",
-                        rangeMin: link.rangeMin || 0,
+                        rangeField: link.rangeField || [],
+                        range: link.range || [],
                         rangeMax: link.rangeMax || 0,
                         //Rectangular Brushes
                         fieldX: link.fieldX || "",

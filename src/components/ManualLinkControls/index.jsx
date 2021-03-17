@@ -12,15 +12,26 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import uniqueId from "utils/uniqueId";
+import Grid from '@material-ui/core/Grid';
+
 
 import { setTextSelection } from "ducks/ui";
 import { createLinks } from "ducks/links";
 import { setManualLinkId, exitManualLinkMode } from "ducks/ui";
 import createLink from "utils/createLink"
+import Filter from "components/Filter"
+import Snackbar from "@material-ui/core/Snackbar";
+import Alert from "components/Alert";
 
 //TODO: needs cleaning & refactoring
 
 const useStyles = makeStyles((theme) => ({
+    chartAvatars: {
+        display: 'flex',
+        '& > *': {
+          margin: theme.spacing(1),
+        },
+      },
     root: {
       width: 300,
     },
@@ -37,6 +48,8 @@ export default function ManualLinkControls(props) {
     const [link, setLink]=useState(null);
     const [selectedPoints, setSelectedPoints] = useState([]);
     const [showSlider, setShowSlider]=useState(false);
+    const [filters, setFilters] = useState([])
+    const [infoMsg, setInfoMsg] = useState(null);
 
     const chartProperties = props.selectedChart.properties;
     let axisOptions = chartProperties.axes.map(axis => axis?.field);
@@ -51,7 +64,6 @@ export default function ManualLinkControls(props) {
         setLink(link);
 
         const axisObj = getAxisObjectByName(chartProperties.axes ,selectedAxis)
-        console.log(axisObj);
 
         if(!["ordinal", "band", "point"].includes(axisObj.type)){
             const min = getMin(props.viewData, selectedAxis);
@@ -63,8 +75,8 @@ export default function ManualLinkControls(props) {
                 setMarks([{value:min, label:min.toLocaleString()}, {value:max, label:max.toLocaleString()}]);
             }
             setShowSlider(true);
-            console.log('numerical axis', min, max);
         }
+        else setShowSlider(false)
     }
     function getMin(data, axisName){
         const min = data.reduce((prev, curr) => {
@@ -123,6 +135,8 @@ export default function ManualLinkControls(props) {
         } else dispatch(setManualLinkId(null));
         dispatch(setTextSelection(null));
         dispatch(exitManualLinkMode(true));
+
+        setInfoMsg("Reference Created!");
     }
 
     useEffect(()=>{
@@ -220,10 +234,69 @@ export default function ManualLinkControls(props) {
         }
         return link;
     }
-        
+    
+    function handleAddSelectionBtn(){
+        setFilters([...filters, {id:uniqueId('filter-'), props:{}}]);
+    }
+    function handleFilterDelete(filterId){
+        console.log('Delete', filterId)
+        const updatedFilters = filters.filter(f=> f.id !== filterId);
+        setFilters(updatedFilters)
+    }
+    function handleFilterUpdate(filterId, filterState){
+        const newFilters = [... filters]
+        const filter = newFilters.find(nf => nf.id === filterId);
+        filter.props = filterState
+        setFilters(newFilters)
+    }
 
+    function handleSaveClick(){
+    
+        const commonProps = {text: props.textSelection.text, extent:[props.textSelection.startIndex, props.textSelection.endIndex], blockKey:props.textSelection.blockKey, chartId: props.selectedChart.id};
+        let dataProps={};
+        let brushProps={};
+        let rangeField = [];
+        let range = [];
+        filters.forEach(filter => {
+            if (filter.props.features){
+                dataProps = {feature:{field:filter.props.field}, values:filter.props.features.map(f=>f.value)}
+            }
+            if (filter.props.intervalValues){
+                rangeField.push(filter.props.field)
+                range.push(...filter.props.intervalValues)
+            }
+        })
+        let link = createLink(commonProps, dataProps, brushProps, {rangeField, range});
+        //TODO: why we must have a valid field in every selection!
+        // if (!link['feature']) link['feature'] = {field: filters[0].props.field}
+
+        const action = createLinks(props.currentDoc.id, [link]);
+        console.log('Action', action)
+        dispatch(setManualLinkId(action.links[0].id));
+        dispatch(setTextSelection(null));
+        dispatch(exitManualLinkMode(true));
+        dispatch(action);
+    }
+
+    console.log('Filters in current state', filters)
     return (
         <React.Fragment>
+            <Button onMouseDown={handleAddSelectionBtn}>+ Add Selection</Button>
+            <Grid container spacing={3}>
+                <Grid item xs={12}>
+                    <div>
+                    {filters.length > 0 && filters.map((filter) => (
+                        <Filter key={filter.id} 
+                            chartProperties={chartProperties} 
+                            viewData={props.viewData} 
+                            id={filter.id} 
+                            onDelete={handleFilterDelete} 
+                            onFilterUpdate={handleFilterUpdate}/>
+                    ))}
+                    </div>
+                </Grid>
+            </Grid>
+            {filters.length > 0 && <Button onMouseDown={handleSaveClick}>Save</Button>}
             {(props.textSelection && showField || props.showSelectedLinkSetting)  && <div className={classes.root}>
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor="age-native-simple">Axis</InputLabel>
@@ -256,6 +329,19 @@ export default function ManualLinkControls(props) {
                     </ButtonGroup>
                 </Paper>
             </div>}
+            <Snackbar
+                open={infoMsg !== null}
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                }}
+                autoHideDuration={5000}
+                onClose={() => {
+                    setInfoMsg(null);
+                }}
+                >
+                <Alert severity="info">{infoMsg}</Alert>
+            </Snackbar>
         </React.Fragment>
     );
 }

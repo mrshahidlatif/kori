@@ -11,6 +11,8 @@ import IconButton from "@material-ui/core/IconButton";
 import SettingsIcon from "@material-ui/icons/Settings";
 import EditLinkSetting from "components/EditLinkSetting"
 import { showSelectedLinkSetting } from "ducks/ui";
+import HelpIcon from '@material-ui/icons/Help';
+import Tooltip from '@material-ui/core/Tooltip';
 
 export function ChartSetting(props) {
     const [view, setView] = useState(null);
@@ -109,7 +111,7 @@ export function ChartSetting(props) {
         <React.Fragment>
             <div ref={containerEl} style={highlightStyle}>
                 <div>
-                    {showConfig && (
+                    {showConfig && <div style={{display:'flex'}}> 
                         <IconButton
                             onMouseDown={handleSettingClick}
                             aria-label="settings"
@@ -117,7 +119,13 @@ export function ChartSetting(props) {
                         >
                             <SettingsIcon />
                         </IconButton>
-                    )}
+                        <Tooltip placement='right-start' title="Use brushing to select visual marks on the chart! Hold down the SHIFT key to select multiple marks!">
+                            <IconButton style={{marginTop:'0px'}} aria-label="help">
+                                <HelpIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </div>
+                    }
                 </div>
                 <div ref={chartEl} />
                 {showConfig && toggleSettings && <ChartConfigPanel chart={chart} />}

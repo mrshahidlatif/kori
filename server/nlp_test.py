@@ -13,7 +13,7 @@ def main():
     overall_performance = [0, 0, 0]  # accurate, false_positives, missed
     df = pd.read_excel('training_data/Training Dataset.xlsx')
     for index, row in df.iterrows():
-        if(index > 9):
+        if(index != 7):
             continue
         sentence = row['Sentence']
         chart_id = int(row['Chart ID'])
@@ -45,7 +45,7 @@ def main():
 
     print('-----End Testing NLP Module------')
     # test_interval_extraction()
-    # print(fuzzy_substr_search('year_Year', 'American cars that were produced in the years 1970 and 1975 had a huge horsepower between 150 and 200, but the latest models seems to have lower values of horsepower, for instance, less than 100.'))
+    print(fuzzy_substr_search('miles_per_gallon', 'There seems to be a negative correlation between horsepower and miles per gallon with more European cars lying around in the range of 20-35 miles per gallon as seen in the middle of the chart.'))
 
 
 def test_interval_extraction():

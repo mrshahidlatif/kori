@@ -4,7 +4,7 @@
         //rangeProps={fieldX, rangeX, fieldY, rangeY}, 
         //suggestionProps={trigger}
 
-export default ({text, extent, blockKey, chartId}, {feature, values}, {fieldX, rangeX, fieldY, rangeY}, trigger) => {
+export default ({text, extent, blockKey, chartId}, {feature, values}, {fieldX, rangeX, fieldY, rangeY}, {rangeField, range}, trigger) => {
     return { 
         // common props
         text: text,
@@ -14,19 +14,18 @@ export default ({text, extent, blockKey, chartId}, {feature, values}, {fieldX, r
         chartId: chartId,
         
         //data props
-        feature: feature,
-        data: values,
+        feature: feature || '',
+        data: values || [],
 
-        //single axis brush props
-        // rangeField =
-        // rangeMin = 
-        // rangeMax =
+        //Brush props new
+        rangeField: rangeField || [],
+        range: range || [],
 
         //rectangular range link props
-        fieldX: fieldX,
-        rangeX: rangeX,
-        fieldY: fieldY,
-        rangeY: rangeY,
+        fieldX: fieldX || '',
+        rangeX: rangeX || [],
+        fieldY: fieldY || '',
+        rangeY: rangeY || [],
 
 
         active: false,
