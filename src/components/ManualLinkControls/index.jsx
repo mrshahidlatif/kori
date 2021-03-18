@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { useEffect } from "react";
-import Slider from '@material-ui/core/Slider';
 import { makeStyles } from '@material-ui/core/styles';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -11,7 +10,6 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import uniqueId from "utils/uniqueId";
 import Grid from '@material-ui/core/Grid';
-
 
 import { setTextSelection } from "ducks/ui";
 import { createLinks } from "ducks/links";
@@ -31,7 +29,8 @@ const useStyles = makeStyles((theme) => ({
         },
       },
     root: {
-      width: 300,
+        // width: 300,
+        margin: theme.spacing(1),
     },
   }));
 
@@ -126,7 +125,6 @@ export default function ManualLinkControls(props) {
     function handleAcceptClick(event) {
         event.preventDefault();
         event.stopPropagation();
-        // makeManualLink(props.textSelection, props.selectedMarks, props.brush, props.viewData);
         if (link !== null) {
             link['feature']={field:axis};
             const action = createLinks(props.currentDoc.id, [link]);
@@ -136,7 +134,7 @@ export default function ManualLinkControls(props) {
         dispatch(setTextSelection(null));
         dispatch(exitManualLinkMode(true));
 
-        setInfoMsg("Reference Created!");
+        setInfoMsg('Link created successfully!')
     }
 
     useEffect(()=>{
@@ -265,9 +263,9 @@ export default function ManualLinkControls(props) {
         dispatch(setTextSelection(null));
         dispatch(exitManualLinkMode(true));
         dispatch(action);
-    }
 
-    console.log('Manual Link Controls', props)
+        setInfoMsg('Link created successfully!')
+    }
     return (
         <React.Fragment>
             {props.mode === 'filter' && <Button variant="contained" size="small" onMouseDown={handleAddSelectionBtn}>+Add Selection</Button>}
@@ -286,45 +284,37 @@ export default function ManualLinkControls(props) {
                 </Grid>
             </Grid>
             {filters.length > 0 && <Button variant="contained" size="small" onMouseDown={handleSaveClick}>Save</Button>}
-            {(props.textSelection && showField || props.showSelectedLinkSetting)  && props.mode === 'brush' && <div className={classes.root}>
-                { props.brush.length === 0 &&  <FormControl className={classes.formControl}>
-                    <InputLabel htmlFor="age-native-simple">Axis</InputLabel>
-                    <Select
-                        native
-                        value={axis}
-                        onChange={handleAxisChange}
-                    >
-                        {axisOptions.map(ao => <option key={uniqueId(ao)} value={ao}>{ao}</option>)}
-                    </Select>
-                    <FormHelperText>Choose which field to link to!</FormHelperText>
-                </FormControl>}
-                {/* {showSlider && <div>
-                <Slider
-                    value={value}
-                    onChange={handleChange}
-                    valueLabelDisplay="auto"
-                    aria-labelledby="range-slider"
-                    marks={marks}
-                    min={marks[0].value}
-                    max={marks[1].value}
-                /> </div>} */}
-                <ButtonGroup size="small" variant="contained" aria-label="small button group">
-                    <Button onMouseDown={handleAcceptClick}>Save</Button>
-                    <Button onMouseDown={handleResetClick}>Cancel</Button>
-                </ButtonGroup>
-            </div>}
+                {(props.textSelection && showField || props.showSelectedLinkSetting)  && props.mode === 'brush' && <div className={classes.root}>
+                    {props.brush.length === 0 &&  <FormControl className={classes.formControl}>
+                        <InputLabel htmlFor="age-native-simple">Axis</InputLabel>
+                        <Select
+                            native
+                            value={axis}
+                            onChange={handleAxisChange}
+                        >
+                            {axisOptions.map(ao => <option key={uniqueId(ao)} value={ao}>{ao}</option>)}
+                        </Select>
+                        <FormHelperText>Choose which field to link to!</FormHelperText>
+                    </FormControl>}
+                    <div>
+                    <ButtonGroup size="small" variant="contained" aria-label="small button group">
+                        <Button onMouseDown={handleAcceptClick}>Save</Button>
+                        <Button onMouseDown={handleResetClick}>Cancel</Button>
+                    </ButtonGroup>
+                    </div>
+                </div>}
             <Snackbar
                 open={infoMsg !== null}
                 anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
+                    vertical: "top",
+                    horizontal: "right",
                 }}
                 autoHideDuration={5000}
                 onClose={() => {
                     setInfoMsg(null);
                 }}
                 >
-                <Alert severity="info">{infoMsg}</Alert>
+                <Alert severity="success">{infoMsg}</Alert>
             </Snackbar>
         </React.Fragment>
     );
