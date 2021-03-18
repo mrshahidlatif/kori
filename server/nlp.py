@@ -11,8 +11,8 @@ import networkx as nx
 import numpy as np
 
 client = Wit('LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N')
-THRESHOLD = 0.53
-WORD2VEC_THRESHOLD = 0.50
+THRESHOLD = 0.7
+WORD2VEC_THRESHOLD = 0.7
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
 model = KeyedVectors.load_word2vec_format(
@@ -274,9 +274,15 @@ def get_intervals(sentence):
         # string_id = nlp.vocab.strings[match_id]  # Get string representation
         span = doc[start:end]  # The matched span
         offset = sentence.find(span.text)
-        extent = get_interval_extent(span.text)
-        interval = {'text': span.text, 'offset': offset,
-                    'min': extent[0], 'max': extent[1]}
+        # TODO: See if we can convert numbers to numerals e.g., ten to 10.
+        # spacy recognizes ten as a number.
+        try:
+            extent = get_interval_extent(span.text)
+            interval = {'text': span.text, 'offset': offset,
+                        'min': extent[0], 'max': extent[1]}
+        except ValueError:
+            interval = {'text': span.text, 'offset': offset,
+                        'min': 0, 'max': 0}
         interval_matches.append(interval)
     return interval_matches
 
