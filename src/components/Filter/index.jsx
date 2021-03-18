@@ -17,6 +17,7 @@ import Alert from "components/Alert";
 const useStyles = makeStyles((theme) => ({
     root: {
       width: 300,
+      margin: theme.spacing(1),
     },
   }));
 
@@ -119,7 +120,7 @@ export default function Filter(props) {
   
     return (
       <React.Fragment>
-        <Grid container spacing={1}>
+        <Grid className= {classes.root} container spacing={1}>
             <Grid item xs={1}>
                 <IconButton aria-label="close" className={classes.margin} size="small">
                     <CloseIcon fontSize="inherit" onMouseDown={() => props.onDelete(props.id)}/>

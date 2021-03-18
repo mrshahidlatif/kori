@@ -266,9 +266,11 @@ export default function ManualLinkControls(props) {
         dispatch(exitManualLinkMode(true));
         dispatch(action);
     }
+
+    console.log('Manual Link Controls', props)
     return (
         <React.Fragment>
-            {props.mode === 'filter' && <Button variant="contained" size="small" onMouseDown={handleAddSelectionBtn}>+ Add Selection</Button>}
+            {props.mode === 'filter' && <Button variant="contained" size="small" onMouseDown={handleAddSelectionBtn}>+Add Selection</Button>}
             <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <div>
