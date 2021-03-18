@@ -62,7 +62,6 @@ def find_links(charts, sentence, sentence_offset, block_key):
                 axis['match_props'] = result
                 matched_axes.append(axis)
         interval_matches = get_intervals(sentence)
-        print('interval matches', interval_matches)
         # TODO: Handle this in a better way
         # Only uncomment (the following *67-70* lines) for quantitative eval
         for interval in interval_matches:
@@ -88,61 +87,75 @@ def combine_axis_interval(sentence, matched_axes, interval_matches):
     for axis in matched_axes:
         axis_instances = [m.start()
                           for m in re.finditer(axis.get('match_props').get('matching_str'), sentence)]
+        instance_id = 0
         for instance in axis_instances:
             new_axis = axis.copy()
             updated_match_props = new_axis.get('match_props').copy()
             updated_match_props['offset'] = instance
+            updated_match_props['instance_id'] = instance_id
             new_axis['match_props'] = updated_match_props
             all_matched_axes_instances.append(new_axis)
+            instance_id += 1
 
     links = []
     distance_matrix = []
     for axis in all_matched_axes_instances:
         distances = []
-        print('Axis', axis.get('match_props').get(
-            'matching_str'))
         for interval in interval_matches:
             # Sometimes range is defined with a hypen
-            # TODO See if we can combine two tokens (words) for computing shortest distance
+            # TODO: See if we can combine two tokens (words) for computing shortest distance
             # at the moment, first token of the interval is used.
             term = re.split(' |-', interval.get('text'))[0]
             dist = compute_shortest_path(
                 sentence, axis.get('match_props'), term)
             distances.append(dist)
         distance_matrix.append(distances)
-        # TODO how to handle if distances are equal?
-        # min_index = distances.index(min(distances))
-        # interval_end_offset = interval_matches[min_index].get(
-        #     'offset') + len(interval_matches[min_index].get('text'))
-        # axis_offset = axis.get('match_props').get('offset')
-        # link_text = sentence[min(axis_offset, interval_end_offset): max(
-        #     axis_offset, interval_end_offset)]
-        # link = interval_matches[min_index]
-        # link['text'] = link_text
-        # link['offset'] = sentence.find(link_text)
-        # links.append(link)
-        # don't allow axis <-> many intervals linking!
-        # del interval_matches[min_index]
+        # TODO: how to handle if distances are equal?
     distance_matrix = np.array(distance_matrix)
-    print('Distance Matrix', distance_matrix)
-    # Case: 1 range, many axes
+    # Case: 1 axis, 1 interval
+    if len(distance_matrix) == 1 and len(distance_matrix[0]) == 1:
+        link = link = merge_axis_interval(
+            sentence, all_matched_axes_instances[0], interval_matches[0])
+        links.append(link)
+
+    # Case: 1 interval, many axes
     if len(distance_matrix) > 1 and len(distance_matrix[0]) == 1:
-        print('Edge Case 1', all_matched_axes_instances, interval_matches)
-        result = np.argwhere(distance_matrix == np.min(distance_matrix))[0]
-        print('min position', result)
-        print(
-            'min pos', all_matched_axes_instances[result[0]], interval_matches[result[1]])
-        # winner_axis =
-        # for distances in distance_matrix:
-        #     print('row', distances)
-        #     print('row min', min(distances))
+        min_pos = np.argwhere(distance_matrix == np.min(distance_matrix))[0]
+        winner_axis = all_matched_axes_instances[min_pos[0]]
+        winner_interval = interval_matches[min_pos[1]]
+        link = merge_axis_interval(sentence, winner_axis, winner_interval)
+        links.append(link)
+
+    # Case: many intervals, many axes
+    if len(distance_matrix) >= 1 and len(distance_matrix[0]) > 1:
+
+        for index, axis in enumerate(all_matched_axes_instances):
+            min_index = np.argmin(distance_matrix[index])
+            link = merge_axis_interval(
+                sentence, axis, interval_matches[min_index])
+            links.append(link)
+            # Delete interval that is already assigned
+            del interval_matches[min_index]
+            distance_matrix = np.delete(distance_matrix, min_index, axis=1)
     return links
 
 
-def compute_shortest_path(sentence, phrase_a, phrase_b):
-    # Copied from https://stackoverflow.com/questions/32835291/how-to-find-the-shortest-dependency-path-between-two-words-in-python
+def merge_axis_interval(sentence, axis, interval):
+    interval_offset = interval.get('offset')
+    axis_offset = axis.get('match_props').get('offset')
+    length = len(axis.get('match_props').get('matching_str')) if axis_offset > interval_offset else len(
+        interval.get('text'))
+    link_text = sentence[min(axis_offset, interval_offset): max(
+        axis_offset, interval_offset) + length]
+    link = interval
+    link['text'] = link_text
+    link['offset'] = sentence.find(link_text)
+    return link
+
+
+def compute_shortest_path(sentence, axis_phrase_obj, interval_phrase):
+    # Source: https://stackoverflow.com/questions/32835291/how-to-find-the-shortest-dependency-path-between-two-words-in-python
     document = nlp(sentence)
-    # print('document: {0}'.format(document))
     # Load spacy's dependency tree into a networkx graph
     edges = []
     for token in document:
@@ -152,23 +165,26 @@ def compute_shortest_path(sentence, phrase_a, phrase_b):
                           '{0}-{1}'.format(child.lower_, child.i)))
     graph = nx.Graph(edges)
     # convert both phrases in node format
-    phrase_a_offset = phrase_a.get('offset')
-    phrase_a = phrase_a.get('matching_str')
+    axis_phrase = axis_phrase_obj.get('matching_str')
+    axis_phrase_instances = []
     for a, b in edges:
-        if a.find(phrase_a) > -1 and sentence[phrase_a_offset: len(sentence)].find(a.split('-')[0]) > -1:
-            phrase_a = a
-        if b.find(phrase_a) > -1 and sentence[phrase_a_offset: len(sentence)].find(b.split('-')[0]) > -1:
-            print('Offset of b/off', b,
-                  sentence.find(b.split('-')[0]), phrase_a_offset)
-            phrase_a = b
-        if a.find(phrase_b) > -1:
-            phrase_b = a
-        if b.find(phrase_b) > -1:
-            phrase_b = b
-    print('a/b', a, b)
+        if a.find(axis_phrase) > -1:
+            axis_phrase_instances.append(a)
+        if b.find(axis_phrase) > -1:
+            axis_phrase_instances.append(b)
+        if a.find(interval_phrase) > -1:
+            interval_phrase = a
+        if b.find(interval_phrase) > -1:
+            interval_phrase = b
     # https://networkx.github.io/documentation/networkx-1.10/reference/algorithms.shortest_paths.html
-    dist = nx.shortest_path_length(graph, source=phrase_a, target=phrase_b)
-    return dist
+    distances = []
+    unique_instances = np.unique(np.array(axis_phrase_instances))
+    # axis_phrase_instances = list(set(axis_phrase_instances))
+    for instance in unique_instances:
+        dist = nx.shortest_path_length(
+            graph, source=instance, target=interval_phrase)
+        distances.append(dist)
+    return distances[axis_phrase_obj.get('instance_id')]
 
 
 def fuzzy_substr_search(needle, hay):
@@ -257,7 +273,6 @@ def get_intervals(sentence):
     for match_id, start, end in matches:
         # string_id = nlp.vocab.strings[match_id]  # Get string representation
         span = doc[start:end]  # The matched span
-        # print(match_id, string_id, start, end, span.text)
         offset = sentence.find(span.text)
         extent = get_interval_extent(span.text)
         interval = {'text': span.text, 'offset': offset,
@@ -276,7 +291,6 @@ def get_interval_extent(interval):
     for match_id, start, end in matches:
         string_id = nlp.vocab.strings[match_id]  # Get string representation
         span = doc[start: end]  # The matched span
-        # print(match_id, string_id, start, end, span.text)
         numbers.append(float(span.text))
     # TODO handle other cases with 1 value
     if len(numbers) == 1:
