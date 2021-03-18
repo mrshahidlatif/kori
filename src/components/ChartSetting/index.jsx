@@ -13,6 +13,10 @@ import EditLinkSetting from "components/EditLinkSetting"
 import { showSelectedLinkSetting } from "ducks/ui";
 import HelpIcon from '@material-ui/icons/Help';
 import Tooltip from '@material-ui/core/Tooltip';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import TuneIcon from '@material-ui/icons/Tune';
+import BrushIcon from '@material-ui/icons/Brush';
 
 export function ChartSetting(props) {
     const [view, setView] = useState(null);
@@ -26,6 +30,7 @@ export function ChartSetting(props) {
     const [brush, setBrush] = useState([]);
     const [toggleSettings, setToggleSettings] = useState(false);
     const selectedLink = useSelector((state)=> state.ui.selectedLink);
+    const [creationMode, setCreationMode] = useState(0);
 
     const {chart} = props;
     const spec = useMemo(
@@ -56,8 +61,7 @@ export function ChartSetting(props) {
             //     contains: "padding",
             //     resize: true,
             // };
-
-            const result = await vegaEmbed(chartEl.current, spec, { actions: false });
+            const result = await vegaEmbed(chartEl?.current, spec, { actions: false });
             const view = result.view;
 
             // const viewData = view.data("source_0");
@@ -100,15 +104,33 @@ export function ChartSetting(props) {
     function handleSettingClick() {
         setToggleSettings(!toggleSettings);
     }
+    function handleModeChange(event, mode){
+        console.log('mode', mode);
+        setCreationMode(mode);
+    }
 
     const showConfig = true;
     const highlightStyle = {
-                  position: "relative",
-                  width: "fit-content",
-              };
+        position: "relative",
+        width: "fit-content",
+    };
 
     return (
         <React.Fragment>
+            <ToggleButtonGroup
+                value={creationMode}
+                exclusive
+                onChange={handleModeChange}
+                aria-label="text alignment"
+                size='small'
+                >
+                <ToggleButton value="brush" aria-label="left aligned">
+                    <BrushIcon />
+                </ToggleButton>
+                <ToggleButton value="filter" aria-label="centered">
+                    <TuneIcon />
+                </ToggleButton>
+            </ToggleButtonGroup>
             <div ref={containerEl} style={highlightStyle}>
                 <div>
                     {showConfig && <div style={{display:'flex'}}> 
@@ -137,6 +159,7 @@ export function ChartSetting(props) {
                         selectedMarks={selectedMarks}
                         brush={brush}
                         viewData={viewData}
+                        mode={creationMode}
                     />
                 )}
                 

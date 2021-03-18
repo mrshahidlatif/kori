@@ -2,8 +2,6 @@ import React,  { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
-import Paper from "@material-ui/core/Paper";
-import Typography from "@material-ui/core/Typography";
 import { useEffect } from "react";
 import Slider from '@material-ui/core/Slider';
 import { makeStyles } from '@material-ui/core/styles';
@@ -56,6 +54,7 @@ export default function ManualLinkControls(props) {
     const featureFields = [...new Set(chartProperties.features.map((f) => f.field))];
     axisOptions = axisOptions.concat(featureFields);
     axisOptions = [...new Set(axisOptions)];
+
 
     const handleAxisChange = (event) => {
         const selectedAxis = event.target.value;
@@ -111,8 +110,8 @@ export default function ManualLinkControls(props) {
     const handleChange = (event, newValue) => {
         setValue(newValue);
         //TODO: send to createLink() for updating link
-        link['rangeField'] = [axis]
-        link['range'] = newValue
+        // link['rangeField'] = [axis]
+        // link['range'] = newValue
         // link['rangeMin'] = newValue[0];
         // link['rangeMax'] = newValue[1];
         setLink(link);
@@ -238,6 +237,7 @@ export default function ManualLinkControls(props) {
         setFilters(updatedFilters)
     }
     function handleFilterUpdate(filterId, filterState){
+        console.log('Filter State', filterState)
         const newFilters = [... filters]
         const filter = newFilters.find(nf => nf.id === filterId);
         filter.props = filterState
@@ -268,7 +268,7 @@ export default function ManualLinkControls(props) {
     }
     return (
         <React.Fragment>
-            <Button onMouseDown={handleAddSelectionBtn}>+ Add Selection</Button>
+            {props.mode === 'filter' && <Button variant="contained" size="small" onMouseDown={handleAddSelectionBtn}>+ Add Selection</Button>}
             <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <div>
@@ -283,9 +283,9 @@ export default function ManualLinkControls(props) {
                     </div>
                 </Grid>
             </Grid>
-            {filters.length > 0 && <Button onMouseDown={handleSaveClick}>Save</Button>}
-            {(props.textSelection && showField || props.showSelectedLinkSetting)  && <div className={classes.root}>
-                <FormControl className={classes.formControl}>
+            {filters.length > 0 && <Button variant="contained" size="small" onMouseDown={handleSaveClick}>Save</Button>}
+            {(props.textSelection && showField || props.showSelectedLinkSetting)  && props.mode === 'brush' && <div className={classes.root}>
+                { props.brush.length === 0 &&  <FormControl className={classes.formControl}>
                     <InputLabel htmlFor="age-native-simple">Axis</InputLabel>
                     <Select
                         native
@@ -294,27 +294,22 @@ export default function ManualLinkControls(props) {
                     >
                         {axisOptions.map(ao => <option key={uniqueId(ao)} value={ao}>{ao}</option>)}
                     </Select>
-                    <FormHelperText>Some important helper text</FormHelperText>
-                </FormControl>
-                {showSlider && <div><Typography id="range-slider" gutterBottom>
-                    Interval range
-                </Typography>
+                    <FormHelperText>Choose which field to link to!</FormHelperText>
+                </FormControl>}
+                {/* {showSlider && <div>
                 <Slider
                     value={value}
                     onChange={handleChange}
                     valueLabelDisplay="auto"
                     aria-labelledby="range-slider"
-                    // getAriaValueText={valuetext}
                     marks={marks}
                     min={marks[0].value}
                     max={marks[1].value}
-                /> </div>}
-                <Paper elevation={1}>
-                    <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
-                        <Button onMouseDown={handleAcceptClick}>Save</Button>
-                        <Button onMouseDown={handleResetClick}>Cancel</Button>
-                    </ButtonGroup>
-                </Paper>
+                /> </div>} */}
+                <ButtonGroup size="small" variant="contained" aria-label="small button group">
+                    <Button onMouseDown={handleAcceptClick}>Save</Button>
+                    <Button onMouseDown={handleResetClick}>Cancel</Button>
+                </ButtonGroup>
             </div>}
             <Snackbar
                 open={infoMsg !== null}
