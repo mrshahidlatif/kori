@@ -66,10 +66,13 @@ export default function LinkSetting() {
     },[showLinkSettingFor])
 
     function handleModeChange(event, mode){
-      console.log('mode', mode);
       if (mode !== null)
         setCreationMode(mode);
     }
+
+    useEffect(()=>{
+      console.log('LinkSetting is loaded!')
+    })
   
     return (
       <React.Fragment>

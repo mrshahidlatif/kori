@@ -32,13 +32,17 @@ def find_links(charts, sentence, sentence_offset, block_key):
                 feature['value'], sentence)
             # don't match strings that are single character long
             if result.get('similarity') > THRESHOLD and len(result.get('matching_str')) > 1:
-                link = create_link(result.get(
-                    'matching_str'), feature, chart.get('id'), feature.get('value'), result.get('offset'), sentence, sentence_offset, block_key, range_link_props=[])
+                link_text = sentence[result.get('offset'): result.get(
+                    'offset') + len(result.get('matching_str'))]
+                link = create_link(link_text, feature, chart.get('id'), [feature.get(
+                    'value')], result.get('offset'), sentence, sentence_offset, block_key, [], [])
                 links.append(link)
             if result.get('similarity') < THRESHOLD and result_w2v != "":
                 if result_w2v.get('similarity') > THRESHOLD and len(result_w2v.get('matching_str')) > 1:
-                    link = create_link(result_w2v.get(
-                        'matching_str'), feature, chart.get('id'), feature.get('value'), result_w2v.get('offset'), sentence, sentence_offset, block_key, range_link_props=[])
+                    link_text = sentence[result_w2v.get('offset'): result.get(
+                        'offset') + len(result_w2v.get('matching_str'))]
+                    link = create_link(link_text, feature, chart.get('id'), [feature.get(
+                        'value')], result_w2v.get('offset'), sentence, sentence_offset, block_key, [], [])
                     links.append(link)
 
     # range links
@@ -59,22 +63,22 @@ def find_links(charts, sentence, sentence_offset, block_key):
             else:
                 result = result_fuzzy
             if result.get('similarity') > THRESHOLD:
+                result['field'] = axis.get('title')
                 axis['match_props'] = result
                 matched_axes.append(axis)
         interval_matches = get_intervals(sentence)
         # TODO: Handle this in a better way
         # Only uncomment (the following *67-70* lines) for quantitative eval
-        for interval in interval_matches:
-            interval_link = create_link(interval.get('text'), axis, chart.get('id'), axis.get(
-                'field'), interval.get('offset'), sentence, sentence_offset, block_key, range_link_props=[])
-            links.append(interval_link)
+        # for interval in interval_matches:
+        #     interval_link = create_link(interval.get('text'), axis, chart.get('id'), axis.get(
+        #         'field'), interval.get('offset'), sentence, sentence_offset, block_key, [], [])
+        #     links.append(interval_link)
         interval_links = combine_axis_interval(
             sentence, matched_axes, interval_matches)
         for link in interval_links:
-            interval_props = [{'min_val': link.get('min')}, {
-                'max_val': link.get('max')}]
-            range_link = create_link(link.get('text'), axis, chart.get('id'), axis.get(
-                'field'), link.get('offset'), sentence, sentence_offset, block_key, range_link_props=interval_props)
+            range = [link.get('min'), link.get('max')]
+            range_link = create_link(link.get('text'), "", chart.get('id'), [], link.get(
+                'offset'), sentence, sentence_offset, block_key, [link.get('rangeField')], range)
             links.append(range_link)
     return links
 
@@ -128,7 +132,6 @@ def combine_axis_interval(sentence, matched_axes, interval_matches):
 
     # Case: many intervals, many axes
     if len(distance_matrix) >= 1 and len(distance_matrix[0]) > 1:
-
         for index, axis in enumerate(all_matched_axes_instances):
             min_index = np.argmin(distance_matrix[index])
             link = merge_axis_interval(
@@ -150,6 +153,7 @@ def merge_axis_interval(sentence, axis, interval):
     link = interval
     link['text'] = link_text
     link['offset'] = sentence.find(link_text)
+    link['rangeField'] = axis.get('match_props').get('field')
     return link
 
 
@@ -181,9 +185,12 @@ def compute_shortest_path(sentence, axis_phrase_obj, interval_phrase):
     unique_instances = np.unique(np.array(axis_phrase_instances))
     # axis_phrase_instances = list(set(axis_phrase_instances))
     for instance in unique_instances:
-        dist = nx.shortest_path_length(
-            graph, source=instance, target=interval_phrase)
-        distances.append(dist)
+        try:
+            dist = nx.shortest_path_length(
+                graph, source=instance, target=interval_phrase)
+            distances.append(dist)
+        except:
+            distances.append(100000)
     return distances[axis_phrase_obj.get('instance_id')]
 
 
@@ -208,24 +215,22 @@ def fuzzy_substr_search(needle, hay):
     return {"similarity": max_sim_val, "matching_str": max_sim_string, "offset": hay.find(max_sim_string)}
 
 
-# TODO: refactor this function to match createLinks() in \util
-def create_link(link_text, feature, chartId, val, offset, sentence, sentence_offset, block_key, range_link_props):
+def create_link(link_text, feature, chartId, val, offset, sentence, sentence_offset, block_key, rangeField, range):
     link = {
         "text": link_text,
         "feature": feature,
         "chartId": chartId,
         "active": False,
         "type": "point",
-        "data": [val],
+        "data": val,
         "startIndex": sentence_offset + offset,
         "endIndex": sentence_offset + offset + len(link_text),
         "sentence": sentence,
         "isConfirmed": False,
         "blockKey": block_key,
+        "rangeField": rangeField,
+        "range": range
     }
-    if(len(range_link_props) == 2):
-        link["rangeMin"] = range_link_props[0].get('min_val')
-        link["rangeMax"] = range_link_props[1].get('max_val')
     return link
 
 
