@@ -271,9 +271,13 @@ def get_intervals(sentence):
                 {'POS': 'NUM'}],
                [{'ORTH': 'less'},
                 {'ORTH': 'than'},
+                {'POS': 'NUM'}],
+               [{'POS': 'NUM'},
+                {'POS': 'CCONJ'},
+                {'POS': 'SYM'},
                 {'POS': 'NUM'}]]
     matcher.add("Interval", pattern)
-    doc = nlp(sentence)
+    doc = nlp(sentence.lower())
     matches = matcher(doc)
     for match_id, start, end in matches:
         # string_id = nlp.vocab.strings[match_id]  # Get string representation
