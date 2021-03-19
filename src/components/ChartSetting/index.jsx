@@ -74,12 +74,10 @@ export function ChartSetting(props) {
             setViewData(viewData);
             try {
                 view.addDataListener("paintbrush_store", function (name, value) {
-                    console.log(name, value);
                     setSelectedMarks(selectedMarks.concat(value));
                 });
 
                 view.addDataListener("brush_store", function (name, value) {
-                    console.log(name, value);
                     setBrush(brush.concat(value));
                 });
             } catch (error) {

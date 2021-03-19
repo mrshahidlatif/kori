@@ -46,7 +46,7 @@ export default function Filter(props) {
         setAxis(filterField);
         const axisObj = getFilterFieldByName(chartProperties.axes, filterField);
 
-        if (!["ordinal", "band", "point"].includes(axisObj?.type)) {
+        if (axisObj && !["ordinal", "band", "point"].includes(axisObj?.type)) {
             const min = getMin(props.viewData, filterField);
             const max = getMax(props.viewData, filterField);
             if (min instanceof Date) {
@@ -62,8 +62,9 @@ export default function Filter(props) {
             setTextValue(null);
             setShowSlider(true);
         }
-        if (!axisObj || ["ordinal", "band", "point"].includes(axisObj?.type)) {
+        if (!axisObj || ["ordinal", "band", "point", "string"].includes(axisObj?.type)) {
             let axisFeatures = chartProperties?.features.filter(f => f?.field === filterField);
+            if (!axisFeatures) axisFeatures = chartProperties?.features?.filter(f => f?.properties?.field === filterField);
             setPointFeatures(axisFeatures);
             setValue(null);
             setShowSlider(false);
@@ -81,6 +82,7 @@ export default function Filter(props) {
     }
 
     function getMin(data, axisName){
+        console.log('Data/', data)
         const min = data.reduce((prev, curr) => {
             if (typeof curr === 'string') {
                 return Number.parseFloat(prev[axisName]) < Number.parseFloat(curr[axisName]) ? prev : curr

@@ -46,14 +46,14 @@ export function addSignalToMark(mark, highlight) {
     //TODO: see if we can combine two categorical variables using the same logic
     const activePredicate = `highlight.enabled===true && (
         (length(highlight.rangeField) === 0 && ${
-            isMap ? "indexof(highlight.data, datum.properties[highlight.field]) != -1" : "indexof(highlight.data, datum[highlight.field]) != -1"
+            isMap ? "indexof(highlight.data, datum.properties[highlight.field]) != -1 || indexof(highlight.data, datum[highlight.field]) != -1"  : "indexof(highlight.data, datum[highlight.field]) != -1"
         }) || 
 
         length(highlight.rangeField) === 0 && length(highlight.field) === 2 && indexof(highlight.data, datum[highlight.field[0]]) != -1 && 
         indexof(highlight.data, datum[highlight.field[1]]) || 
 
         (length(highlight.rangeField) === 1 && ${
-            isMap ? "indexof(highlight.data, datum.properties[highlight.field]) != -1" : "indexof(highlight.data, datum[highlight.field]) != -1"
+            isMap ? "indexof(highlight.data, datum.properties[highlight.field]) != -1 || indexof(highlight.data, datum[highlight.field]) != -1" : "indexof(highlight.data, datum[highlight.field]) != -1"
         }) && inrange(datum[highlight.rangeField[0]], [highlight.range[0], highlight.range[1]]) || 
 
         length(highlight.rangeField) === 1 && length(highlight.data) === 0 && inrange(datum[highlight.rangeField[0]], [highlight.range[0], highlight.range[1]]) ||
@@ -62,14 +62,14 @@ export function addSignalToMark(mark, highlight) {
         inrange(datum[highlight.rangeField[1]], [highlight.range[2], highlight.range[3]]) ||
 
         (length(highlight.rangeField) === 2 && ${
-            isMap ? "indexof(highlight.data, datum.properties[highlight.field]) != -1" : "indexof(highlight.data, datum[highlight.field]) != -1"
+            isMap ? "indexof(highlight.data, datum.properties[highlight.field]) != -1 || indexof(highlight.data, datum[highlight.field]) != -1" : "indexof(highlight.data, datum[highlight.field]) != -1"
         }) && inrange(datum[highlight.rangeField[0]], [highlight.range[0], highlight.range[1]]) && inrange(datum[highlight.rangeField[1]], [highlight.range[2], highlight.range[3]]) ||
 
         length(highlight.rangeField) === 3 && length(highlight.data) === 0 && inrange(datum[highlight.rangeField[0]], [highlight.range[0], highlight.range[1]]) && 
         inrange(datum[highlight.rangeField[1]], [highlight.range[2], highlight.range[3]]) && inrange(datum[highlight.rangeField[2]], [highlight.range[4], highlight.range[5]]) ||
 
         (length(highlight.rangeField) === 3 && ${
-            isMap ? "indexof(highlight.data, datum.properties[highlight.field]) != -1" : "indexof(highlight.data, datum[highlight.field]) != -1"
+            isMap ? "indexof(highlight.data, datum.properties[highlight.field]) != -1 || indexof(highlight.data, datum[highlight.field]) != -1" : "indexof(highlight.data, datum[highlight.field]) != -1"
         }) && inrange(datum[highlight.rangeField[0]], [highlight.range[0], highlight.range[1]]) && inrange(datum[highlight.rangeField[1]], [highlight.range[2], highlight.range[3]]) &&
         inrange(datum[highlight.rangeField[2]], [highlight.range[4], highlight.range[5]])
 

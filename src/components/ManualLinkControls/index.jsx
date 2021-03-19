@@ -63,14 +63,14 @@ export default function ManualLinkControls(props) {
 
         const axisObj = getAxisObjectByName(chartProperties.axes ,selectedAxis)
 
-        if(!["ordinal", "band", "point"].includes(axisObj.type)){
+        if(!["ordinal", "band", "point"].includes(axisObj?.type)){
             const min = getMin(props.viewData, selectedAxis);
             const max = getMax(props.viewData, selectedAxis);
             if (min instanceof Date){
                 setMarks([{value:min.getTime(), label:min.toLocaleString()}, {value:max.getTime(), label:max.toLocaleString()}]);
             }
             else{
-                setMarks([{value:min, label:min.toLocaleString()}, {value:max, label:max.toLocaleString()}]);
+                setMarks([{value:min, label:min?.toLocaleString()}, {value:max, label:max?.toLocaleString()}]);
             }
             setShowSlider(true);
         }
@@ -230,12 +230,10 @@ export default function ManualLinkControls(props) {
         setFilters([...filters, {id:uniqueId('filter-'), props:{}}]);
     }
     function handleFilterDelete(filterId){
-        console.log('Delete', filterId)
         const updatedFilters = filters.filter(f=> f.id !== filterId);
         setFilters(updatedFilters)
     }
     function handleFilterUpdate(filterId, filterState){
-        console.log('Filter State', filterState)
         const newFilters = [... filters]
         const filter = newFilters.find(nf => nf.id === filterId);
         filter.props = filterState

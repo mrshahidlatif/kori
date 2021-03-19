@@ -113,7 +113,6 @@ export default async function (spec) {
             }
         });
     const properties = { axes: Object.values(axesMap), features: Object.values(featureMap) };
-    console.log('properties', JSON.stringify(properties))
     return properties;
 }
 
