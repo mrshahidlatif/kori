@@ -5,6 +5,7 @@ export const EXIT_MANUAL_LINK_MODE = "EXIT_MANUAL_LINK_MODE";
 export const SET_CURRENT_DOC_ID = "SET_CURRENT_DOC_ID";
 export const SET_VIEW_MODE = "SET_VIEW_MODE";
 export const LINK_ACTIVE_NO_AUTO_TRIGGER = "LINK_ACTIVE_NO_AUTO_TRIGGER";
+export const SHOW_LINK_SETTING_FOR = "SHOW_LINK_SETTING_FOR"
 
 export const setSelectedLink = (link) => {
     return { type: SET_SELECTED_LINK, link };
@@ -27,6 +28,9 @@ export const setViewMode = (val) => {
 };
 export const setLinkActiveNoAutoTrigger = (val) => {
     return { type: LINK_ACTIVE_NO_AUTO_TRIGGER, val };
+};
+export const showLinkSettingFor = (val) => {
+    return { type: SHOW_LINK_SETTING_FOR, val };
 };
 //reducers
 const initialState = {};
@@ -62,6 +66,8 @@ export default (state = initialState, action) => {
             return { ...state, viewMode: action.val };
         case LINK_ACTIVE_NO_AUTO_TRIGGER:
             return { ...state, linkActiveNoAutoTrigger: action.val };
+        case SHOW_LINK_SETTING_FOR:
+            return { ...state, showLinkSettingFor: action.val};
         default:
             return state;
     }

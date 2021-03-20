@@ -81,7 +81,7 @@ loadData
         store.subscribe(
             throttle(() => {
                 let state = { ...store.getState() };
-                // delete state["ui"]; // don't persist ui sate
+                delete state["ui"]; // don't persist ui sate
                 localforage.setItem("state", state);
             }, 1000)
         );

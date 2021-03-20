@@ -4,7 +4,7 @@ const request = require("request");
 export default async (sentence, sentenceOffset, charts, blockKey) => {
     const payload = { text: sentence, sentenceOffset, charts: charts, blockKey};
     const options = {
-        uri: "https://koriserver.namwkim.org/discover-links",
+        uri: "http://localhost:8885/discover-links",
         method: "POST",
         headers: {
             Accept: "application/json",
@@ -15,6 +15,11 @@ export default async (sentence, sentenceOffset, charts, blockKey) => {
     };
 
     const requestPromise = util.promisify(request);
-    const response = await requestPromise(options);
-    return response.body.data;
+    try{
+        const response = await requestPromise(options);
+        return response?.body?.data;
+    }
+    catch(e){
+        return []
+    }
 }

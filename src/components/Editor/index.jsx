@@ -73,7 +73,6 @@ export default function Editor(props) {
     const [autoLinksToInsert, setAutoLinksToInsert] = useState([]);
 
     let interval = useRef();
-
     const startTimer = () => {
         interval = setInterval(() => {
             console.log("Checking for autosuggestions every:", AUTOMATIC_SUGGESTION_TIMEOUT);
@@ -350,7 +349,7 @@ export default function Editor(props) {
         setCurrentSelectionState(editorState.getSelection());
         setEditorState(highlightTextSelection(tempTextSelection, editorState));
         setInfoMsg(
-            "Click on any chart. Use brushing or clicking to select visual marks. Multiple points can be selected holding the SHIFT key."
+            "Click on any chart avatar to begin linking!"
         );
     }
 
@@ -439,8 +438,8 @@ export default function Editor(props) {
             <Snackbar
                 open={infoMsg !== null}
                 anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
+                    vertical: "top",
+                    horizontal: "right",
                 }}
                 autoHideDuration={5000}
                 onClose={() => {
