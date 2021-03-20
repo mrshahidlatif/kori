@@ -13,7 +13,7 @@ import datetime
 
 client = Wit('LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N')
 THRESHOLD = 0.7
-WORD2VEC_THRESHOLD = 0.7
+WORD2VEC_THRESHOLD = 0.4
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
 model = KeyedVectors.load_word2vec_format(
@@ -56,21 +56,14 @@ def find_links(charts, sentence, sentence_offset, block_key):
             if isinstance(axis.get('title'), list):
                 continue
             result = fuzzy_substr_search(axis.get('title'), sentence)
-            # result_w2v = compute_word2vec_similarity(
-            #     axis.get('title'), sentence)
-            # if result_fuzzy != None and result_w2v != "":
-            #     if result_w2v.get('similarity') > result_fuzzy.get('similarity'):
-            #         result = result_w2v
-            # else:
-            #     result = result_fuzzy
-            print('Axes matched result', axis)
+            result_w2v = compute_word2vec_similarity(
+                axis.get('title'), sentence)
+            if result.get('similarity') < THRESHOLD and result_w2v != "":
+                result = result_w2v
             if result.get('similarity') > THRESHOLD:
-                # print('Axes matched result', sentence,
-                #       axis.get('title'), result)
                 result['field'] = axis.get('title')
                 result['type'] = axis.get('type')
                 axis['match_props'] = result
-                print('updated axis', axis)
                 matched_axes.append(axis)
         interval_matches = get_intervals(sentence)
         # TODO: Handle this in a better way
@@ -157,7 +150,6 @@ def combine_axis_interval(sentence, matched_axes, interval_matches):
 
 
 def merge_axis_interval(sentence, axis, interval):
-    print('AXis in MERGE INTERVAL', axis)
     interval_offset = interval.get('offset')
     axis_offset = axis.get('match_props').get('offset')
     length = len(axis.get('match_props').get('matching_str')) if axis_offset > interval_offset else len(
