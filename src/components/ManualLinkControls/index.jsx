@@ -38,13 +38,10 @@ export default function ManualLinkControls(props) {
     const dispatch = useDispatch();
     const classes = useStyles();
 
-    const [value, setValue] = useState([20, 37]);
-    const [marks, setMarks] = useState([{value:1900, label:1900}, {value:2000, label:2000}]);
     const [axis, setAxis] = useState('');
     const [showField, setShowField] = useState(false);
     const [link, setLink]=useState(null);
     const [selectedPoints, setSelectedPoints] = useState([]);
-    const [showSlider, setShowSlider]=useState(false);
     const [filters, setFilters] = useState([])
     const [infoMsg, setInfoMsg] = useState(null);
 
@@ -60,61 +57,7 @@ export default function ManualLinkControls(props) {
         setAxis(selectedAxis);
         link['data'] = selectedPoints.map(sp => sp[selectedAxis]);
         setLink(link);
-
-        const axisObj = getAxisObjectByName(chartProperties.axes ,selectedAxis)
-
-        if(!["ordinal", "band", "point"].includes(axisObj?.type)){
-            const min = getMin(props.viewData, selectedAxis);
-            const max = getMax(props.viewData, selectedAxis);
-            if (min instanceof Date){
-                setMarks([{value:min.getTime(), label:min.toLocaleString()}, {value:max.getTime(), label:max.toLocaleString()}]);
-            }
-            else{
-                setMarks([{value:min, label:min?.toLocaleString()}, {value:max, label:max?.toLocaleString()}]);
-            }
-            setShowSlider(true);
-        }
-        else setShowSlider(false)
     }
-    function getMin(data, axisName){
-        const min = data.reduce((prev, curr) => {
-            if (typeof curr === 'string') {
-                return Number.parseFloat(prev[axisName]) < Number.parseFloat(curr[axisName]) ? prev : curr
-            }
-            else {
-                return prev[axisName] < curr[axisName] ? prev : curr
-            }
-        });
-        return typeof min[axisName] === 'string' ? parseFloat(min[axisName]): min[axisName];
-    }
-
-    function getMax(data, axisName){
-        const max = data.reduce((prev, curr) => {
-            if (typeof curr === 'string'){
-                return Number.parseFloat(prev[axisName]) > Number.parseFloat(curr[axisName]) ? prev : curr
-            }
-            else{
-                return prev[axisName] > curr[axisName] ? prev : curr
-            }
-        });
-        return typeof max[axisName] === 'string' ? parseFloat(max[axisName]): max[axisName];
-    }
-
-    function getAxisObjectByName(axes, name){
-        //TODO: handle if matches to title or field
-        const axisObj = axes.find(a => a.field === name);
-        return axisObj;
-    }
-
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-        //TODO: send to createLink() for updating link
-        // link['rangeField'] = [axis]
-        // link['range'] = newValue
-        // link['rangeMin'] = newValue[0];
-        // link['rangeMax'] = newValue[1];
-        setLink(link);
-      };
   
     function handleResetClick(event) {
         dispatch(exitManualLinkMode(true));

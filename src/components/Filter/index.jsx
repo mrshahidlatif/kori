@@ -47,10 +47,11 @@ export default function Filter(props) {
         const axisObj = getFilterFieldByName(chartProperties.axes, filterField);
 
         if (axisObj && !["ordinal", "band", "point"].includes(axisObj?.type)) {
-            const min = getMin(props.viewData, filterField);
-            const max = getMax(props.viewData, filterField);
+            const arr = props.viewData.map(vd => vd[filterField]);
+            console.log('ARRAY', arr)
+            const [min, max] = getMinMax(arr)
             if (min instanceof Date) {
-                const newMarks = [{ value: min.getTime(), label: min.toLocaleString() }, { value: max.getTime(), label: max.toLocaleString() }];
+                const newMarks = [{ value: min.getTime(), label: min.toLocaleDateString() }, { value: max.getTime(), label: max.toLocaleDateString() }];
                 setMarks(newMarks);
                 setValue([newMarks[0].value, newMarks[1].value]);
             }
@@ -81,29 +82,17 @@ export default function Filter(props) {
         return axisObj;
     }
 
-    function getMin(data, axisName){
-        console.log('Data/', data)
-        const min = data.reduce((prev, curr) => {
-            if (typeof curr === 'string') {
-                return Number.parseFloat(prev[axisName]) < Number.parseFloat(curr[axisName]) ? prev : curr
-            }
-            else {
-                return prev[axisName] < curr[axisName] ? prev : curr
-            }
-        });
-        return typeof min[axisName] === 'string' ? parseFloat(min[axisName]): min[axisName];
-    }
-
-    function getMax(data, axisName){
-        const max = data.reduce((prev, curr) => {
-            if (typeof curr === 'string'){
-                return Number.parseFloat(prev[axisName]) > Number.parseFloat(curr[axisName]) ? prev : curr
-            }
-            else{
-                return prev[axisName] > curr[axisName] ? prev : curr
-            }
-        });
-        return typeof max[axisName] === 'string' ? parseFloat(max[axisName]): max[axisName];
+    function getMinMax(myArray){
+        var lowest = Number.POSITIVE_INFINITY;
+        var highest = Number.NEGATIVE_INFINITY;
+        var tmp;
+        for (var i=myArray.length-1; i>=0; i--) {
+            tmp = +myArray[i];
+            if (tmp < lowest) lowest = tmp;
+            if (tmp > highest) highest = tmp;
+        }
+        console.log('low/high', lowest, highest)
+        return [lowest, highest]
     }
 
     function handleTagsChange(event, values){
