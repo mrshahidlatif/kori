@@ -9,6 +9,7 @@ from spacy.matcher import PhraseMatcher
 import re
 import networkx as nx
 import numpy as np
+import datetime
 
 client = Wit('LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N')
 THRESHOLD = 0.7
@@ -54,17 +55,22 @@ def find_links(charts, sentence, sentence_offset, block_key):
                 continue
             if isinstance(axis.get('title'), list):
                 continue
-            result_fuzzy = fuzzy_substr_search(axis.get('title'), sentence)
-            result_w2v = compute_word2vec_similarity(
-                axis.get('title'), sentence)
-            if result_fuzzy != None and result_w2v != "":
-                if result_w2v.get('similarity') > result_fuzzy.get('similarity'):
-                    result = result_w2v
-            else:
-                result = result_fuzzy
+            result = fuzzy_substr_search(axis.get('title'), sentence)
+            # result_w2v = compute_word2vec_similarity(
+            #     axis.get('title'), sentence)
+            # if result_fuzzy != None and result_w2v != "":
+            #     if result_w2v.get('similarity') > result_fuzzy.get('similarity'):
+            #         result = result_w2v
+            # else:
+            #     result = result_fuzzy
+            print('Axes matched result', axis)
             if result.get('similarity') > THRESHOLD:
+                # print('Axes matched result', sentence,
+                #       axis.get('title'), result)
                 result['field'] = axis.get('title')
+                result['type'] = axis.get('type')
                 axis['match_props'] = result
+                print('updated axis', axis)
                 matched_axes.append(axis)
         interval_matches = get_intervals(sentence)
         # TODO: Handle this in a better way
@@ -77,6 +83,13 @@ def find_links(charts, sentence, sentence_offset, block_key):
             sentence, matched_axes, interval_matches)
         for link in interval_links:
             range = [link.get('min'), link.get('max')]
+            if link.get('type') == 'time':
+                # Getting time in milliseconds since 1970-1-1: Equivalent of JavaScript date.getTime()
+                minTime = (datetime.datetime(int(link.get('min')), 1,
+                                             1) - datetime.datetime(1970, 1, 1)).total_seconds()
+                maxTime = (datetime.datetime(int(link.get('max')), 1,
+                                             1) - datetime.datetime(1970, 1, 1)).total_seconds()
+                range = [minTime*1000, maxTime*1000]
             range_link = create_link(link.get('text'), "", chart.get('id'), [], link.get(
                 'offset'), sentence, sentence_offset, block_key, [link.get('rangeField')], range)
             links.append(range_link)
@@ -118,7 +131,7 @@ def combine_axis_interval(sentence, matched_axes, interval_matches):
     distance_matrix = np.array(distance_matrix)
     # Case: 1 axis, 1 interval
     if len(distance_matrix) == 1 and len(distance_matrix[0]) == 1:
-        link = link = merge_axis_interval(
+        link = merge_axis_interval(
             sentence, all_matched_axes_instances[0], interval_matches[0])
         links.append(link)
 
@@ -144,6 +157,7 @@ def combine_axis_interval(sentence, matched_axes, interval_matches):
 
 
 def merge_axis_interval(sentence, axis, interval):
+    print('AXis in MERGE INTERVAL', axis)
     interval_offset = interval.get('offset')
     axis_offset = axis.get('match_props').get('offset')
     length = len(axis.get('match_props').get('matching_str')) if axis_offset > interval_offset else len(
@@ -152,6 +166,8 @@ def merge_axis_interval(sentence, axis, interval):
         axis_offset, interval_offset) + length]
     link = interval
     link['text'] = link_text
+    # To store if a variable is temporal or not!
+    link['type'] = axis.get('match_props').get('type')
     link['offset'] = sentence.find(link_text)
     link['rangeField'] = axis.get('match_props').get('field')
     return link
