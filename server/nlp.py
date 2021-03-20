@@ -13,7 +13,7 @@ import datetime
 
 client = Wit('LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N')
 THRESHOLD = 0.7
-WORD2VEC_THRESHOLD = 0.4
+WORD2VEC_THRESHOLD = 0.5
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
 model = KeyedVectors.load_word2vec_format(
