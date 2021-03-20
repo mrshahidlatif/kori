@@ -49,7 +49,6 @@ urllib3==1.25.10
 wasabi==0.7.1
 wcwidth==0.2.5
 Werkzeug==1.0.1
-wit==6.0.0
 wrapt==1.11.1
 wsproto==1.0.0
 zipp==3.1.0
