@@ -48,7 +48,7 @@ export default function PotentialLinkControls(props) {
                 <ButtonGroup size="small" variant="text" fullWidth aria-label="small button group">
                     <Button onMouseDown={handleAcceptClick}>Accept</Button>
                     <Button onMouseDown={handleDiscardClick}>Discard</Button>
-                    <Button onMouseDown={handleSettingClick}>Setting</Button>
+                    {/* <Button onMouseDown={handleSettingClick}>Setting</Button> */}
                 </ButtonGroup>
             </Paper>
         </Box>

@@ -104,7 +104,6 @@ export default function Filter(props) {
             if (tmp < lowest) lowest = tmp;
             if (tmp > highest) highest = tmp;
         }
-        console.log('low/high', lowest, highest)
         return [lowest, highest]
     }
 
@@ -118,7 +117,6 @@ export default function Filter(props) {
     }, [value, textValue])
 
     useEffect(()=>{
-        console.log('Just once, the chart is loaded or chaned.', axis)
         showRightControlsForFilter(filterOptions[0])
     },[])
   
