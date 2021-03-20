@@ -4,7 +4,7 @@ const request = require("request");
 export default async (sentence, sentenceOffset, charts, blockKey) => {
     const payload = { text: sentence, sentenceOffset, charts: charts, blockKey};
     const options = {
-        uri: "http://localhost:8885/discover-links",
+        uri: "https://koriserver.namwkim.org/discover-links",
         method: "POST",
         headers: {
             Accept: "application/json",
