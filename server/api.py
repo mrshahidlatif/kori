@@ -16,6 +16,11 @@ def pos():
     return jsonify(status=True, message="success", data=doc.to_json())
 
 
+@app.route('/test', methods=['GET'])
+def test():
+    return jsonify(status=True, message="success", data="Hello from KORI backend!")
+
+
 @app.route('/discover-links', methods=['POST'])
 def discover_links():
     data = request.get_json()

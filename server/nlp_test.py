@@ -20,13 +20,7 @@ nlp = spacy.load("en_core_web_md")
 
 def main():
     # test_interval_extraction()
-    aaa = datetime.datetime(1910, 1, 1)
-    bbb = (datetime.datetime(1910, 1, 1) -
-           datetime.datetime(1970, 1, 1)).total_seconds()
-    a = fuzzy_substr_search(
-        'price', "Stockbrokers think that the price of Google's stock will go up from 200 to 650 in the mid of 2008. And then it will take a dip")
-    print(aaa, bbb)
-    return
+    # return
     print('-----Begin Testing NLP Module------')
     overall_performance = [0, 0, 0]  # accurate, false_positives, missed
     df = pd.read_excel('training_data/Training Dataset.xlsx')
