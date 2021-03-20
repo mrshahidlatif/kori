@@ -13,6 +13,7 @@ import Grid from '@material-ui/core/Grid';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "components/Alert";
+import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -20,6 +21,15 @@ const useStyles = makeStyles((theme) => ({
       margin: theme.spacing(1),
     },
   }));
+
+function ValueLabelComponent(props) {
+    const { children, open, value } = props;
+    return (
+        <Tooltip open={open} enterTouchDelay={0} placement="top" title={value}>
+           {children}
+        </Tooltip>
+    );
+}
 
 export default function Filter(props) {
     const classes = useStyles();
@@ -54,7 +64,7 @@ export default function Filter(props) {
             ) {
                 const minDate = new Date(min);
                 const maxDate = new Date(max);
-                const newMarks = [{ value: min, label: minDate.toLocaleDateString() }, { value: max, label:  maxDate.toLocaleDateString() }];
+                const newMarks = [{ value: min, label: minDate.toLocaleDateString(), type:'date' }, { value: max, label:  maxDate.toLocaleDateString(), type:'date' }];
                 setMarks(newMarks);
                 setValue([newMarks[0].value, newMarks[1].value]);
             }
@@ -156,10 +166,12 @@ export default function Filter(props) {
                         value={value}
                         onChange={handleSliderChange}
                         valueLabelDisplay="auto"
+                        ValueLabelComponent={ValueLabelComponent}
                         aria-labelledby="range-slider"
                         marks={marks}
                         min={marks[0]?.value}
                         max={marks[1]?.value}
+                        valueLabelFormat={value => <div>{marks[0]?.type==='date' ? new Date(value).toLocaleDateString() : value.toLocaleString()}</div>}
                     /> }
             </Grid>
       </Grid>
