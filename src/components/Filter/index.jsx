@@ -48,10 +48,13 @@ export default function Filter(props) {
 
         if (axisObj && !["ordinal", "band", "point"].includes(axisObj?.type)) {
             const arr = props.viewData.map(vd => vd[filterField]);
-            console.log('ARRAY', arr)
             const [min, max] = getMinMax(arr)
-            if (min instanceof Date) {
-                const newMarks = [{ value: min.getTime(), label: min.toLocaleDateString() }, { value: max.getTime(), label: max.toLocaleDateString() }];
+            //TODO: Handle date/time in a better way!
+            if (["date", "year", "month", "time", "year_year"].includes(filterField.toLowerCase()) || axisObj?.type === 'temporal'
+            ) {
+                const minDate = new Date(min);
+                const maxDate = new Date(max);
+                const newMarks = [{ value: min, label: minDate.toLocaleDateString() }, { value: max, label:  maxDate.toLocaleDateString() }];
                 setMarks(newMarks);
                 setValue([newMarks[0].value, newMarks[1].value]);
             }
