@@ -13,7 +13,7 @@ import datetime
 
 client = Wit('LKKJIM2L7TQ6JJJCUBGDUSQGAI5SZB7N')
 THRESHOLD = 0.7
-WORD2VEC_THRESHOLD = 0.5
+WORD2VEC_THRESHOLD = 0.7
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
 model = KeyedVectors.load_word2vec_format(
@@ -61,6 +61,7 @@ def find_links(charts, sentence, sentence_offset, block_key):
             if result.get('similarity') < THRESHOLD and result_w2v != "":
                 result = result_w2v
             if result.get('similarity') > THRESHOLD:
+                print('Result', result)
                 result['field'] = axis.get('title')
                 result['type'] = axis.get('type')
                 axis['match_props'] = result
@@ -76,7 +77,7 @@ def find_links(charts, sentence, sentence_offset, block_key):
             sentence, matched_axes, interval_matches)
         for link in interval_links:
             range = [link.get('min'), link.get('max')]
-            if link.get('type') == 'time':
+            if link.get('type') == 'time' or link.get('type') == 'temporal':
                 # Getting time in milliseconds since 1970-1-1: Equivalent of JavaScript date.getTime()
                 minTime = (datetime.datetime(int(link.get('min')), 1,
                                              1) - datetime.datetime(1970, 1, 1)).total_seconds()

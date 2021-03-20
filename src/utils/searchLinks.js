@@ -3,7 +3,6 @@ const request = require("request");
 
 export default async (sentence, sentenceOffset, charts, blockKey) => {
     const payload = { text: sentence, sentenceOffset, charts: charts, blockKey};
-    console.log('payload', payload);
     const options = {
         uri: "http://localhost:8885/discover-links",
         method: "POST",
@@ -16,6 +15,11 @@ export default async (sentence, sentenceOffset, charts, blockKey) => {
     };
 
     const requestPromise = util.promisify(request);
-    const response = await requestPromise(options);
-    return response.body.data;
+    try{
+        const response = await requestPromise(options);
+        return response?.body?.data;
+    }
+    catch(e){
+        return []
+    }
 }

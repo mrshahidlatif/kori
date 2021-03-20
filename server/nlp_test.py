@@ -20,7 +20,6 @@ nlp = spacy.load("en_core_web_md")
 
 def main():
     # test_interval_extraction()
-    # return
     print('-----Begin Testing NLP Module------')
     overall_performance = [0, 0, 0]  # accurate, false_positives, missed
     df = pd.read_excel('training_data/Training Dataset.xlsx')
