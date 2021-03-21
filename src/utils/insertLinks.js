@@ -24,7 +24,7 @@ export const insertLink = (link, editorState, currentBlockText) => {
     let i = 0, j=0;
     while (~(i = currentBlockText.indexOf (find,i + find.length))) allInstancesOfLink.push(i);
     
-    if (!allInstancesOfLink.includes(link.startIndex)){
+    if (allInstancesOfLink.length > 0 && !allInstancesOfLink.includes(link.startIndex)){
        return editorState;
     }
 
