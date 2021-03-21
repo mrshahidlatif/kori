@@ -48,12 +48,18 @@ export default function LinkSetting() {
     const showLinkSettingFor = useSelector((state) => state.ui.showLinkSettingFor);
     const [selectedChart, setSelectedChart] = useState(null);
     const [creationMode, setCreationMode] = useState('brush');
+    const [createNewLink, setCreateNewLink] = useState(false)
 
-    let createNewLink = false;
-
-    if(textSelection) {
-        createNewLink = true; 
-    }
+    useEffect(()=>{
+      if(!textSelection) {
+        setCreateNewLink(false);
+        setSelectedChart(null);
+      }
+      else {
+        setCreateNewLink(true);
+        setCreationMode('brush');
+      }
+    },[textSelection])
 
     function handleChartAvatarClick(chart){
         if(selectedChart != chart)

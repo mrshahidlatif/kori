@@ -114,6 +114,7 @@ export default function Editor(props) {
             );
             dispatch(setManualLinkId(null));
             setCurrentSelectionState(null);
+            setInfoMsg({msg: 'Link successfully created!', severity: 'success'});
             //Quick and dirty fix! //Clearing Chart Selections
             window.dispatchEvent(new KeyboardEvent("keypress", { key: "a" }));
         }
@@ -163,6 +164,7 @@ export default function Editor(props) {
                         startIndex: blockText.indexOf(text),
                         endIndex: blockText.indexOf(text) + text.length,
                     };
+                    if (chartsInEditor.length === 0) return;
                     const links = await searchLinks(sentenceObject.text, sentenceObject.startIndex, chartsInEditor, currentBlock.blockKey);
                     allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
                 }
@@ -179,6 +181,14 @@ export default function Editor(props) {
                         blockText
                     );
                     if (allLinksInCurrentBlockText.length > 0) {
+                        // Remove duplicates if any
+                        // TODO: Check why backend send duplicates in the first place
+                        const seen = new Set();
+                        allLinksInCurrentBlockText = allLinksInCurrentBlockText.filter(el => {
+                            const duplicate = seen.has(el.startIndex);
+                            seen.add(el.startIndex);
+                            return !duplicate;
+                          });
                         setAutoLinksToInsert(allLinksInCurrentBlockText);
                     }
                 }
@@ -348,8 +358,7 @@ export default function Editor(props) {
         dispatch(exitManualLinkMode(false));
         setCurrentSelectionState(editorState.getSelection());
         setEditorState(highlightTextSelection(tempTextSelection, editorState));
-        setInfoMsg(
-            "Click on any chart avatar to begin linking!"
+        setInfoMsg({msg:"Click on any chart avatar to begin linking!", severity:'info'}
         );
     }
 
@@ -446,7 +455,7 @@ export default function Editor(props) {
                     setInfoMsg(null);
                 }}
             >
-                <Alert severity="info">{infoMsg}</Alert>
+                <Alert severity={infoMsg?.severity}>{infoMsg?.msg}</Alert>
             </Snackbar>
         </Fragment>
     );
