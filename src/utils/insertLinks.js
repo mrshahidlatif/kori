@@ -19,9 +19,13 @@ export const insertLink = (link, editorState, currentBlockText) => {
     if (start < 0) start = 0;
 
     // Handle situation when paragraph changes before inserting links
-    if (currentBlockText.indexOf(link.text) !== link.startIndex){
-        start = currentBlockText.indexOf(link.text);
-        end = start + link.endIndex - link.startIndex;
+    const find = link.text
+    let allInstancesOfLink = [];
+    let i = 0, j=0;
+    while (~(i = currentBlockText.indexOf (find,i + find.length))) allInstancesOfLink.push(i);
+    
+    if (!allInstancesOfLink.includes(link.startIndex)){
+       return editorState;
     }
 
     let newContent = currentContent.createEntity(`LINK`, "MUTABLE", {

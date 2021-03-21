@@ -201,7 +201,6 @@ export default function Editor(props) {
         setEditorState(editorState);
         if(autoLinksToInsert.length>0){
             const action = createLinks(doc.id, autoLinksToInsert);
-            console.log('LInks to be added', action)
             setEditorState(insertLinks(action.links, editorState));
             dispatch(action);
 
