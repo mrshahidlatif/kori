@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/vis-text-editor/static/css/main.7d3538c5.chunk.css",
-    "main.js": "/vis-text-editor/static/js/main.ef76b5e9.chunk.js",
-    "main.js.map": "/vis-text-editor/static/js/main.ef76b5e9.chunk.js.map",
+    "main.js": "/vis-text-editor/static/js/main.ecf89771.chunk.js",
+    "main.js.map": "/vis-text-editor/static/js/main.ecf89771.chunk.js.map",
     "runtime-main.js": "/vis-text-editor/static/js/runtime-main.73280aa9.js",
     "runtime-main.js.map": "/vis-text-editor/static/js/runtime-main.73280aa9.js.map",
     "static/css/2.ebd6c4ee.chunk.css": "/vis-text-editor/static/css/2.ebd6c4ee.chunk.css",
     "static/js/2.eecc9f82.chunk.js": "/vis-text-editor/static/js/2.eecc9f82.chunk.js",
     "static/js/2.eecc9f82.chunk.js.map": "/vis-text-editor/static/js/2.eecc9f82.chunk.js.map",
     "index.html": "/vis-text-editor/index.html",
-    "precache-manifest.5bb0c88e1c97084704c5dc913d914389.js": "/vis-text-editor/precache-manifest.5bb0c88e1c97084704c5dc913d914389.js",
+    "precache-manifest.43e818b0badb50e8919258f595cbb7b6.js": "/vis-text-editor/precache-manifest.43e818b0badb50e8919258f595cbb7b6.js",
     "service-worker.js": "/vis-text-editor/service-worker.js",
     "static/css/2.ebd6c4ee.chunk.css.map": "/vis-text-editor/static/css/2.ebd6c4ee.chunk.css.map",
     "static/css/main.7d3538c5.chunk.css.map": "/vis-text-editor/static/css/main.7d3538c5.chunk.css.map",
@@ -20,6 +20,6 @@
     "static/css/2.ebd6c4ee.chunk.css",
     "static/js/2.eecc9f82.chunk.js",
     "static/css/main.7d3538c5.chunk.css",
-    "static/js/main.ef76b5e9.chunk.js"
+    "static/js/main.ecf89771.chunk.js"
   ]
 }
