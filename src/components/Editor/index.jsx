@@ -114,6 +114,7 @@ export default function Editor(props) {
             );
             dispatch(setManualLinkId(null));
             setCurrentSelectionState(null);
+            setInfoMsg({msg: 'Link successfully created!', severity: 'success'});
             //Quick and dirty fix! //Clearing Chart Selections
             window.dispatchEvent(new KeyboardEvent("keypress", { key: "a" }));
         }
@@ -357,8 +358,7 @@ export default function Editor(props) {
         dispatch(exitManualLinkMode(false));
         setCurrentSelectionState(editorState.getSelection());
         setEditorState(highlightTextSelection(tempTextSelection, editorState));
-        setInfoMsg(
-            "Click on any chart avatar to begin linking!"
+        setInfoMsg({msg:"Click on any chart avatar to begin linking!", severity:'info'}
         );
     }
 
@@ -455,7 +455,7 @@ export default function Editor(props) {
                     setInfoMsg(null);
                 }}
             >
-                <Alert severity="info">{infoMsg}</Alert>
+                <Alert severity={infoMsg?.severity}>{infoMsg?.msg}</Alert>
             </Snackbar>
         </Fragment>
     );
