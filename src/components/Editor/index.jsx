@@ -163,6 +163,7 @@ export default function Editor(props) {
                         startIndex: blockText.indexOf(text),
                         endIndex: blockText.indexOf(text) + text.length,
                     };
+                    if (chartsInEditor.length === 0) return;
                     const links = await searchLinks(sentenceObject.text, sentenceObject.startIndex, chartsInEditor, currentBlock.blockKey);
                     allLinksInCurrentBlockText = allLinksInCurrentBlockText.concat(links);
                 }
