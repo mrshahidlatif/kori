@@ -180,6 +180,14 @@ export default function Editor(props) {
                         blockText
                     );
                     if (allLinksInCurrentBlockText.length > 0) {
+                        // Remove duplicates if any
+                        // TODO: Check why backend send duplicates in the first place
+                        const seen = new Set();
+                        allLinksInCurrentBlockText = allLinksInCurrentBlockText.filter(el => {
+                            const duplicate = seen.has(el.startIndex);
+                            seen.add(el.startIndex);
+                            return !duplicate;
+                          });
                         setAutoLinksToInsert(allLinksInCurrentBlockText);
                     }
                 }
@@ -193,6 +201,7 @@ export default function Editor(props) {
         setEditorState(editorState);
         if(autoLinksToInsert.length>0){
             const action = createLinks(doc.id, autoLinksToInsert);
+            console.log('LInks to be added', action)
             setEditorState(insertLinks(action.links, editorState));
             dispatch(action);
 
