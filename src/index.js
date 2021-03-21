@@ -73,7 +73,7 @@ loadData
             rootReducer,
             // {},
             data ? data : {},
-            applyMiddleware(...middleware)
+            // applyMiddleware(...middleware)
         );
         // initialize if ne
         if (!data) {
