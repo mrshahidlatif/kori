@@ -14,6 +14,9 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import TuneIcon from '@material-ui/icons/Tune';
 import BrushIcon from '@material-ui/icons/Brush';
+import { Fragment } from "react";
+import LinkIcon from '@material-ui/icons/Link';
+import MenuOpenIcon from '@material-ui/icons/MenuOpen';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -121,6 +124,21 @@ export default function LinkSetting() {
           </div>
           {selectedChart && <ChartSetting textSelection={textSelection} chart={selectedChart} showLinkSettingFor={showLinkSettingFor} />}
       </div>}
+      {!createNewLink && <Fragment>
+          <Typography variant="overline" display="block" gutterBottom>
+              Useful Shortcuts
+          </Typography>
+          <Tooltip placement='right-start' title="Press Tab key while at the end of a sentence or paragraph to get automatic suggestions!">
+              <IconButton style={{marginTop:'-8px'}} size="small" aria-label="help">
+                  <LinkIcon />
+              </IconButton>
+          </Tooltip>
+          <Tooltip placement='right-start' title="Press @ key or select portion of text to triggers suggestions!">
+              <IconButton style={{marginTop:'-8px'}} size="small" aria-label="help">
+                  <MenuOpenIcon />
+              </IconButton>
+          </Tooltip>
+          </Fragment>}
       </React.Fragment>
     );
 }

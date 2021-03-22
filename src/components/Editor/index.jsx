@@ -204,6 +204,7 @@ export default function Editor(props) {
             const action = createLinks(doc.id, autoLinksToInsert);
             setEditorState(insertLinks(action.links, editorState));
             dispatch(action);
+            setInfoMsg({msg:"Found some suggestions!", severity:'success'});
             setAutoLinksToInsert([]);
         }
 
@@ -294,8 +295,8 @@ export default function Editor(props) {
     }
 
     function handleKeyCommand(command) {
-        // handle common key bindings (e.g., bold, italic, etc.)
         const newEditorState = RichUtils.handleKeyCommand(editorState, command);
+        // handle common key bindings (e.g., bold, italic, etc.)
         if (newEditorState) {
             setEditorState(newEditorState);
             return "handled";
@@ -306,6 +307,8 @@ export default function Editor(props) {
         e.preventDefault();
         e.stopPropagation();
         setCurrentBlock(getBlockText(editorState));
+
+        setInfoMsg({msg:"Detecting references! Continue typing...", severity:'info'});
         return "handled";
     }
 
@@ -421,7 +424,7 @@ export default function Editor(props) {
                     onChange={handleEditorChange}
                     onBlur={handleBlur}
                     handleKeyCommand={handleKeyCommand}
-                    handlePastedText={handlePastedText}
+                    // handlePastedText={handlePastedText}
                     stripPastedStyles={true}
                     decorators={editorDecorators}
                     ref={editorEl}
