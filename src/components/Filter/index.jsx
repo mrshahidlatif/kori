@@ -53,6 +53,8 @@ export default function Filter(props) {
     }
 
     function showRightControlsForFilter(filterField) {
+
+        if (Array.isArray(filterField)) return;
         setAxis(filterField);
         const axisObj = getFilterFieldByName(chartProperties.axes, filterField);
 
@@ -60,7 +62,7 @@ export default function Filter(props) {
             const arr = props.viewData.map(vd => vd[filterField]);
             const [min, max] = getMinMax(arr)
             //TODO: Handle date/time in a better way!
-            if (["date", "year", "month", "time", "year_year"].includes(filterField.toLowerCase()) || axisObj?.type === 'temporal'
+            if (["date", "year", "month", "time", "year_year"].includes(filterField?.toLowerCase()) || axisObj?.type === 'temporal'
             ) {
                 const minDate = new Date(min);
                 const maxDate = new Date(max);
