@@ -1,0 +1,24 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"url": "data/wheat.json"},
+  "repeat": {"layer": ["wheat", "wages"]},
+  "spec": {
+    "mark": "line",
+    "encoding": {
+      "x": {
+        "bin": true,
+        "timeUnit": "year",
+        "field": "year",
+        "type": "temporal"
+      },
+      "y": {
+        "aggregate": "mean",
+        "field": {"repeat": "layer"},
+        "type": "quantitative",
+        "title": "Mean wheat yield and wage in US"
+      },
+      "color": {"datum": {"repeat": "layer"}, "type": "nominal"}
+    }
+  },
+  "config": {}
+}

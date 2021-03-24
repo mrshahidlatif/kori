@@ -1,0 +1,10 @@
+{
+  "data": {"url": "data/weather.csv", "formatType": "csv"},
+  "mark": "line",
+  "encoding": {
+    "x": {"field": "date", "type": "temporal", "timeUnit": "month"},
+    "y": {"field": "precipitation", "type": "quantitative", "aggregate": "sum"},
+    "color": {"field": "location", "type": "nominal"}
+  },
+  "config": {}
+}

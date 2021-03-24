@@ -1,0 +1,11 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"url": "data/wheat.json"},
+  "mark": "point",
+  "encoding": {
+    "x": {"field": "year", "timeUnit": "year", "type": "temporal"},
+    "y": {"field": "wheat", "type": "quantitative"},
+    "color": {"type": "nominal"}
+  },
+  "config": {}
+}

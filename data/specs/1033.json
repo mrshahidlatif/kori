@@ -1,0 +1,11 @@
+{
+  "data": {"url": "data/weather.csv"},
+  "transform": [{"filter": "datum.location === 'Seattle'"}],
+  "mark": "point",
+  "encoding": {
+    "x": {"field": "temp_min", "bin": true},
+    "y": {"field": "temp_max", "bin": true},
+    "size": {"aggregate": "count"}
+  },
+  "config": {}
+}
