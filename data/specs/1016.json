@@ -1,0 +1,24 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"url": "data/cars.json"},
+  "repeat": {"layer": ["Horsepower", "Miles_per_Gallon"]},
+  "spec": {
+    "mark": "line",
+    "encoding": {
+      "x": {
+        "bin": true,
+        "timeUnit": "year",
+        "field": "Year",
+        "type": "temporal"
+      },
+      "y": {
+        "aggregate": "mean",
+        "field": {"repeat": "layer"},
+        "type": "quantitative",
+        "title": "Mean Horsepower and Miles Per Gallon"
+      },
+      "color": {"datum": {"repeat": "layer"}, "type": "nominal"}
+    }
+  },
+  "config": {}
+}

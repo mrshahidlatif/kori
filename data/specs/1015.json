@@ -1,0 +1,25 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"url": "data/movies.json"},
+  "repeat": {"layer": ["Rotten Tomatoes Rating", "IMDB Rating"]},
+  "spec": {
+    "mark": "line",
+    "encoding": {
+      "x": {
+        "bin": true,
+        "timeUnit": "year",
+        "field": "Release Date",
+        "type": "temporal"
+      },
+      "y": {
+        "aggregate": "mean",
+        "field": {"repeat": "layer"},
+        "type": "quantitative",
+        "scale": {"domain": [0, 110]},
+        "title": "Mean of Ratings"
+      },
+      "color": {"datum": {"repeat": "layer"}, "type": "nominal"}
+    }
+  },
+  "config": {}
+}
