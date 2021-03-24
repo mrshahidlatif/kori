@@ -4,7 +4,7 @@ import Home from 'components/Home';
 import Docs from 'components/Docs';
 import View from 'components/View';
 import Edit from 'components/Edit';
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import Container from '@material-ui/core/Container';
 
 function App() {

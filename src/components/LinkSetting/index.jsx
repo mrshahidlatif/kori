@@ -125,19 +125,27 @@ export default function LinkSetting() {
           {selectedChart && <ChartSetting textSelection={textSelection} chart={selectedChart} showLinkSettingFor={showLinkSettingFor} />}
       </div>}
       {!createNewLink && <Fragment>
-          <Typography variant="overline" display="block" gutterBottom>
+          <Typography variant="button" display="block" gutterBottom>
               Useful Shortcuts
           </Typography>
+          <Typography variant="caption" display="block" gutterBottom>
+          👉 Press <strong>Tab key</strong> while at the end of a sentence or paragraph to get automatic suggestions!
+      </Typography>
+      <Typography variant="caption" display="block" gutterBottom>
+      👉 Type <strong>@</strong> or <strong> select portion of text</strong> to triggers suggestions!
+      </Typography>
+          
+{/*           
           <Tooltip placement='right-start' title="Press Tab key while at the end of a sentence or paragraph to get automatic suggestions!">
-              <IconButton style={{marginTop:'-8px'}} size="small" aria-label="help">
+              <IconButton style={{marginTop:'-8px'}}  aria-label="help">
                   <LinkIcon />
               </IconButton>
           </Tooltip>
           <Tooltip placement='right-start' title="Press @ key or select portion of text to triggers suggestions!">
-              <IconButton style={{marginTop:'-8px'}} size="small" aria-label="help">
+              <IconButton style={{marginTop:'-8px'}}  aria-label="help">
                   <MenuOpenIcon />
               </IconButton>
-          </Tooltip>
+          </Tooltip> */}
           </Fragment>}
       </React.Fragment>
     );
