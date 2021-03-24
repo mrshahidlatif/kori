@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "4b8feaf0369e1d96d7ab9850e08b8ab1",
+    "revision": "5d0fe316eb71d4454b0e5e6293f65348",
     "url": "/vis-text-editor/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/vis-text-editor/static/css/2.4c0ab1a8.chunk.css"
   },
   {
-    "revision": "b481def51a426a198513",
+    "revision": "232b032962f915835c53",
     "url": "/vis-text-editor/static/css/main.3da054f9.chunk.css"
   },
   {
@@ -20,8 +20,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/vis-text-editor/static/js/2.168c642f.chunk.js.LICENSE"
   },
   {
-    "revision": "b481def51a426a198513",
-    "url": "/vis-text-editor/static/js/main.8d385c5b.chunk.js"
+    "revision": "232b032962f915835c53",
+    "url": "/vis-text-editor/static/js/main.ab9d6c6a.chunk.js"
   },
   {
     "revision": "1c5f87e1942053f33df8",
