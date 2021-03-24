@@ -10,8 +10,8 @@ import networkx as nx
 import numpy as np
 import datetime
 
-THRESHOLD = 0.7
-WORD2VEC_THRESHOLD = 0.7
+# THRESHOLD = 0.7
+# WORD2VEC_THRESHOLD = 0.7
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
 model = KeyedVectors.load_word2vec_format(
@@ -20,7 +20,7 @@ model = KeyedVectors.load_word2vec_format(
 nlp = spacy.load('en_core_web_sm')
 
 
-def find_links(charts, sentence, sentence_offset, block_key):
+def find_links(charts, sentence, sentence_offset, block_key, THRESHOLD):
     links = []
     # word or phrase links
     for chart in charts:
@@ -28,7 +28,7 @@ def find_links(charts, sentence, sentence_offset, block_key):
         for feature in features:
             result = fuzzy_substr_search(feature['value'], sentence)
             result_w2v = compute_word2vec_similarity(
-                feature['value'], sentence)
+                feature['value'], sentence, THRESHOLD)
             # don't match strings that are single character long
             if result.get('similarity') > THRESHOLD and len(result.get('matching_str')) > 1:
                 link_text = sentence[result.get('offset'): result.get(
@@ -55,11 +55,10 @@ def find_links(charts, sentence, sentence_offset, block_key):
                 continue
             result = fuzzy_substr_search(axis.get('title'), sentence)
             result_w2v = compute_word2vec_similarity(
-                axis.get('title'), sentence)
+                axis.get('title'), sentence, THRESHOLD)
             if result.get('similarity') < THRESHOLD and result_w2v != "":
                 result = result_w2v
             if result.get('similarity') > THRESHOLD:
-                print('Result', result)
                 result['field'] = axis.get('title')
                 result['type'] = axis.get('type')
                 axis['match_props'] = result
@@ -67,10 +66,10 @@ def find_links(charts, sentence, sentence_offset, block_key):
         interval_matches = get_intervals(sentence)
         # TODO: Handle this in a better way
         # Only uncomment (the following *67-70* lines) for quantitative eval
-        # for interval in interval_matches:
-        #     interval_link = create_link(interval.get('text'), axis, chart.get('id'), axis.get(
-        #         'field'), interval.get('offset'), sentence, sentence_offset, block_key, [], [])
-        #     links.append(interval_link)
+        for interval in interval_matches:
+            interval_link = create_link(interval.get('text'), axis, chart.get('id'), axis.get(
+                'field'), interval.get('offset'), sentence, sentence_offset, block_key, [], [])
+            links.append(interval_link)
         interval_links = combine_axis_interval(
             sentence, matched_axes, interval_matches)
         for link in interval_links:
@@ -241,7 +240,7 @@ def create_link(link_text, feature, chartId, val, offset, sentence, sentence_off
     return link
 
 
-def compute_word2vec_similarity(word, sentence):
+def compute_word2vec_similarity(word, sentence, THRESHOLD):
     match_in_sentence = ''
     # corpus expects spaces to be replaced with '_'
     if(word is None):
@@ -250,7 +249,7 @@ def compute_word2vec_similarity(word, sentence):
     try:
         similar_words = model.most_similar(word)
         similar_words = [sm[0]
-                         for sm in similar_words if sm[1] > WORD2VEC_THRESHOLD]
+                         for sm in similar_words if sm[1] > THRESHOLD]
         for word in similar_words:
             match_in_sentence = fuzzy_substr_search(
                 " ".join(word.split("_")), sentence)

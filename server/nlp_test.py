@@ -10,58 +10,62 @@ import time
 
 
 # loging outputs
-old_stdout = sys.stdout
-log_file = codecs.open("Output.log", "w", "utf-8")
-sys.stdout = log_file
+# old_stdout = sys.stdout
+# log_file = codecs.open("Output.log", "w", "utf-8")
+# sys.stdout = log_file
 
-THRESHOLD = 0.5
+THRESHOLD = 0.7
 nlp = spacy.load("en_core_web_md")
 
 
 def main():
     # test_interval_extraction()
     print('-----Begin Testing NLP Module------')
-    overall_performance = [0, 0, 0]  # accurate, false_positives, missed
-    df = pd.read_excel('training_data/Training Dataset.xlsx')
-    for index, row in df.iterrows():
-        if(index > 54):
-            continue
-        sentence = row['Sentence']
-        chart_id = int(row['Chart ID'])
-        print('Processing Item # ', index, 'Chart ID # ',
-              chart_id, 'Sentence: ', sentence[0:80])
-        try:
-            with open('training_data/features/' + str(chart_id) + '.json', 'r') as chart_feature_json:
-                chart_features = json.load(chart_feature_json)
-                # nlp methods accept array of charts
-                chart_properties = [{'properties': chart_features}]
-                # sentence_offset and block_key are only relevant for creating links in Draft.js!
-                links = find_links(chart_properties, sentence, 0, 'block_key')
-                matches = get_matches(links)
-                print('matches', matches)
-                true_matches = get_true_matches(
-                    row['Match Point Phrase'], row['Matched Interval Phrase'], row['Matched Group Phrase'])
-                print('true matches', true_matches)
-                performance = compute_performance(matches, true_matches)
-                print('Accurate/False Positives/Missed Instances', performance)
-                print('---')
-                overall_performance = [a + b for a,
-                                       b in zip(overall_performance, performance)]
-        except:
-            continue
-    print('Overall Performance Summary')
-    print('Accurate/False Positives/Missed Instances', overall_performance)
-    tp = overall_performance[0]
-    fp = overall_performance[1]
-    fn = overall_performance[2]
-    print('Accuracy: TP/(TP+FP+FN)', round(tp/(tp+fp+fn)*100, 2))
-    print('Precision: TP/(TP+FP)', round(tp/(tp+fp)*100, 2))
-    print('Recall: TP/(TP + FN)', round(tp/(tp + fn)*100, 2))
+    for THRESHOLD in range(0, 10, 5):
+        overall_performance = [0, 0, 0]  # accurate, false_positives, missed
+        df = pd.read_excel('training_data/Training Dataset.xlsx')
+        for index, row in df.iterrows():
+            if(index > 54):
+                continue
+            sentence = row['Sentence']
+            chart_id = int(row['Chart ID'])
+            # print('Processing Item # ', index, 'Chart ID # ',
+            #       chart_id, 'Sentence: ', sentence[0:80])
+            try:
+                with open('training_data/features/' + str(chart_id) + '.json', 'r') as chart_feature_json:
+                    chart_features = json.load(chart_feature_json)
+                    # nlp methods accept array of charts
+                    chart_properties = [{'properties': chart_features}]
+                    # sentence_offset and block_key are only relevant for creating links in Draft.js!
+                    links = find_links(chart_properties, sentence,
+                                       0, 'block_key', THRESHOLD*0.1)
+                    matches = get_matches(links)
+                    # print('matches', matches)
+                    true_matches = get_true_matches(
+                        row['Match Point Phrase'], row['Matched Interval Phrase'], row['Matched Group Phrase'])
+                    # print('true matches', true_matches)
+                    performance = compute_performance(matches, true_matches)
+                    # print('Accurate/False Positives/Missed Instances', performance)
+                    # print('---')
+                    overall_performance = [a + b for a,
+                                           b in zip(overall_performance, performance)]
+                    # print(*overall_performance, sep='\t')
+            except:
+                continue
+        print('Overall Performance Summary: THRESHOLD', THRESHOLD)
+        print('Accurate/False Positives/Missed Instances', overall_performance)
+        tp = overall_performance[0]
+        fp = overall_performance[1]
+        fn = overall_performance[2]
+        print('Accuracy: TP/(TP+FP+FN)', round(tp/(tp+fp+fn)*100, 2))
+        print('Precision: TP/(TP+FP)', round(tp/(tp+fp)*100, 2))
+        print('Recall: TP/(TP + FN)', round(tp/(tp + fn)*100, 2))
+        print('F1 Score', tp / (tp+0.5*(fp+fn)))
 
     print('-----End Testing NLP Module------')
 
-    sys.stdout = old_stdout
-    log_file.close()
+    # sys.stdout = old_stdout
+    # log_file.close()
 
 
 def test_interval_extraction():
@@ -129,7 +133,8 @@ def is_partial_match(a, b):
     doc1 = nlp(a)
     doc2 = nlp(b)
     similarity = doc1.similarity(doc2)
-    return similarity > THRESHOLD
+    # To detect partial matches which are correct
+    return similarity > 0.5
 
 
 if __name__ == "__main__":
