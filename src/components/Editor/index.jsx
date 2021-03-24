@@ -199,6 +199,7 @@ export default function Editor(props) {
     }, [currentBlock]);
 
     function handleEditorChange(editorState) {
+
         setEditorState(editorState);
         if(autoLinksToInsert.length>0){
             const action = createLinks(doc.id, autoLinksToInsert);
@@ -220,6 +221,9 @@ export default function Editor(props) {
                 searchedSentences: updatedSearchedSentences,
             })
         );
+        if (lastTypedWord?.text.includes('.')){
+            setCurrentBlock(getBlockText(editorState));
+        }
 
         //Enable SuggestionMenu on @
         if (lastTypedWord.text.startsWith("@")) {
@@ -410,7 +414,10 @@ export default function Editor(props) {
     function handlePastedText(text){
         //immediatly search for suggestions in pasted text
         //TODO: for now it only searches for links in the first pargraph immediately
-        setCurrentBlock({blockText: text.split("\n")[0], blockKey:getBlockText(editorState).blockKey});
+        //Just for user study: To maximize link suggestion discovery
+        if (text.length > 260 && text.includes('.')){
+            setCurrentBlock({blockText: text.split("\n")[0], blockKey:getBlockText(editorState).blockKey});
+        }
         return "not-handled";
     }
 
@@ -424,7 +431,7 @@ export default function Editor(props) {
                     onChange={handleEditorChange}
                     onBlur={handleBlur}
                     handleKeyCommand={handleKeyCommand}
-                    // handlePastedText={handlePastedText}
+                    handlePastedText={handlePastedText}
                     stripPastedStyles={true}
                     decorators={editorDecorators}
                     ref={editorEl}
