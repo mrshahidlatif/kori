@@ -14,23 +14,30 @@ import time
 # log_file = codecs.open("Output.log", "w", "utf-8")
 # sys.stdout = log_file
 
-THRESHOLD = 0.7
+THRESHOLD = 0.8
 nlp = spacy.load("en_core_web_md")
 
 
 def main():
+    # Testing functions
+    # sentence = "An America sizable minority of chaplains answering this question also say that followers of pagan or earth-based religions are growing (34%)."
+    # term = "United States of America"
     # test_interval_extraction()
+    # r1 = word2vec_matching(term, sentence)
+    # r2 = keyword_matching(term, sentence)
     print('-----Begin Testing NLP Module------')
-    for THRESHOLD in range(0, 10, 5):
+    f = codecs.open("logs.txt", "w", "utf-8")
+    f.write('THRESHOLD / Accuracy / Precision / Recall / F1 \n')
+    for THRESHOLD in range(0, 11, 1):
         overall_performance = [0, 0, 0]  # accurate, false_positives, missed
         df = pd.read_excel('training_data/Training Dataset.xlsx')
         for index, row in df.iterrows():
-            if(index > 54):
+            if(index > 91):
                 continue
             sentence = row['Sentence']
             chart_id = int(row['Chart ID'])
-            # print('Processing Item # ', index, 'Chart ID # ',
-            #       chart_id, 'Sentence: ', sentence[0:80])
+            print('Processing Item # ', index, 'Chart ID # ',
+                  chart_id, 'Threshold', THRESHOLD/10, 'Sentence: ', sentence[0:40])
             try:
                 with open('training_data/features/' + str(chart_id) + '.json', 'r') as chart_feature_json:
                     chart_features = json.load(chart_feature_json)
@@ -40,28 +47,30 @@ def main():
                     links = find_links(chart_properties, sentence,
                                        0, 'block_key', THRESHOLD*0.1)
                     matches = get_matches(links)
-                    # print('matches', matches)
+                    print('matches', matches)
                     true_matches = get_true_matches(
                         row['Match Point Phrase'], row['Matched Interval Phrase'], row['Matched Group Phrase'])
-                    # print('true matches', true_matches)
+                    print('true matches', true_matches)
                     performance = compute_performance(matches, true_matches)
-                    # print('Accurate/False Positives/Missed Instances', performance)
-                    # print('---')
+                    # print('Row/TP/FP/FN/Total-True-References', index,
+                    #   performance[0], performance[1], performance[2], len(true_matches), sep='\t')
                     overall_performance = [a + b for a,
                                            b in zip(overall_performance, performance)]
-                    # print(*overall_performance, sep='\t')
-            except:
+            except Exception as e:
+                print(e)
                 continue
-        print('Overall Performance Summary: THRESHOLD', THRESHOLD)
-        print('Accurate/False Positives/Missed Instances', overall_performance)
         tp = overall_performance[0]
         fp = overall_performance[1]
         fn = overall_performance[2]
-        print('Accuracy: TP/(TP+FP+FN)', round(tp/(tp+fp+fn)*100, 2))
-        print('Precision: TP/(TP+FP)', round(tp/(tp+fp)*100, 2))
-        print('Recall: TP/(TP + FN)', round(tp/(tp + fn)*100, 2))
-        print('F1 Score', tp / (tp+0.5*(fp+fn)))
-
+        accuracy = round(tp/(tp+fp+fn)*100, 2)
+        precision = round(tp/(tp+fp)*100, 2)
+        recall = round(tp/(tp + fn)*100, 2)
+        f1 = tp / (tp+0.5*(fp+fn))
+        print('THRESHOLD/Accuracy/Precision/Recall/F1',
+              THRESHOLD/10, accuracy, precision, recall, f1, sep='\t')
+        f.write(str(THRESHOLD/10) + '\t' + str(accuracy) + '\t' +
+                str(precision) + '\t' + str(recall) + '\t' + str(f1) + '\n')
+    f.close()
     print('-----End Testing NLP Module------')
 
     # sys.stdout = old_stdout
@@ -132,9 +141,9 @@ def compute_performance(matches, true_matches):
 def is_partial_match(a, b):
     doc1 = nlp(a)
     doc2 = nlp(b)
-    similarity = doc1.similarity(doc2)
+    similarity = keyword_matching(a, b).get('similarity')
     # To detect partial matches which are correct
-    return similarity > 0.5
+    return similarity >= 0.9
 
 
 if __name__ == "__main__":

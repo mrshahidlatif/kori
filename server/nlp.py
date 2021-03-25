@@ -9,6 +9,7 @@ import re
 import networkx as nx
 import numpy as np
 import datetime
+from scipy import spatial
 
 # THRESHOLD = 0.7
 # WORD2VEC_THRESHOLD = 0.7
@@ -26,23 +27,19 @@ def find_links(charts, sentence, sentence_offset, block_key, THRESHOLD):
     for chart in charts:
         features = chart.get('properties').get('features')
         for feature in features:
-            result = fuzzy_substr_search(feature['value'], sentence)
-            result_w2v = compute_word2vec_similarity(
-                feature['value'], sentence, THRESHOLD)
+            r1 = keyword_matching(feature['value'], sentence)
+            r2 = word2vec_matching(
+                feature['value'], sentence)
+            # print('r1/r2 f', r1, r2)
+            if r1.get('similarity') == 0 and r2.get('similarity') == 0:
+                continue
+            result = r1 if r1.get('similarity') > r2.get('similarity') else r2
             # don't match strings that are single character long
             if result.get('similarity') > THRESHOLD and len(result.get('matching_str')) > 1:
-                link_text = sentence[result.get('offset'): result.get(
-                    'offset') + len(result.get('matching_str'))]
+                link_text = result.get('matching_str')
                 link = create_link(link_text, feature, chart.get('id'), [feature.get(
                     'value')], result.get('offset'), sentence, sentence_offset, block_key, [], [])
                 links.append(link)
-            if result.get('similarity') < THRESHOLD and result_w2v != "":
-                if result_w2v.get('similarity') > THRESHOLD and len(result_w2v.get('matching_str')) > 1:
-                    link_text = sentence[result_w2v.get('offset'): result.get(
-                        'offset') + len(result_w2v.get('matching_str'))]
-                    link = create_link(link_text, feature, chart.get('id'), [feature.get(
-                        'value')], result_w2v.get('offset'), sentence, sentence_offset, block_key, [], [])
-                    links.append(link)
 
     # range links
     for chart in charts:
@@ -53,11 +50,12 @@ def find_links(charts, sentence, sentence_offset, block_key, THRESHOLD):
                 continue
             if isinstance(axis.get('title'), list):
                 continue
-            result = fuzzy_substr_search(axis.get('title'), sentence)
-            result_w2v = compute_word2vec_similarity(
-                axis.get('title'), sentence, THRESHOLD)
-            if result.get('similarity') < THRESHOLD and result_w2v != "":
-                result = result_w2v
+            r1 = keyword_matching(axis.get('title'), sentence)
+            r2 = word2vec_matching(axis.get('title'), sentence)
+            # print('r1/r2 a', r1, r2)
+            if r1.get('similarity') == 0 and r2.get('similarity') == 0:
+                continue
+            result = r1 if r1.get('similarity') > r2.get('similarity') else r2
             if result.get('similarity') > THRESHOLD:
                 result['field'] = axis.get('title')
                 result['type'] = axis.get('type')
@@ -65,7 +63,11 @@ def find_links(charts, sentence, sentence_offset, block_key, THRESHOLD):
                 matched_axes.append(axis)
         interval_matches = get_intervals(sentence)
         # TODO: Handle this in a better way
-        # Only uncomment (the following *67-70* lines) for quantitative eval
+        # Only uncomment (the following lines *62-69* lines) for quantitative eval
+        link_text = result.get('matching_str')
+        link = create_link(link_text, axes, chart.get('id'), [], result.get(
+            'offset'), sentence, sentence_offset, block_key, [], [])
+        links.append(link)
         for interval in interval_matches:
             interval_link = create_link(interval.get('text'), axis, chart.get('id'), axis.get(
                 'field'), interval.get('offset'), sentence, sentence_offset, block_key, [], [])
@@ -200,25 +202,25 @@ def compute_shortest_path(sentence, axis_phrase_obj, interval_phrase):
     return distances[axis_phrase_obj.get('instance_id')]
 
 
-def fuzzy_substr_search(needle, hay):
-    if needle == None or isinstance(needle, list):
-        return {"similarity": 0, "matching_str": '', "offset": 0}
-    hay = hay.lower()
-    needle = needle.lower()
-    if hay.find(needle) > -1:
-        offset = hay.find(needle)
-        matching_str = hay[offset: offset+len(needle)]
+def keyword_matching(term, sentence):
+    if term == None or isinstance(term, list):
+        return {"similarity": 0}
+    sentence = sentence.lower()
+    term = term.lower()
+    if sentence.find(term) > -1:
+        offset = sentence.find(term)
+        matching_str = sentence[offset: offset+len(term)]
         return {"similarity": 1, "matching_str": matching_str, "offset": offset}
-    needle_length = len(needle.split())
+    term_length = len(term.split())
     max_sim_val = 0
     max_sim_string = u""
-    for ngram in ngrams(hay.split(), needle_length + int(.2*needle_length)):
-        hay_ngram = u" ".join(ngram)
-        similarity = SM(None, hay_ngram, needle).ratio()
+    for ngram in ngrams(sentence.split(), term_length):
+        sentence_ngram = u" ".join(ngram)
+        similarity = SM(None, sentence_ngram, term).ratio()
         if similarity > max_sim_val:
             max_sim_val = similarity
-            max_sim_string = hay_ngram
-    return {"similarity": max_sim_val, "matching_str": max_sim_string, "offset": hay.find(max_sim_string)}
+            max_sim_string = sentence_ngram
+    return {"similarity": max_sim_val, "matching_str": max_sim_string, "offset": sentence.find(max_sim_string)}
 
 
 def create_link(link_text, feature, chartId, val, offset, sentence, sentence_offset, block_key, rangeField, range):
@@ -240,33 +242,15 @@ def create_link(link_text, feature, chartId, val, offset, sentence, sentence_off
     return link
 
 
-def compute_word2vec_similarity(word, sentence, THRESHOLD):
-    match_in_sentence = ''
-    # corpus expects spaces to be replaced with '_'
-    if(word is None):
-        return match_in_sentence
-    word = "_".join(word.split())
-    try:
-        similar_words = model.most_similar(word)
-        similar_words = [sm[0]
-                         for sm in similar_words if sm[1] > THRESHOLD]
-        for word in similar_words:
-            match_in_sentence = fuzzy_substr_search(
-                " ".join(word.split("_")), sentence)
-            if match_in_sentence.get('similarity') > THRESHOLD:
-                return match_in_sentence
-    except:
-        pass
-    return match_in_sentence
-
-
 def get_intervals(sentence):
     interval_matches = []
     matcher = Matcher(nlp.vocab)
-    pattern = [[{'POS': 'NUM'},
+    pattern = [[{'ORTH': 'from'},
+                {'POS': 'NUM'},
                 {'DEP': 'prep'},
                 {'POS': 'NUM'}],
-               [{'POS': 'NUM'},
+               [{'ORTH': 'between'},
+                {'POS': 'NUM'},
                 {'POS': 'CCONJ'},
                 {'POS': 'NUM'}],
                [{'POS': 'NUM'},
@@ -281,6 +265,13 @@ def get_intervals(sentence):
                [{'POS': 'NUM'},
                 {'POS': 'CCONJ'},
                 {'POS': 'SYM'},
+                {'POS': 'NUM'}],
+               [{'ORTH': 'above'},
+                {'POS': 'NUM'}],
+               [{'ORTH': 'below'},
+                {'POS': 'NUM'}],
+               [{'ORTH': 'at'},
+                {'ORTH': 'least'},
                 {'POS': 'NUM'}]]
     matcher.add("Interval", pattern)
     doc = nlp(sentence.lower())
@@ -322,3 +313,37 @@ def get_interval_extent(interval):
     if len(numbers) == 2:
         return [min(numbers), max(numbers)]
     return [0, 0]
+
+
+def compute_mean_vectors(words):
+    vector = [0]*300
+    for word in words:
+        try:
+            vector += model[word]
+        except KeyError:
+            continue
+    return [x / len(words) for x in vector] if len(words) > 0 else None
+
+
+def cosine_similarity(u, v):
+    return 1 - spatial.distance.cosine(u, v)
+
+
+def word2vec_matching(term, sentence):
+    if(term is None):
+        return {"similarity": 0}
+    avg_term_vector = compute_mean_vectors(term.split())
+    if avg_term_vector is None:
+        return {"similarity": 0}
+    words = sentence.split()
+    max_sim = 0
+    substr = ''
+    for n in range(1, len(term.split())+1, 1):
+        n_grams = ngrams(words, n)
+        for gram in n_grams:
+            vector = compute_mean_vectors(list(gram))
+            sim = cosine_similarity(avg_term_vector, vector)
+            if sim > max_sim:
+                max_sim = sim
+                substr = " ".join(list(gram))
+    return {"similarity": max_sim, "matching_str": substr, "offset": sentence.find(substr)}
