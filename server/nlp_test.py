@@ -28,7 +28,7 @@ def main():
     print('-----Begin Testing NLP Module------')
     f = codecs.open("logs.txt", "w", "utf-8")
     f.write('THRESHOLD / Accuracy / Precision / Recall / F1 \n')
-    for THRESHOLD in range(0, 11, 1):
+    for THRESHOLD in range(0, 11, 12):
         overall_performance = [0, 0, 0]  # accurate, false_positives, missed
         df = pd.read_excel('training_data/Training Dataset.xlsx')
         for index, row in df.iterrows():
@@ -47,17 +47,17 @@ def main():
                     links = find_links(chart_properties, sentence,
                                        0, 'block_key', THRESHOLD*0.1)
                     matches = get_matches(links)
-                    print('matches', matches)
+                    # print('matches', matches)
                     true_matches = get_true_matches(
                         row['Match Point Phrase'], row['Matched Interval Phrase'], row['Matched Group Phrase'])
-                    print('true matches', true_matches)
+                    # print('true matches', true_matches)
                     performance = compute_performance(matches, true_matches)
                     # print('Row/TP/FP/FN/Total-True-References', index,
                     #   performance[0], performance[1], performance[2], len(true_matches), sep='\t')
                     overall_performance = [a + b for a,
                                            b in zip(overall_performance, performance)]
             except Exception as e:
-                print(e)
+                # print(e)
                 continue
         tp = overall_performance[0]
         fp = overall_performance[1]
@@ -143,7 +143,7 @@ def is_partial_match(a, b):
     doc2 = nlp(b)
     similarity = keyword_matching(a, b).get('similarity')
     # To detect partial matches which are correct
-    return similarity >= 0.9
+    return similarity >= 1.0
 
 
 if __name__ == "__main__":
