@@ -1,0 +1,1 @@
+{"axes":[{"name":"x","field":"date","data":"source_0","type":"time","title":"date"},{"name":"y","field":"price","data":"source_0","type":"linear","title":"price"}],"features":[]}

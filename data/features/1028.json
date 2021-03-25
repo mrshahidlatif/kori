@@ -1,0 +1,1 @@
+{"axes":[{"name":"x","field":"IMDB Rating","data":"source_0","type":"linear","title":"IMDB Rating"},{"name":"y","field":"Cumulative Count","data":"source_0","type":"linear","title":"Cumulative Count"}],"features":[]}

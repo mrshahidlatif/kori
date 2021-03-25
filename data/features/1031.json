@@ -1,0 +1,1 @@
+{"axes":[{"name":"x","field":"life_expect","type":"linear","title":"Life Expectancy (years)"},{"name":"y","field":"country","type":"point","title":"Country"},{"name":"color","type":"ordinal"}],"features":[{"value":"1955","type":"string","field":"year","data":null},{"value":"2000","type":"string","field":"year","data":null}]}

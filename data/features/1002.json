@@ -1,0 +1,1 @@
+{"axes":[{"name":"x","field":"income","data":"source_0","type":"log","title":"income"},{"name":"y","field":"health","data":"source_0","type":"linear","title":"health"},{"name":"size","field":"population","data":"source_0","type":"linear","title":"population"}],"features":[]}

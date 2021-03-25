@@ -1,0 +1,1 @@
+{"axes":[{"name":"x","type":"time","title":"year (binned)"},{"name":"y","field":["mean_wheat","mean_wages"],"data":"source_0","type":"linear","title":"Mean wheat yield and wage in US"},{"name":"color","field":[["wheat"],["wages"]],"type":"ordinal","title":[["wheat"],["wages"]]}],"features":[{"value":null,"type":"string","data":"source_0"}]}

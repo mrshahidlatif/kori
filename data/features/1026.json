@@ -1,0 +1,1 @@
+{"axes":[{"name":"x","field":"yearmonth_date","data":"source_0","type":"time","title":"date (year-month)"},{"name":"y","field":["sum_count_start","sum_count_end"],"data":"source_0","type":"linear","title":"Sum of count"},{"name":"color","field":"series","data":"source_0","type":"ordinal","title":"series"}],"features":[]}

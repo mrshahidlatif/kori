@@ -1,0 +1,1 @@
+{"axes":[{"name":"x","type":"time","title":"Year (binned)"},{"name":"y","field":["mean_Horsepower","mean_Miles_per_Gallon"],"data":"source_0","type":"linear","title":"Mean Horsepower and Miles Per Gallon"},{"name":"color","field":[["Horsepower"],["Miles_per_Gallon"]],"type":"ordinal","title":[["Horsepower"],["Miles_per_Gallon"]]}],"features":[]}

@@ -1,0 +1,1 @@
+{"axes":[{"name":"trellis_barley_x","field":"median_yield","data":"data_0","type":"linear","title":"Median of yield"},{"name":"trellis_barley_y","field":"variety","data":"source_0","type":"point","title":"variety"},{"name":"trellis_barley_color","field":"year","data":"data_0","type":"ordinal","title":"year"}],"features":[]}

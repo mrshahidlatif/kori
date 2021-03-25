@@ -1,0 +1,1 @@
+{"axes":[{"name":"x","field":"month_date","data":"source_0","type":"time","title":"date (month)"},{"name":"y","field":"mean_temp_max","data":"source_0","type":"linear","title":"Mean of temp_max"}],"features":[]}

@@ -1,0 +1,1 @@
+{"axes":[{"name":"x","type":"linear","title":"IMDB Rating (binned)"},{"name":"y","type":"linear","title":"Rotten Tomatoes Rating (binned)"},{"name":"color","field":"__count","data":"source_0","type":"linear","title":"__count"}],"features":[]}
