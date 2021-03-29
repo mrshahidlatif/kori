@@ -26,9 +26,10 @@
           "aggregate": "sum",
           "field": "people",
           "type": "quantitative",
-          "stack": "zero"
+          "stack": "zero",
+          "title":"Sum of people"
         },
-        "x": {"field": "age", "type": "nominal"},
+        "x": {"field": "age", "type": "nominal", "title": "age"},
         "color": {
           "field": "gender",
           "scale": {"range": ["#675193", "#ca8861"]},

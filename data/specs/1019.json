@@ -9,7 +9,8 @@
         "bin": true,
         "timeUnit": "year",
         "field": "year",
-        "type": "temporal"
+        "type": "temporal",
+        "title": "year"
       },
       "y": {
         "aggregate": "mean",

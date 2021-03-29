@@ -10,7 +10,7 @@
   ],
   "encoding": {
     "x": {"field": "value", "type": "quantitative", "title": "Body Mass (g)"},
-    "y": {"field": "density", "type": "quantitative", "stack": "zero"},
+    "y": {"field": "density", "type": "quantitative", "stack": "zero", "title": "density"},
     "color": {"field": "Species", "type": "nominal"}
   },
   "config": {}

@@ -3,8 +3,8 @@
   "data": {"url": "data/cars.json"},
   "mark": "point",
   "encoding": {
-    "x": {"field": "Displacement", "type": "quantitative"},
-    "y": {"field": "Acceleration", "type": "quantitative"},
+    "x": {"field": "Displacement", "type": "quantitative", "title":"Displacement"},
+    "y": {"field": "Acceleration", "type": "quantitative", "title":"Acceleration"},
     "color": {"field": "Origin", "type": "nominal"}
   },
   "config": {}

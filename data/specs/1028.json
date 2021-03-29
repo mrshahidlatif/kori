@@ -10,8 +10,8 @@
   ],
   "mark": "area",
   "encoding": {
-    "x": {"field": "IMDB Rating", "type": "quantitative"},
-    "y": {"field": "Cumulative Count", "type": "quantitative"}
+    "x": {"field": "IMDB Rating", "type": "quantitative", "title": "IMDB Rating"},
+    "y": {"field": "Cumulative Count", "type": "quantitative", "title": "Cumulative Count"}
   },
   "config": {}
 }

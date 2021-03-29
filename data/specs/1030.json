@@ -11,6 +11,7 @@
       "title": "Date",
       "field": "date",
       "timeUnit": "monthdate"
+
     },
     "y": {
       "title": "Daily Temperature Range (C)",

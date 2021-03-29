@@ -3,8 +3,8 @@
   "transform": [{"filter": "datum.location === 'Seattle'"}],
   "mark": "point",
   "encoding": {
-    "x": {"field": "temp_min", "bin": true},
-    "y": {"field": "temp_max", "bin": true},
+    "x": {"field": "temp_min", "bin": true, "title": "Minimum Temperature"},
+    "y": {"field": "temp_max", "bin": true, "title": "Maximum Temperature"},
     "size": {"aggregate": "count"}
   },
   "config": {}

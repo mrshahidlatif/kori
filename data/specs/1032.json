@@ -18,12 +18,14 @@
     "x": {
       "bin": {"maxbins": 60},
       "field": "IMDB Rating",
-      "type": "quantitative"
+      "type": "quantitative",
+      "title": "IMDB Rating"
     },
     "y": {
       "bin": {"maxbins": 40},
       "field": "Rotten Tomatoes Rating",
-      "type": "quantitative"
+      "type": "quantitative",
+      "title": "Rotten Tomatoes Rating"
     },
     "color": {"aggregate": "count", "type": "quantitative"}
   },

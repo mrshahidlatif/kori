@@ -3,8 +3,12 @@
   "data": {"url": "data/seattle-weather.csv"},
   "mark": "bar",
   "encoding": {
-    "x": {"timeUnit": "month", "field": "date"},
-    "y": {"aggregate": "mean", "field": "precipitation"}
+    "x": {"timeUnit": "month", "field": "date", "title": "Date"},
+    "y": {
+      "aggregate": "mean",
+      "field": "precipitation",
+      "title": "Mean of precipitation"
+    }
   },
   "config": {}
 }

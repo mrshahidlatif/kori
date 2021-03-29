@@ -18,7 +18,7 @@
     {
       "mark": "circle",
       "encoding": {
-        "x": {"timeUnit": "year", "field": "Year"},
+        "x": {"timeUnit": "year", "field": "Year", "title": "Year"},
         "y": {"field": "Miles_per_Gallon", "type": "quantitative"}
       }
     },

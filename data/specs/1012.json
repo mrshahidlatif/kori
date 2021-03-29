@@ -2,8 +2,8 @@
   "data": {"url": "data/stocks.csv"},
   "mark": "line",
   "encoding": {
-    "x": {"field": "date", "type": "temporal"},
-    "y": {"field": "price", "type": "quantitative"},
+    "x": {"field": "date", "type": "temporal", "title":"date"},
+    "y": {"field": "price", "type": "quantitative","title":"price"},
     "color": {"field": "symbol", "type": "nominal"}
   },
   "config": {}

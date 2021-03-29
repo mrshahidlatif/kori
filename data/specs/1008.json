@@ -2,8 +2,8 @@
   "data": {"url": "data/weather.csv", "formatType": "csv"},
   "mark": "line",
   "encoding": {
-    "x": {"field": "date", "type": "temporal", "timeUnit": "month"},
-    "y": {"field": "temp_max", "type": "quantitative", "aggregate": "mean"},
+    "x": {"field": "date", "type": "temporal", "timeUnit": "month", "title":"Date"},
+    "y": {"field": "temp_max", "type": "quantitative", "aggregate": "mean", "title": "Mean of Maximum Temperature"},
     "color": {"field": "location", "type": "nominal"}
   },
   "config": {}

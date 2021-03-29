@@ -15,7 +15,7 @@
     "x": {
       "field": "life_expect",
       "type": "quantitative",
-      "title": "Life Expectancy (years)"
+      "title": "Life Expectancy"
     },
     "y": {
       "field": "country",

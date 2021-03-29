@@ -3,8 +3,8 @@
   "data": {"url": "data/cars.json"},
   "mark": "point",
   "encoding": {
-    "x": {"field": "Horsepower", "type": "quantitative"},
-    "y": {"field": "Miles_per_Gallon", "type": "quantitative"},
+    "x": {"field": "Horsepower", "type": "quantitative", "title": "Horsepower"},
+    "y": {"field": "Miles_per_Gallon", "type": "quantitative","title": "Miles per Gallon"},
     "color": {"field": "Displacement", "type": "quantitative"}
   },
   "config": {}

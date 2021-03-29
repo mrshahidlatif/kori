@@ -3,8 +3,8 @@
   "data": {"url": "data/wheat.json"},
   "mark": "point",
   "encoding": {
-    "x": {"field": "year", "timeUnit": "year", "type": "temporal"},
-    "y": {"field": "wheat", "type": "quantitative"},
+    "x": {"field": "year", "timeUnit": "year", "type": "temporal", "title":"year"},
+    "y": {"field": "wheat", "type": "quantitative", "title":"wheat"},
     "color": {"type": "nominal"}
   },
   "config": {}

@@ -2,8 +2,18 @@
   "data": {"url": "data/weather.csv", "formatType": "csv"},
   "mark": "line",
   "encoding": {
-    "x": {"field": "date", "type": "temporal", "timeUnit": "month"},
-    "y": {"field": "precipitation", "type": "quantitative", "aggregate": "sum"},
+    "x": {
+      "field": "date",
+      "type": "temporal",
+      "timeUnit": "month",
+      "title": "date"
+    },
+    "y": {
+      "field": "precipitation",
+      "type": "quantitative",
+      "aggregate": "sum",
+      "title": "Sum of precipitation"
+    },
     "color": {"field": "location", "type": "nominal"}
   },
   "config": {}
