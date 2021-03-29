@@ -10,32 +10,39 @@ import networkx as nx
 import numpy as np
 import datetime
 from scipy import spatial
+from get_sim import *
 
 # THRESHOLD = 0.7
 # WORD2VEC_THRESHOLD = 0.7
 NO_OF_MOST_FREQUENT_WORDS = 100000
 
-model = KeyedVectors.load_word2vec_format(
-    'lang_models/GoogleNews-vectors-negative300.bin.gz', binary=True, limit=NO_OF_MOST_FREQUENT_WORDS)
+# Gensim Model
+# model = KeyedVectors.load_word2vec_format(
+#     'lang_models/GoogleNews-vectors-negative300.bin.gz', binary=True, limit=NO_OF_MOST_FREQUENT_WORDS)
+
+# FastText Model
+model = fasttext.load_model("lang_models/crawl-300d-2M-subword.bin")
 
 nlp = spacy.load('en_core_web_sm')
 
 
-def find_links(charts, sentence, sentence_offset, block_key, THRESHOLD):
+def find_links(charts, sentence, sentence_offset, block_key, threshold, ngram_size):
     links = []
     # word or phrase links
     for chart in charts:
         features = chart.get('properties').get('features')
         for feature in features:
-            r1 = keyword_matching(feature['value'], sentence)
-            r2 = word2vec_matching(
-                feature['value'], sentence)
-            # print('r1/r2 f', r1, r2)
-            if r1.get('similarity') == 0 and r2.get('similarity') == 0:
-                continue
-            result = r1 if r1.get('similarity') > r2.get('similarity') else r2
+            # r1 = keyword_matching(feature['value'], sentence)
+            # r2 = word2vec_matching(
+            #     feature['value'], sentence)
+            # # print('r1/r2 f', r1, r2)
+            # if r1.get('similarity') == 0 and r2.get('similarity') == 0:
+            #     continue
+            # result = r1 if r1.get('similarity') > r2.get('similarity') else r2
+            result = term_matching(
+                model, feature['value'], sentence, ngram_size=ngram_size)
             # don't match strings that are single character long
-            if result.get('similarity') > THRESHOLD and len(result.get('matching_str')) > 1:
+            if result.get('similarity') > threshold and len(result.get('matching_str')) > 1:
                 link_text = result.get('matching_str')
                 link = create_link(link_text, feature, chart.get('id'), [feature.get(
                     'value')], result.get('offset'), sentence, sentence_offset, block_key, [], [])
@@ -50,13 +57,15 @@ def find_links(charts, sentence, sentence_offset, block_key, THRESHOLD):
                 continue
             if isinstance(axis.get('title'), list):
                 continue
-            r1 = keyword_matching(axis.get('title'), sentence)
-            r2 = word2vec_matching(axis.get('title'), sentence)
-            # print('r1/r2 a', r1, r2)
-            if r1.get('similarity') == 0 and r2.get('similarity') == 0:
-                continue
-            result = r1 if r1.get('similarity') > r2.get('similarity') else r2
-            if result.get('similarity') > THRESHOLD:
+            # r1 = keyword_matching(axis.get('title'), sentence)
+            # r2 = word2vec_matching(axis.get('title'), sentence)
+            # # print('r1/r2 a', r1, r2)
+            # if r1.get('similarity') == 0 and r2.get('similarity') == 0:
+            #     continue
+            # result = r1 if r1.get('similarity') > r2.get('similarity') else r2
+            result = term_matching(model, axis.get(
+                'title'), sentence, ngram_size=ngram_size)
+            if result.get('similarity') > threshold:
                 result['field'] = axis.get('title')
                 result['type'] = axis.get('type')
                 axis['match_props'] = result
