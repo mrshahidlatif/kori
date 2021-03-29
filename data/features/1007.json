@@ -1,1 +1,1 @@
-{"axes":[{"name":"x","field":["month_date","month_date_end"],"data":"source_0","type":"time","title":"date (month)"},{"name":"y","field":"mean_precipitation","data":"source_0","type":"linear","title":"Mean of precipitation"}],"features":[]}
+{"axes":[{"name":"x","field":["month_date","month_date_end"],"data":"source_0","type":"time","title":"Date"},{"name":"y","field":"mean_precipitation","data":"source_0","type":"linear","title":"Mean of precipitation"}],"features":[]}

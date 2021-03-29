@@ -1,1 +1,1 @@
-{"axes":[{"name":"x","type":"linear","title":"temp_min (binned)"},{"name":"y","type":"linear","title":"temp_max (binned)"},{"name":"size","field":"__count","data":"source_0","type":"linear","title":"__count"}],"features":[]}
+{"axes":[{"name":"x","type":"linear","title":"Minimum Temperature"},{"name":"y","type":"linear","title":"Maximum Temperature"},{"name":"size","field":"__count","data":"source_0","type":"linear","title":"__count"}],"features":[]}

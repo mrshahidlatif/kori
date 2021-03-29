@@ -1,1 +1,1 @@
-{"axes":[{"name":"x","type":"time","title":"Release Date (binned)"},{"name":"y","type":"linear","title":"Mean of Ratings"},{"name":"color","field":[["Rotten Tomatoes Rating"],["IMDB Rating"]],"type":"ordinal","title":[["Rotten Tomatoes Rating"],["IMDB Rating"]]}],"features":[]}
+{"axes":[{"name":"x","type":"time","title":"Release Date"},{"name":"y","type":"linear","title":"Mean of Ratings"},{"name":"color","field":[["Rotten Tomatoes Rating"],["IMDB Rating"]],"type":"ordinal","title":[["Rotten Tomatoes Rating"],["IMDB Rating"]]}],"features":[]}
