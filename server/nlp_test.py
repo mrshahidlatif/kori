@@ -24,7 +24,7 @@ def main():
     overall_performance = [0, 0, 0]  # accurate, false_positives, missed
     df = pd.read_excel('training_data/Training Dataset.xlsx')
     for index, row in df.iterrows():
-        if(index > 54):
+        if(index > 91):
             continue
         sentence = row['Sentence']
         chart_id = int(row['Chart ID'])
