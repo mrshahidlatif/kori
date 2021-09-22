@@ -1,25 +1,25 @@
 {
   "files": {
-    "main.css": "/vis-text-editor/static/css/main.543c3099.chunk.css",
-    "main.js": "/vis-text-editor/static/js/main.9ddea91d.chunk.js",
-    "main.js.map": "/vis-text-editor/static/js/main.9ddea91d.chunk.js.map",
-    "runtime-main.js": "/vis-text-editor/static/js/runtime-main.73280aa9.js",
-    "runtime-main.js.map": "/vis-text-editor/static/js/runtime-main.73280aa9.js.map",
-    "static/css/2.4c0ab1a8.chunk.css": "/vis-text-editor/static/css/2.4c0ab1a8.chunk.css",
-    "static/js/2.055acaa9.chunk.js": "/vis-text-editor/static/js/2.055acaa9.chunk.js",
-    "static/js/2.055acaa9.chunk.js.map": "/vis-text-editor/static/js/2.055acaa9.chunk.js.map",
-    "index.html": "/vis-text-editor/index.html",
-    "precache-manifest.cde8dd004ccd23d338fcd73ed97022f2.js": "/vis-text-editor/precache-manifest.cde8dd004ccd23d338fcd73ed97022f2.js",
-    "service-worker.js": "/vis-text-editor/service-worker.js",
-    "static/css/2.4c0ab1a8.chunk.css.map": "/vis-text-editor/static/css/2.4c0ab1a8.chunk.css.map",
-    "static/css/main.543c3099.chunk.css.map": "/vis-text-editor/static/css/main.543c3099.chunk.css.map",
-    "static/js/2.055acaa9.chunk.js.LICENSE": "/vis-text-editor/static/js/2.055acaa9.chunk.js.LICENSE"
+    "main.css": "/kori/static/css/main.543c3099.chunk.css",
+    "main.js": "/kori/static/js/main.c5d42aef.chunk.js",
+    "main.js.map": "/kori/static/js/main.c5d42aef.chunk.js.map",
+    "runtime-main.js": "/kori/static/js/runtime-main.843c6df0.js",
+    "runtime-main.js.map": "/kori/static/js/runtime-main.843c6df0.js.map",
+    "static/css/2.4c0ab1a8.chunk.css": "/kori/static/css/2.4c0ab1a8.chunk.css",
+    "static/js/2.a9854641.chunk.js": "/kori/static/js/2.a9854641.chunk.js",
+    "static/js/2.a9854641.chunk.js.map": "/kori/static/js/2.a9854641.chunk.js.map",
+    "index.html": "/kori/index.html",
+    "precache-manifest.d27f49a3fa8092d4a1a05de95a720cf1.js": "/kori/precache-manifest.d27f49a3fa8092d4a1a05de95a720cf1.js",
+    "service-worker.js": "/kori/service-worker.js",
+    "static/css/2.4c0ab1a8.chunk.css.map": "/kori/static/css/2.4c0ab1a8.chunk.css.map",
+    "static/css/main.543c3099.chunk.css.map": "/kori/static/css/main.543c3099.chunk.css.map",
+    "static/js/2.a9854641.chunk.js.LICENSE": "/kori/static/js/2.a9854641.chunk.js.LICENSE"
   },
   "entrypoints": [
-    "static/js/runtime-main.73280aa9.js",
+    "static/js/runtime-main.843c6df0.js",
     "static/css/2.4c0ab1a8.chunk.css",
-    "static/js/2.055acaa9.chunk.js",
+    "static/js/2.a9854641.chunk.js",
     "static/css/main.543c3099.chunk.css",
-    "static/js/main.9ddea91d.chunk.js"
+    "static/js/main.c5d42aef.chunk.js"
   ]
 }
