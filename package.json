@@ -27,7 +27,7 @@
         "react-dom": "^16.14.0",
         "react-redux": "^7.2.2",
         "react-router-dom": "^5.2.0",
-        "react-scripts": "3.3.0",
+        "react-scripts": "5.0.1",
         "readline": "^1.3.0",
         "redux": "^4.0.5",
         "reselect": "^4.0.0",
